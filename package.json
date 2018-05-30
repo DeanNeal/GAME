@@ -1,0 +1,61 @@
+{
+  "name": "game",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeanNeal/ace-js.git"
+  },
+  "scripts": {
+    "publish": "npm publish --access=public",
+    "watch": "webpack --watch",
+    "dev": "webpack --watch  --progress --colors --display-modules --display-reasons --profile",
+    "prod": "cross-env NODE_ENV=prod webpack --config webpack.config.js --progress --colors"
+  },
+  "devDependencies": {
+    "autoprefixer-loader": "^3.2.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-object-assign": "^6.22.0",
+    "babel-preset-es2015": "^6.24.1",
+    "bootstrap": "^3.3.7",
+    "clean-webpack-plugin": "^0.1.9",
+    "copy-webpack-plugin": "^3.0.1",
+    "cross-env": "^1.0.8",
+    "css-loader": "^0.23.1",
+    "css-raw-loader": "^0.1.1",
+    "css-sourcemaps-webpack-plugin": "^1.0.3",
+    "extract-text-webpack-plugin": "^2.1.2",
+    "file-loader": "^0.8.5",
+    "html-loader": "^0.4.3",
+    "html-webpack-harddisk-plugin": "^0.1.0",
+    "html-webpack-plugin": "^2.30.1",
+    "node-libs-browser": "^0.5.3",
+    "node-sass": "^4.5.3",
+    "postcss-loader": "^0.9.1",
+    "preprocess-loader": "^0.2.0",
+    "raw-loader": "^0.5.1",
+    "react-dom": "^16.4.0",
+    "resolve-url": "^0.2.1",
+    "resolve-url-loader": "^1.4.3",
+    "sass-loader": "^3.2.3",
+    "sass-resources-loader": "^1.0.2",
+    "smart-banner-webpack-plugin": "^3.0.1",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.9",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.5"
+  },
+  "dependencies": {
+    "babel-preset-react": "^6.24.1",
+    "jade": "^1.11.0",
+    "react": "^16.4.0",
+    "socket.io": "^2.1.1",
+    "webpack-cli": "^2.1.4",
+    "webpack-command": "^0.2.0"
+  },
+  "author": "Bogdan Zinkevich",
+  "license": "MIT"
+}
