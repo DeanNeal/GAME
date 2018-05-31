@@ -1097,8 +1097,8 @@ function socketIoInit() {
         controls.autoForward = false;
         controls.dragToLook = true;
 
-        controls.dragToLook = false;
-        controls.rollSpeed = Math.PI / 6;
+        // controls.dragToLook = false;
+        // controls.rollSpeed = Math.PI / 6;
 
         // scene
 
@@ -1465,7 +1465,7 @@ function socketIoInit() {
 
     function onDocumentMouseDown(event) {
 
-        event.preventDefault();
+        // event.preventDefault();
 
         raycaster.setFromCamera(mouse, camera);
 
@@ -1519,7 +1519,9 @@ function socketIoInit() {
 
 
         //if(isMove){
-        window.socket.emit("move", { position: camera.position, rotation: camera.rotation });
+        if (_userService2.default.getUser()) {
+            window.socket.emit("move", { position: camera.position, rotation: camera.rotation });
+        }
         $('#position').html('Position: ' + camera.position.x.toFixed(0) + ' ' + camera.position.y.toFixed(0) + ' ' + camera.position.z.toFixed(0));
         $('#rotation').html('Rotation: ' + camera.rotation.x.toFixed(2) + ' ' + camera.rotation.y.toFixed(2) + ' ' + camera.rotation.z.toFixed(2));
         //}

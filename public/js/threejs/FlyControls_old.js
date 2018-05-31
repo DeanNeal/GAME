@@ -110,33 +110,35 @@ THREE.FlyControls = function ( object, domElement ) {
 	};
 
 	this.mousedown = function( event ) {
+		if (!document.querySelector('.chatRoom').contains(event.target)) {
+	
 
-		if ( this.domElement !== document ) {
+			if ( this.domElement !== document ) {
 
-			this.domElement.focus();
-
-		}
-
-		event.preventDefault();
-		event.stopPropagation();
-
-		if ( this.dragToLook ) {
-
-			this.mouseStatus ++;
-
-		} else {
-
-			switch ( event.button ) {
-
-				case 0: this.moveState.forward = 1; break;
-				case 2: this.moveState.back = 1; break;
+				this.domElement.focus();
 
 			}
 
-			this.updateMovementVector();
+			event.preventDefault();
+			event.stopPropagation();
 
+			if ( this.dragToLook ) {
+
+				this.mouseStatus ++;
+
+			} else {
+
+				switch ( event.button ) {
+
+					case 0: this.moveState.forward = 1; break;
+					case 2: this.moveState.back = 1; break;
+
+				}
+
+				this.updateMovementVector();
+
+			}
 		}
-
 	};
 
 	this.mousemove = function( event ) {
@@ -157,30 +159,31 @@ THREE.FlyControls = function ( object, domElement ) {
 	};
 
 	this.mouseup = function( event ) {
+		if (!document.querySelector('.chatRoom').contains(event.target)) {
+			event.preventDefault();
+			event.stopPropagation();
 
-		event.preventDefault();
-		event.stopPropagation();
+			if ( this.dragToLook ) {
 
-		if ( this.dragToLook ) {
+				this.mouseStatus --;
 
-			this.mouseStatus --;
+				this.moveState.yawLeft = this.moveState.pitchDown = 0;
 
-			this.moveState.yawLeft = this.moveState.pitchDown = 0;
+			} else {
 
-		} else {
+				switch ( event.button ) {
 
-			switch ( event.button ) {
+					case 0: this.moveState.forward = 0; break;
+					case 2: this.moveState.back = 0; break;
 
-				case 0: this.moveState.forward = 0; break;
-				case 2: this.moveState.back = 0; break;
+				}
+
+				this.updateMovementVector();
 
 			}
 
-			this.updateMovementVector();
-
+			this.updateRotationVector();
 		}
-
-		this.updateRotationVector();
 
 	};
 
