@@ -14,21 +14,44 @@ class UserList extends React.Component {
   componentDidMount() {
     let self = this;
     window.socket.on('selfPlayer', function(params) {
-        let users = params.users;
         let curUser = params.currentPlayer;
         UserService.setUser(curUser);
+    });
+
+    window.socket.on('otherNewPlayer', function(params) {
+        self.setState({
+          users: params.users
+        });
+    });
+
+    window.socket.on('deletePlayer', function(userId) {
         let a = self.state.users.slice();
-        users.forEach(r=> a.push(r));
+        a = a.filter(r=> r.id !== userId);
         self.setState({
           users: a
         });
     });
+
+    window.socket.on('updateUsersData', function(users) {
+        self.setState({
+          users: users
+        });
+    });
+
+
+    window.addEventListener('click', ()=> {
+      let user =  UserService.getUser();
+      user.scores +=1;
+      window.socket.emit('updateUserData', user);
+    }, false);
   }
 
   render() {
     const listItems = this.state.users.map((item, i) =>
-      <li key={i} className="new-message">{item.playerName}</li>
+      <li key={i} className="new-message">{item.playerName} <span>Scores: {item.scores} </span></li>
     );
+    // console.log(this.state);
+    // console.log(listItems);
     return (
 
       <div className="sidebar">

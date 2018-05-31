@@ -61,11 +61,16 @@ class App extends React.Component {
               </form>
             </div> 
           </div>
-          ) : <Chat/>
+
+          ) :  (
+            <div>
+              <UserList/> 
+              <Chat/>
+            </div>
+          )
         }
 
-        <UserList/>
-          
+
         <div id="info">Controls - > WASD/RF/QE + mouse </div>
         <div id="position"></div>
         <div id="rotation"></div>

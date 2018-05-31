@@ -59,7 +59,7 @@ let Helpers = {
     	var textureFlare0 = loader.load( "img/lensflare0.png" );
     	var textureFlare1 = loader.load( "img/lensflare2.png" );
     	var textureFlare2 = loader.load( "img/lensflare3.png" );
-        var light = new THREE.PointLight(0xffffff, 1.5, 4500);
+        var light = new THREE.PointLight(0xffffff, 1.5, 450);
         light.color.setHSL(h, s, l);
         light.position.set(x, y, z);
         scene.add(light);

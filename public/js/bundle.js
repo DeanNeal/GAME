@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 16);
+/******/ 	return __webpack_require__(__webpack_require__.s = 18);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -264,9 +264,9 @@ process.umask = function() { return 0; };
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(28);
+  module.exports = __webpack_require__(31);
 } else {
-  module.exports = __webpack_require__(27);
+  module.exports = __webpack_require__(30);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
@@ -499,6 +499,103 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+function checkDCE() {
+  /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+  if (
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ||
+    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== 'function'
+  ) {
+    return;
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    // This branch is unreachable because this function is only called
+    // in production, but the condition is true only in development.
+    // Therefore if the branch is still here, dead code elimination wasn't
+    // properly applied.
+    // Don't change the message. React DevTools relies on it. Also make sure
+    // this message doesn't occur elsewhere in this function, or it will cause
+    // a false positive.
+    throw new Error('^_^');
+  }
+  try {
+    // Verify that the code above has been dead code eliminated (DCE'd).
+    __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE(checkDCE);
+  } catch (err) {
+    // DevTools shouldn't crash React, no matter what.
+    // We should still report in case we break this code.
+    console.error(err);
+  }
+}
+
+if (process.env.NODE_ENV === 'production') {
+  // DCE check should happen before ReactDOM bundle executes so that
+  // DevTools can report bad minification during injection.
+  checkDCE();
+  module.exports = __webpack_require__(29);
+} else {
+  module.exports = __webpack_require__(28);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+var UserService = function () {
+    function UserService() {
+        _classCallCheck(this, UserService);
+
+        this.user = undefined;
+    }
+
+    _createClass(UserService, [{
+        key: "setUser",
+        value: function setUser(user) {
+            this.user = user;
+        }
+    }, {
+        key: "getUser",
+        value: function getUser() {
+            return this.user;
+        }
+    }]);
+
+    return UserService;
+}();
+
+exports.default = new UserService();
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /* WEBPACK VAR INJECTION */(function(process) {/**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -564,53 +661,7 @@ module.exports = warning;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-function checkDCE() {
-  /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
-  if (
-    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined' ||
-    typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE !== 'function'
-  ) {
-    return;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    // This branch is unreachable because this function is only called
-    // in production, but the condition is true only in development.
-    // Therefore if the branch is still here, dead code elimination wasn't
-    // properly applied.
-    // Don't change the message. React DevTools relies on it. Also make sure
-    // this message doesn't occur elsewhere in this function, or it will cause
-    // a false positive.
-    throw new Error('^_^');
-  }
-  try {
-    // Verify that the code above has been dead code eliminated (DCE'd).
-    __REACT_DEVTOOLS_GLOBAL_HOOK__.checkDCE(checkDCE);
-  } catch (err) {
-    // DevTools shouldn't crash React, no matter what.
-    // We should still report in case we break this code.
-    console.error(err);
-  }
-}
-
-if (process.env.NODE_ENV === 'production') {
-  // DCE check should happen before ReactDOM bundle executes so that
-  // DevTools can report bad minification during injection.
-  checkDCE();
-  module.exports = __webpack_require__(26);
-} else {
-  module.exports = __webpack_require__(25);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -649,7 +700,7 @@ var ExecutionEnvironment = {
 module.exports = ExecutionEnvironment;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -664,7 +715,7 @@ module.exports = ExecutionEnvironment;
  * 
  */
 
-var isTextNode = __webpack_require__(23);
+var isTextNode = __webpack_require__(26);
 
 /*eslint-disable no-bitwise */
 
@@ -692,7 +743,7 @@ function containsNode(outerNode, innerNode) {
 module.exports = containsNode;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -734,7 +785,7 @@ function getActiveElement(doc) /*?DOMElement*/{
 module.exports = getActiveElement;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -805,7 +856,7 @@ function shallowEqual(objA, objB) {
 module.exports = shallowEqual;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -820,8 +871,8 @@ module.exports = shallowEqual;
 
 if (process.env.NODE_ENV !== 'production') {
   var invariant = __webpack_require__(3);
-  var warning = __webpack_require__(6);
-  var ReactPropTypesSecret = __webpack_require__(24);
+  var warning = __webpack_require__(8);
+  var ReactPropTypesSecret = __webpack_require__(27);
   var loggedTypeFailures = {};
 }
 
@@ -872,7 +923,7 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -888,15 +939,15 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _chatComponent = __webpack_require__(17);
+var _chatComponent = __webpack_require__(19);
 
 var _chatComponent2 = _interopRequireDefault(_chatComponent);
 
-var _listComponent = __webpack_require__(33);
+var _listComponent = __webpack_require__(20);
 
 var _listComponent2 = _interopRequireDefault(_listComponent);
 
-var _main = __webpack_require__(15);
+var _main = __webpack_require__(17);
 
 var _main2 = _interopRequireDefault(_main);
 
@@ -990,8 +1041,12 @@ var App = function (_React$Component) {
               )
             )
           )
-        ) : _react2.default.createElement(_chatComponent2.default, null),
-        _react2.default.createElement(_listComponent2.default, null),
+        ) : _react2.default.createElement(
+          'div',
+          null,
+          _react2.default.createElement(_listComponent2.default, null),
+          _react2.default.createElement(_chatComponent2.default, null)
+        ),
         _react2.default.createElement(
           'div',
           { id: 'info' },
@@ -1009,13 +1064,93 @@ var App = function (_React$Component) {
 exports.default = App;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 15 */
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+var colors = ['#FF62B0', '#9A03FE', '#62D0FF', '#48FB0D', '#DFA800', '#C27E3A', '#990099', '#9669FE', '#23819C', '#01F33E', '#B6BA18', '#FF800D', '#B96F6F', '#4A9586'];
+
+var Helpers = {
+        roundRect: function roundRect(ctx, x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+        },
+        lensFlareUpdateCallback: function lensFlareUpdateCallback(object) {
+
+                var f,
+                    fl = object.lensFlares.length;
+                var flare;
+                var vecX = -object.positionScreen.x * 2;
+                var vecY = -object.positionScreen.y * 2;
+
+                for (f = 0; f < fl; f++) {
+
+                        flare = object.lensFlares[f];
+
+                        flare.x = object.positionScreen.x + vecX * flare.distance;
+                        flare.y = object.positionScreen.y + vecY * flare.distance;
+
+                        flare.rotation = 0;
+                }
+
+                object.lensFlares[2].y += 0.025;
+                object.lensFlares[3].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad(45);
+        },
+        addLight: function addLight(scene, h, s, l, x, y, z) {
+                var loader = new THREE.TextureLoader();
+                var textureFlare0 = loader.load("img/lensflare0.png");
+                var textureFlare1 = loader.load("img/lensflare2.png");
+                var textureFlare2 = loader.load("img/lensflare3.png");
+                var light = new THREE.PointLight(0xffffff, 1.5, 450);
+                light.color.setHSL(h, s, l);
+                light.position.set(x, y, z);
+                scene.add(light);
+
+                var flareColor = new THREE.Color(0xffffff);
+                flareColor.setHSL(h, s, l + 0.5);
+
+                var lensflare = new THREE.Lensflare();
+                lensflare.addElement(new THREE.LensflareElement(textureFlare0, 512, 0));
+                lensflare.addElement(new THREE.LensflareElement(textureFlare1, 512, 0));
+                lensflare.addElement(new THREE.LensflareElement(textureFlare2, 60, 0.6));
+
+                lensflare.customUpdateCallback = Helpers.lensFlareUpdateCallback;
+                lensflare.position.copy(light.position);
+
+                scene.add(lensflare);
+        },
+
+        getRandColor: function getRandColor() {
+                return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+};
+exports.default = Helpers;
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1027,11 +1162,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.Game = undefined;
 exports.default = socketIoInit;
 
-var _helper = __webpack_require__(32);
+var _helper = __webpack_require__(16);
 
 var _helper2 = _interopRequireDefault(_helper);
 
-var _userService = __webpack_require__(34);
+var _userService = __webpack_require__(7);
 
 var _userService2 = _interopRequireDefault(_userService);
 
@@ -1306,7 +1441,7 @@ function socketIoInit() {
 
         //Player
 
-        var createNewPlayer = function createNewPlayer(name, playerName) {
+        var createNewPlayer = function createNewPlayer(user) {
 
             var newPlayer = new THREE.Mesh(new THREE.SphereGeometry(80, 32, 32), new THREE.MeshPhongMaterial({
                 map: texture,
@@ -1317,26 +1452,24 @@ function socketIoInit() {
             }));
 
             newPlayer.position.set(0, 50, 300);
-            newPlayer.name = name;
-            newPlayer.playerName = playerName;
 
-            var spritey = makeTextSprite(playerName, { fontsize: 32, fontface: "Georgia" });
+            var spritey = makeTextSprite(user.playerName, { fontsize: 32, fontface: "Georgia" });
             spritey.position.set(50, 100, 0);
             newPlayer.add(spritey);
 
-            players.push(newPlayer);
+            players.push({ mesh: newPlayer, user: user });
 
             return newPlayer;
         };
 
-        window.socket.on('updateUsers', function (users) {
+        window.socket.on('updateUsersCoords', function (users) {
             $.each(users, function (i, player) {
-                if (player.name == _userService2.default.getUser().name) return;
+                if (player.id == _userService2.default.getUser().id) return;
 
                 players.forEach(function (p) {
-                    if (p.name === player.name) {
-                        p.position.set(player.position.x, player.position.y - playerPosition.y, player.position.z - playerPosition.z);
-                        p.rotation.set(player.rotation._x, player.rotation._y, player.rotation._z);
+                    if (p.user.id === player.id) {
+                        p.mesh.position.set(player.position.x, player.position.y - playerPosition.y, player.position.z - playerPosition.z);
+                        p.mesh.rotation.set(player.rotation._x, player.rotation._y, player.rotation._z);
                     }
                 });
             });
@@ -1346,28 +1479,20 @@ function socketIoInit() {
             var users = params.users;
             var curUser = params.currentPlayer;
             $.each(users, function (i, user) {
-                if (_userService2.default.getUser().name !== user.name) {
-                    allUsers.empty();
-                    $.each(users, function (i, player) {
-                        allUsers.append('<li data-id="' + player.name + '">' + player.playerName + '<span></span></li>');
-                    });
-                    scene.add(createNewPlayer(user.name, user.playerName));
+                if (_userService2.default.getUser().id !== user.id) {
+                    scene.add(createNewPlayer(user));
                 }
             });
         });
 
-        window.socket.on('deletePlayer', function (playerName) {
+        window.socket.on('deletePlayer', function (userId) {
             console.log('deletePlayer');
-
-            allUsers.find('[data-id=' + playerName + ']').remove();
-
             var elementPos;
             $.each(players, function (i, item) {
-
-                if (item.name == playerName) {
+                if (item.user.id == userId) {
                     elementPos = players.map(function (x) {
-                        return x.name;
-                    }).indexOf(item.name);
+                        return x.user.id;
+                    }).indexOf(item.user.id);
                     scene.remove(item);
                 }
             });
@@ -1380,15 +1505,6 @@ function socketIoInit() {
         $(window).on('keyup', function () {
             isMove = false;
         });
-
-        // $('.chatRoom').hover(function(){
-        //  controls.dragToLook = true;
-        //  controls.rollSpeed = 0;
-        // }, function(){
-        //  controls.dragToLook = false;
-        //  controls.rollSpeed = Math.PI / 6;
-        // });
-
 
         //
 
@@ -1543,7 +1659,7 @@ function socketIoInit() {
 }
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1553,22 +1669,22 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(7);
+var _reactDom = __webpack_require__(6);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _appComponent = __webpack_require__(13);
+var _appComponent = __webpack_require__(14);
 
 var _appComponent2 = _interopRequireDefault(_appComponent);
 
-__webpack_require__(14);
+__webpack_require__(15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _reactDom2.default.render(_react2.default.createElement(_appComponent2.default, null), document.getElementById("root"));
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1584,11 +1700,11 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(7);
+var _reactDom = __webpack_require__(6);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _userService = __webpack_require__(34);
+var _userService = __webpack_require__(7);
 
 var _userService2 = _interopRequireDefault(_userService);
 
@@ -1735,7 +1851,138 @@ var Chat = function (_React$Component2) {
 exports.default = Chat;
 
 /***/ }),
-/* 18 */
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = __webpack_require__(6);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _userService = __webpack_require__(7);
+
+var _userService2 = _interopRequireDefault(_userService);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var UserList = function (_React$Component) {
+  _inherits(UserList, _React$Component);
+
+  function UserList(props) {
+    _classCallCheck(this, UserList);
+
+    var _this = _possibleConstructorReturn(this, (UserList.__proto__ || Object.getPrototypeOf(UserList)).call(this, props));
+
+    _this.state = {
+      users: []
+    };
+
+    return _this;
+  }
+
+  _createClass(UserList, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var self = this;
+      window.socket.on('selfPlayer', function (params) {
+        var curUser = params.currentPlayer;
+        _userService2.default.setUser(curUser);
+      });
+
+      window.socket.on('otherNewPlayer', function (params) {
+        self.setState({
+          users: params.users
+        });
+      });
+
+      window.socket.on('deletePlayer', function (userId) {
+        var a = self.state.users.slice();
+        a = a.filter(function (r) {
+          return r.id !== userId;
+        });
+        self.setState({
+          users: a
+        });
+      });
+
+      window.socket.on('updateUsersData', function (users) {
+        self.setState({
+          users: users
+        });
+      });
+
+      window.addEventListener('click', function () {
+        var user = _userService2.default.getUser();
+        user.scores += 1;
+        window.socket.emit('updateUserData', user);
+      }, false);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var listItems = this.state.users.map(function (item, i) {
+        return _react2.default.createElement(
+          "li",
+          { key: i, className: "new-message" },
+          item.playerName,
+          " ",
+          _react2.default.createElement(
+            "span",
+            null,
+            "Scores: ",
+            item.scores,
+            " "
+          )
+        );
+      });
+      // console.log(this.state);
+      // console.log(listItems);
+      return _react2.default.createElement(
+        "div",
+        { className: "sidebar" },
+        _react2.default.createElement(
+          "div",
+          { id: "users" },
+          _react2.default.createElement(
+            "span",
+            { className: "title" },
+            " Online:"
+          ),
+          _react2.default.createElement(
+            "ul",
+            null,
+            listItems
+          )
+        )
+      );
+    }
+  }]);
+
+  return UserList;
+}(_react2.default.Component);
+
+exports.default = UserList;
+
+/***/ }),
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1770,7 +2017,7 @@ function camelize(string) {
 module.exports = camelize;
 
 /***/ }),
-/* 19 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1785,7 +2032,7 @@ module.exports = camelize;
 
 
 
-var camelize = __webpack_require__(18);
+var camelize = __webpack_require__(21);
 
 var msPattern = /^-ms-/;
 
@@ -1813,7 +2060,7 @@ function camelizeStyleName(string) {
 module.exports = camelizeStyleName;
 
 /***/ }),
-/* 20 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1849,7 +2096,7 @@ function hyphenate(string) {
 module.exports = hyphenate;
 
 /***/ }),
-/* 21 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1864,7 +2111,7 @@ module.exports = hyphenate;
 
 
 
-var hyphenate = __webpack_require__(20);
+var hyphenate = __webpack_require__(23);
 
 var msPattern = /^ms-/;
 
@@ -1891,7 +2138,7 @@ function hyphenateStyleName(string) {
 module.exports = hyphenateStyleName;
 
 /***/ }),
-/* 22 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1919,7 +2166,7 @@ function isNode(object) {
 module.exports = isNode;
 
 /***/ }),
-/* 23 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1934,7 +2181,7 @@ module.exports = isNode;
  * @typechecks
  */
 
-var isNode = __webpack_require__(22);
+var isNode = __webpack_require__(25);
 
 /**
  * @param {*} object The object to check.
@@ -1947,7 +2194,7 @@ function isTextNode(object) {
 module.exports = isTextNode;
 
 /***/ }),
-/* 24 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1966,7 +2213,7 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 25 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1989,17 +2236,17 @@ if (process.env.NODE_ENV !== "production") {
 
 var invariant = __webpack_require__(3);
 var React = __webpack_require__(1);
-var warning = __webpack_require__(6);
-var ExecutionEnvironment = __webpack_require__(8);
+var warning = __webpack_require__(8);
+var ExecutionEnvironment = __webpack_require__(9);
 var _assign = __webpack_require__(5);
 var emptyFunction = __webpack_require__(2);
-var checkPropTypes = __webpack_require__(12);
-var getActiveElement = __webpack_require__(10);
-var shallowEqual = __webpack_require__(11);
-var containsNode = __webpack_require__(9);
+var checkPropTypes = __webpack_require__(13);
+var getActiveElement = __webpack_require__(11);
+var shallowEqual = __webpack_require__(12);
+var containsNode = __webpack_require__(10);
 var emptyObject = __webpack_require__(4);
-var hyphenateStyleName = __webpack_require__(21);
-var camelizeStyleName = __webpack_require__(19);
+var hyphenateStyleName = __webpack_require__(24);
+var camelizeStyleName = __webpack_require__(22);
 
 // Relying on the `invariant()` implementation lets us
 // have preserve the format and params in the www builds.
@@ -19280,7 +19527,7 @@ module.exports = reactDom;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 26 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19296,7 +19543,7 @@ module.exports = reactDom;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(3),ca=__webpack_require__(1),m=__webpack_require__(8),p=__webpack_require__(5),v=__webpack_require__(2),da=__webpack_require__(10),ea=__webpack_require__(11),fa=__webpack_require__(9),ha=__webpack_require__(4);
+var aa=__webpack_require__(3),ca=__webpack_require__(1),m=__webpack_require__(9),p=__webpack_require__(5),v=__webpack_require__(2),da=__webpack_require__(11),ea=__webpack_require__(12),fa=__webpack_require__(10),ha=__webpack_require__(4);
 function A(a){for(var b=arguments.length-1,c="https://reactjs.org/docs/error-decoder.html?invariant="+a,d=0;d<b;d++)c+="&args[]="+encodeURIComponent(arguments[d+1]);aa(!1,"Minified React error #"+a+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",c)}ca?void 0:A("227");
 function ia(a,b,c,d,e,f,g,h,k){this._hasCaughtError=!1;this._caughtError=null;var n=Array.prototype.slice.call(arguments,3);try{b.apply(c,n)}catch(r){this._caughtError=r,this._hasCaughtError=!0}}
 var B={_caughtError:null,_hasCaughtError:!1,_rethrowError:null,_hasRethrowError:!1,invokeGuardedCallback:function(a,b,c,d,e,f,g,h,k){ia.apply(B,arguments)},invokeGuardedCallbackAndCatchFirstError:function(a,b,c,d,e,f,g,h,k){B.invokeGuardedCallback.apply(this,arguments);if(B.hasCaughtError()){var n=B.clearCaughtError();B._hasRethrowError||(B._hasRethrowError=!0,B._rethrowError=n)}},rethrowCaughtError:function(){return ka.apply(B,arguments)},hasCaughtError:function(){return B._hasCaughtError},clearCaughtError:function(){if(B._hasCaughtError){var a=
@@ -19525,7 +19772,7 @@ var vi={default:qi},wi=vi&&qi||vi;module.exports=wi.default?wi.default:wi;
 
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19549,9 +19796,9 @@ if (process.env.NODE_ENV !== "production") {
 var _assign = __webpack_require__(5);
 var invariant = __webpack_require__(3);
 var emptyObject = __webpack_require__(4);
-var warning = __webpack_require__(6);
+var warning = __webpack_require__(8);
 var emptyFunction = __webpack_require__(2);
-var checkPropTypes = __webpack_require__(12);
+var checkPropTypes = __webpack_require__(13);
 
 // TODO: this is special because it gets imported during build.
 
@@ -21007,7 +21254,7 @@ module.exports = react;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 28 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21034,241 +21281,6 @@ _calculateChangedBits:b,_defaultValue:a,_currentValue:a,_currentValue2:a,_change
 b.key&&(g=""+b.key);var l=void 0;a.type&&a.type.defaultProps&&(l=a.type.defaultProps);for(c in b)K.call(b,c)&&!L.hasOwnProperty(c)&&(d[c]=void 0===b[c]&&void 0!==l?l[c]:b[c])}c=arguments.length-2;if(1===c)d.children=e;else if(1<c){l=Array(c);for(var m=0;m<c;m++)l[m]=arguments[m+2];d.children=l}return{$$typeof:t,type:a.type,key:g,ref:h,props:d,_owner:f}},createFactory:function(a){var b=M.bind(null,a);b.type=a;return b},isValidElement:N,version:"16.4.0",__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentOwner:J,
 assign:k}},Y={default:X},Z=Y&&X||Y;module.exports=Z.default?Z.default:Z;
 
-
-/***/ }),
-/* 29 */,
-/* 30 */,
-/* 31 */,
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-        value: true
-});
-var colors = ['#FF62B0', '#9A03FE', '#62D0FF', '#48FB0D', '#DFA800', '#C27E3A', '#990099', '#9669FE', '#23819C', '#01F33E', '#B6BA18', '#FF800D', '#B96F6F', '#4A9586'];
-
-var Helpers = {
-        roundRect: function roundRect(ctx, x, y, w, h, r) {
-                ctx.beginPath();
-                ctx.moveTo(x + r, y);
-                ctx.lineTo(x + w - r, y);
-                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-                ctx.lineTo(x + w, y + h - r);
-                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-                ctx.lineTo(x + r, y + h);
-                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-                ctx.lineTo(x, y + r);
-                ctx.quadraticCurveTo(x, y, x + r, y);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-        },
-        lensFlareUpdateCallback: function lensFlareUpdateCallback(object) {
-
-                var f,
-                    fl = object.lensFlares.length;
-                var flare;
-                var vecX = -object.positionScreen.x * 2;
-                var vecY = -object.positionScreen.y * 2;
-
-                for (f = 0; f < fl; f++) {
-
-                        flare = object.lensFlares[f];
-
-                        flare.x = object.positionScreen.x + vecX * flare.distance;
-                        flare.y = object.positionScreen.y + vecY * flare.distance;
-
-                        flare.rotation = 0;
-                }
-
-                object.lensFlares[2].y += 0.025;
-                object.lensFlares[3].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad(45);
-        },
-        addLight: function addLight(scene, h, s, l, x, y, z) {
-                var loader = new THREE.TextureLoader();
-                var textureFlare0 = loader.load("img/lensflare0.png");
-                var textureFlare1 = loader.load("img/lensflare2.png");
-                var textureFlare2 = loader.load("img/lensflare3.png");
-                var light = new THREE.PointLight(0xffffff, 1.5, 4500);
-                light.color.setHSL(h, s, l);
-                light.position.set(x, y, z);
-                scene.add(light);
-
-                var flareColor = new THREE.Color(0xffffff);
-                flareColor.setHSL(h, s, l + 0.5);
-
-                var lensflare = new THREE.Lensflare();
-                lensflare.addElement(new THREE.LensflareElement(textureFlare0, 512, 0));
-                lensflare.addElement(new THREE.LensflareElement(textureFlare1, 512, 0));
-                lensflare.addElement(new THREE.LensflareElement(textureFlare2, 60, 0.6));
-
-                lensflare.customUpdateCallback = Helpers.lensFlareUpdateCallback;
-                lensflare.position.copy(light.position);
-
-                scene.add(lensflare);
-        },
-
-        getRandColor: function getRandColor() {
-                return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-};
-exports.default = Helpers;
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(1);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = __webpack_require__(7);
-
-var _reactDom2 = _interopRequireDefault(_reactDom);
-
-var _userService = __webpack_require__(34);
-
-var _userService2 = _interopRequireDefault(_userService);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var UserList = function (_React$Component) {
-  _inherits(UserList, _React$Component);
-
-  function UserList(props) {
-    _classCallCheck(this, UserList);
-
-    var _this = _possibleConstructorReturn(this, (UserList.__proto__ || Object.getPrototypeOf(UserList)).call(this, props));
-
-    _this.state = {
-      users: []
-    };
-
-    return _this;
-  }
-
-  _createClass(UserList, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var self = this;
-      window.socket.on('selfPlayer', function (params) {
-        var users = params.users;
-        var curUser = params.currentPlayer;
-        _userService2.default.setUser(curUser);
-        var a = self.state.users.slice();
-        users.forEach(function (r) {
-          return a.push(r);
-        });
-        self.setState({
-          users: a
-        });
-      });
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var listItems = this.state.users.map(function (item, i) {
-        return _react2.default.createElement(
-          "li",
-          { key: i, className: "new-message" },
-          item.playerName
-        );
-      });
-      return _react2.default.createElement(
-        "div",
-        { className: "sidebar" },
-        _react2.default.createElement(
-          "div",
-          { id: "users" },
-          _react2.default.createElement(
-            "span",
-            { className: "title" },
-            " Online:"
-          ),
-          _react2.default.createElement(
-            "ul",
-            null,
-            listItems
-          )
-        )
-      );
-    }
-  }]);
-
-  return UserList;
-}(_react2.default.Component);
-
-exports.default = UserList;
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () {
-    function defineProperties(target, props) {
-        for (var i = 0; i < props.length; i++) {
-            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
-        }
-    }return function (Constructor, protoProps, staticProps) {
-        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
-    };
-}();
-
-function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-        throw new TypeError("Cannot call a class as a function");
-    }
-}
-
-var UserService = function () {
-    function UserService() {
-        _classCallCheck(this, UserService);
-
-        this.user = undefined;
-    }
-
-    _createClass(UserService, [{
-        key: "setUser",
-        value: function setUser(user) {
-            this.user = user;
-        }
-    }, {
-        key: "getUser",
-        value: function getUser() {
-            return this.user;
-        }
-    }]);
-
-    return UserService;
-}();
-
-exports.default = new UserService();
 
 /***/ })
 /******/ ]);
