@@ -1,38 +1,50 @@
 import React from "react";
 import Chat from './chat/chat.component.jsx';
+import UserList from './list/list.component.jsx';
+import socketIoInit from '../main.js';
+import {Game} from '../main.js';
+// let socket = io();
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
-      getReady: false
+      getReady: false,
+      playerOptions: {
+        name: ''
+      }
     };
 
-    this.startClick = this.startClick.bind(this);
+    this.submit = this.submit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.keyPress = this.keyPress.bind(this);
   }
 
-  startClick() {
-    var playerOptions = {};
+  componentDidMount() {
 
-    if (!this.state.username.length) {
-        alert('Please enter your name');
-        return;
-    }
+  }
 
+  submit() {
+    this.start();
+  }
+
+  start() {
     this.setState({
       getReady: true
     });
-
-    playerOptions.name = this.state.username;
-
-    socketIoInit(playerOptions);
-    socket.emit('add new player', playerOptions);
+    socketIoInit(this.state.playerOptions);
+    window.socket.emit('add new player', this.state.playerOptions);
   }
 
   handleChange(event) {
-    this.setState({username: event.target.value});
+
+    this.setState({playerOptions: {name: event.target.value}});
+  }
+
+  keyPress(event) {
+    if (event.key == 'Enter' && this.state.playerOptions.name){
+      this.start();
+    }
   }
  
   render() {
@@ -42,25 +54,18 @@ class App extends React.Component {
           <div className="start-page">
             <div className="overlay"></div>
             <div className="popup">
-              <div className="popup__content">
+              <form className="popup__content" onSubmit={this.submit}>
                  <label> Username</label>
-                 <input type="text" value={this.state.username} onChange={this.handleChange}/>
-                 <button onClick={this.startClick} className="btn">START</button>
-              </div>
+                 <input type="text" value={this.state.playerOptions.name} onKeyDown={this.keyPress} onChange={this.handleChange} required/>
+                 <button className="btn" type="submit">START</button>
+              </form>
             </div> 
           </div>
           ) : <Chat/>
         }
 
-        <div className="sidebar dark">
-          <div id="users">
-            <span className="title"> Online:</span>
-            <ul></ul>
-          </div>
-        </div>
+        <UserList/>
           
-        <div className="version dark">alpha 0.03</div>
-
         <div id="info">Controls - > WASD/RF/QE + mouse </div>
         <div id="position"></div>
         <div id="rotation"></div>
