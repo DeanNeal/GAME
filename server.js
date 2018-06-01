@@ -27,7 +27,7 @@ io.sockets.on('connection', function (socket) {
        user = addUser(socket.id, playerOptions);
        socket.emit("selfPlayer", { users: users, currentPlayer: user });
        io.sockets.emit("otherNewPlayer", { users: users, currentPlayer: user });
-       io.sockets.emit('updateUserData', users);
+       // io.sockets.emit('updateUserData', users);
     });
 
     socket.on('disconnect', function () {
@@ -37,8 +37,8 @@ io.sockets.on('connection', function (socket) {
         updateUsersCoords(user.id, data);
     });
 
-    socket.on("updateUserData", function( user ) {
-        updateUserData(user);
+    socket.on("increaseScores", function() {
+        increaseScores(user);
     });
 
 
@@ -88,14 +88,23 @@ var updateUsersCoords = function(id, data) {
     io.sockets.emit("updateUsersCoords", users);
 }
 
-var updateUserData = function(data) {
+var increaseScores = function(curUser) {
   for(var i=0; i<users.length; i++) {
-      if(users[i].id == data.id){
-        users[i] = data;
+      if(users[i].id == curUser.id){
+        users[i].scores += 1;
       }
   }
   io.sockets.emit("updateUsersData", users);
 }
+
+// var updateUserData = function(data) {
+//   for(var i=0; i<users.length; i++) {
+//       if(users[i].id == data.id){
+//         users[i] = data;
+//       }
+//   }
+//   io.sockets.emit("updateUsersData", users);
+// }
 /****LOGIC*****/
 
 

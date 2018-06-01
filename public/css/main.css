@@ -43,6 +43,13 @@ ul {
   top: 20px;
   font-size: 14px; }
 
+#position-camera {
+  color: #fff;
+  position: absolute;
+  top: 20px;
+  font-size: 14px;
+  left: 200px; }
+
 #rotation {
   font-size: 14px;
   color: #fff;

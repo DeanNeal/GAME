@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 22);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -264,9 +264,9 @@ process.umask = function() { return 0; };
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(31);
+  module.exports = __webpack_require__(35);
 } else {
-  module.exports = __webpack_require__(30);
+  module.exports = __webpack_require__(34);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
@@ -533,9 +533,9 @@ if (process.env.NODE_ENV === 'production') {
   // DCE check should happen before ReactDOM bundle executes so that
   // DevTools can report bad minification during injection.
   checkDCE();
-  module.exports = __webpack_require__(29);
+  module.exports = __webpack_require__(33);
 } else {
-  module.exports = __webpack_require__(28);
+  module.exports = __webpack_require__(32);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
@@ -661,7 +661,9 @@ module.exports = warning;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 9 */
+/* 9 */,
+/* 10 */,
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -700,7 +702,7 @@ var ExecutionEnvironment = {
 module.exports = ExecutionEnvironment;
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -715,7 +717,7 @@ module.exports = ExecutionEnvironment;
  * 
  */
 
-var isTextNode = __webpack_require__(26);
+var isTextNode = __webpack_require__(30);
 
 /*eslint-disable no-bitwise */
 
@@ -743,7 +745,7 @@ function containsNode(outerNode, innerNode) {
 module.exports = containsNode;
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -785,7 +787,7 @@ function getActiveElement(doc) /*?DOMElement*/{
 module.exports = getActiveElement;
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -856,7 +858,7 @@ function shallowEqual(objA, objB) {
 module.exports = shallowEqual;
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -872,7 +874,7 @@ module.exports = shallowEqual;
 if (process.env.NODE_ENV !== 'production') {
   var invariant = __webpack_require__(3);
   var warning = __webpack_require__(8);
-  var ReactPropTypesSecret = __webpack_require__(27);
+  var ReactPropTypesSecret = __webpack_require__(31);
   var loggedTypeFailures = {};
 }
 
@@ -923,7 +925,7 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -939,15 +941,15 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _chatComponent = __webpack_require__(19);
+var _chatComponent = __webpack_require__(23);
 
 var _chatComponent2 = _interopRequireDefault(_chatComponent);
 
-var _listComponent = __webpack_require__(20);
+var _listComponent = __webpack_require__(24);
 
 var _listComponent2 = _interopRequireDefault(_listComponent);
 
-var _main = __webpack_require__(17);
+var _main = __webpack_require__(21);
 
 var _main2 = _interopRequireDefault(_main);
 
@@ -1053,6 +1055,7 @@ var App = function (_React$Component) {
           'Controls - > WASD/RF/QE + mouse '
         ),
         _react2.default.createElement('div', { id: 'position' }),
+        _react2.default.createElement('div', { id: 'position-camera' }),
         _react2.default.createElement('div', { id: 'rotation' })
       );
     }
@@ -1064,13 +1067,15 @@ var App = function (_React$Component) {
 exports.default = App;
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 16 */
+/* 18 */,
+/* 19 */,
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1150,7 +1155,7 @@ var Helpers = {
 exports.default = Helpers;
 
 /***/ }),
-/* 17 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1162,7 +1167,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.Game = undefined;
 exports.default = socketIoInit;
 
-var _helper = __webpack_require__(16);
+var _helper = __webpack_require__(20);
 
 var _helper2 = _interopRequireDefault(_helper);
 
@@ -1187,7 +1192,7 @@ var Game = exports.Game = function Game() {
 };
 
 function socketIoInit() {
-
+    // var colliderSystem  = new THREEx.ColliderSystem();
     var container, stats;
 
     var camera, scene, renderer, projector, raycaster, controls;
@@ -1199,7 +1204,9 @@ function socketIoInit() {
 
     var allSpheres = [],
         allCubes = [],
-        Player,
+        COLLIDERS = [],
+        lastCollisionId,
+        InvisiblePlayer,
         currentPlayer,
         players = [];
 
@@ -1207,7 +1214,7 @@ function socketIoInit() {
 
     var isMove = false;
     var earthMesh, cloudMesh;
-    var startPosition = { x: 1000, y: 0, z: 2000 },
+    var startPosition = { x: 0, y: 0, z: 0 },
         playerPosition = { x: 0, y: 0, z: 0 };
 
     init();
@@ -1224,9 +1231,24 @@ function socketIoInit() {
         camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 200000);
         camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 
-        controls = new THREE.FlyControls(camera);
+        InvisiblePlayer = new THREE.Mesh(new THREE.SphereGeometry(200, 9, 9), new THREE.MeshPhongMaterial({
+            // map: texture,
+            // bumpMap: textureBump,
+            color: 0x00ff00,
+            // specular: 0x0022ff,
+            // shininess: 3
+            // side: THREE.BackSide,
+            opacity: 1,
+            transparent: true
+        }));
+        InvisiblePlayer.position.set(0, 0, 0);
+        // camera.add(InvisiblePlayer);
 
-        controls.movementSpeed = 500;
+
+        controls = new THREE.FlyControls(camera); //new THREE.FirstPersonControls(camera);
+
+
+        controls.movementSpeed = 1000;
         controls.domElement = container;
         controls.rollSpeed = Math.PI / 3;
         controls.autoForward = false;
@@ -1239,6 +1261,8 @@ function socketIoInit() {
 
 
         scene = new THREE.Scene();
+
+        scene.add(InvisiblePlayer);
         //  scene.fog = new THREE.Fog( 0x000000, 3500, 15000 );
         //  scene.fog.color.setHSL( 0.51, 0.4, 0.01 );
 
@@ -1248,17 +1272,28 @@ function socketIoInit() {
 
         var cube = new THREE.BoxGeometry(s, s, s);
 
-        for (var i = 0; i < 500; i++) {
-            var material = new THREE.MeshPhongMaterial({ color: _helper2.default.getRandColor(), specular: 0xffffff, shininess: 50 });
+        for (var i = 0; i < 10; i++) {
+            var material = new THREE.MeshPhongMaterial({ color: _helper2.default.getRandColor(), wireframe: false, specular: 0xffffff, shininess: 50 });
             var mesh = new THREE.Mesh(cube, material);
+            // mesh.name = i;
 
-            mesh.position.x = 8000 * (2.0 * Math.random() - 1.0);
-            mesh.position.y = 8000 * (2.0 * Math.random() - 1.0);
-            mesh.position.z = 8000 * (2.0 * Math.random() - 1.0);
+
+            // var collider    = THREEx.Collider.createFromObject3d(mesh);
+
+            // COLLIDERS.push(collider);
+
+            mesh.position.x = 1000 * (2.0 * Math.random() - 1.0);
+            mesh.position.y = 1000 * (2.0 * Math.random() - 1.0);
+            mesh.position.z = 1000 * (2.0 * Math.random() - 1.0);
 
             mesh.rotation.x = Math.random() * Math.PI;
             mesh.rotation.y = Math.random() * Math.PI;
             mesh.rotation.z = Math.random() * Math.PI;
+
+            var spritey = makeTextSprite(mesh.position.x.toFixed(0) + ' ' + mesh.position.y.toFixed(0) + ' ' + mesh.position.z.toFixed(0), { fontsize: 50, fontface: "Georgia" });
+            spritey.position.set(50, 100, 0);
+
+            mesh.add(spritey);
 
             // mesh.matrixAutoUpdate = false;
             mesh.updateMatrix();
@@ -1579,37 +1614,40 @@ function socketIoInit() {
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
 
-    function onDocumentMouseDown(event) {
+    function onDocumentMouseDown(event) {}
 
-        // event.preventDefault();
+    // event.preventDefault();
 
-        raycaster.setFromCamera(mouse, camera);
+    // raycaster.setFromCamera(mouse, camera);
 
-        var intersects = raycaster.intersectObjects(allSpheres);
+    // var intersects = raycaster.intersectObjects(allSpheres);
 
-        if (intersects.length > 0) {
+    // if (intersects.length > 0) {
 
-            if (INTERSECTED != intersects[0].object) {
+    //     if (INTERSECTED != intersects[0].object) {
 
-                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+    //         if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
 
-                INTERSECTED = intersects[0].object;
-                // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                // INTERSECTED.material.emissive.setHex( 0xff0000 );
+    //         INTERSECTED = intersects[0].object;
+    //         // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+    //         // INTERSECTED.material.emissive.setHex( 0xff0000 );
 
-                // new TWEEN.Tween( camera.position ).to( {
-                //      x: 1000,
-                //      y: 0,
-                //      z: 2000 } )
-                //  .easing( TWEEN.Easing.Elastic.Out).start();
-            }
-        } else {
+    //         // new TWEEN.Tween( camera.position ).to( {
+    //         //      x: 1000,
+    //         //      y: 0,
+    //         //      z: 2000 } )
+    //         //  .easing( TWEEN.Easing.Elastic.Out).start();
 
-            if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+    //     }
 
-            INTERSECTED = null;
-        }
-    }
+    // } else {
+
+    //     if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+    //     INTERSECTED = null;
+
+    // }
+
 
     //
 
@@ -1617,17 +1655,24 @@ function socketIoInit() {
 
         requestAnimationFrame(animate);
 
-        for (var i = 0; i < allSpheres.length; i++) {
-            allSpheres[i].rotation.y += 0.02;
-        };
+        // for (var i = 0; i < allSpheres.length; i++) {
+        //     allSpheres[i].rotation.y += 0.02;
+        // };
         // var delta = clock.getDelta();
 
-        for (var i = 0; i < allCubes.length; i++) {
-            // allCubes[i].position.x += 1;
-            allCubes[i].rotation.y += 0.01;
-            // allCubes[i].rotation.z += 0.2;
-        };
+        // for (var i = 0; i < allCubes.length; i++) {
+        //     // allCubes[i].position.x += 1;
+        //     allCubes[i].rotation.y += 0.01;
+        //     // allCubes[i].rotation.z += 0.2;
+        // };
+        // InvisiblePlayer.position.x += 1;
+        InvisiblePlayer.position.x = camera.position.x /* - InvisiblePlayer.geometry.parameters.radius*/;
+        InvisiblePlayer.position.y = camera.position.y /* - InvisiblePlayer.geometry.parameters.radius*/;
+        InvisiblePlayer.position.z = camera.position.z /* - InvisiblePlayer.geometry.parameters.radius*/;
 
+        InvisiblePlayer.rotation.x = camera.rotation.x;
+        InvisiblePlayer.rotation.y = camera.rotation.y;
+        InvisiblePlayer.rotation.z = camera.rotation.z;
         // earthMesh.rotation.y += 1 / 10000;
 
 
@@ -1638,15 +1683,42 @@ function socketIoInit() {
         if (_userService2.default.getUser()) {
             window.socket.emit("move", { position: camera.position, rotation: camera.rotation });
         }
-        $('#position').html('Position: ' + camera.position.x.toFixed(0) + ' ' + camera.position.y.toFixed(0) + ' ' + camera.position.z.toFixed(0));
+        $('#position').html('Position: ' + InvisiblePlayer.position.x.toFixed(0) + ' ' + InvisiblePlayer.position.y.toFixed(0) + ' ' + InvisiblePlayer.position.z.toFixed(0));
+        $('#position-camera').html('Position camera: ' + camera.position.x.toFixed(0) + ' ' + camera.position.y.toFixed(0) + ' ' + camera.position.z.toFixed(0));
         $('#rotation').html('Rotation: ' + camera.rotation.x.toFixed(2) + ' ' + camera.rotation.y.toFixed(2) + ' ' + camera.rotation.z.toFixed(2));
-        //}
+
         if (camera.position.x > 10000 || camera.position.y > 10000 || camera.position.z > 10000) {
             camera.position.set(startPosition.x, startPosition.y, startPosition.z);
         }
 
         render();
+
+        collisionDetection();
         stats.update();
+    }
+
+    function collisionDetection() {
+        var originPoint = InvisiblePlayer.position.clone();
+
+        for (var vertexIndex = 0; vertexIndex < InvisiblePlayer.geometry.vertices.length; vertexIndex++) {
+            var localVertex = InvisiblePlayer.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(InvisiblePlayer.matrix);
+            var directionVector = globalVertex.sub(InvisiblePlayer.position);
+            var ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+            var collisionResults = ray.intersectObjects(allCubes);
+            if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
+                var obj = collisionResults[0].object;
+                if (obj.id !== lastCollisionId) {
+                    console.log(obj.id);
+                    lastCollisionId = obj.id;
+
+                    // obj.material.opacity = 0.4;
+                    // obj.material.transparent = true;
+                    scene.remove(obj);
+                    window.socket.emit('increaseScores');
+                }
+            }
+        }
     }
 
     function render() {
@@ -1659,7 +1731,7 @@ function socketIoInit() {
 }
 
 /***/ }),
-/* 18 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1673,18 +1745,18 @@ var _reactDom = __webpack_require__(6);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _appComponent = __webpack_require__(14);
+var _appComponent = __webpack_require__(16);
 
 var _appComponent2 = _interopRequireDefault(_appComponent);
 
-__webpack_require__(15);
+__webpack_require__(17);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _reactDom2.default.render(_react2.default.createElement(_appComponent2.default, null), document.getElementById("root"));
 
 /***/ }),
-/* 19 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1851,7 +1923,7 @@ var Chat = function (_React$Component2) {
 exports.default = Chat;
 
 /***/ }),
-/* 20 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1928,12 +2000,6 @@ var UserList = function (_React$Component) {
           users: users
         });
       });
-
-      window.addEventListener('click', function () {
-        var user = _userService2.default.getUser();
-        user.scores += 1;
-        window.socket.emit('updateUserData', user);
-      }, false);
     }
   }, {
     key: "render",
@@ -1953,8 +2019,6 @@ var UserList = function (_React$Component) {
           )
         );
       });
-      // console.log(this.state);
-      // console.log(listItems);
       return _react2.default.createElement(
         "div",
         { className: "sidebar" },
@@ -1982,7 +2046,7 @@ var UserList = function (_React$Component) {
 exports.default = UserList;
 
 /***/ }),
-/* 21 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2017,7 +2081,7 @@ function camelize(string) {
 module.exports = camelize;
 
 /***/ }),
-/* 22 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2032,7 +2096,7 @@ module.exports = camelize;
 
 
 
-var camelize = __webpack_require__(21);
+var camelize = __webpack_require__(25);
 
 var msPattern = /^-ms-/;
 
@@ -2060,7 +2124,7 @@ function camelizeStyleName(string) {
 module.exports = camelizeStyleName;
 
 /***/ }),
-/* 23 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2096,7 +2160,7 @@ function hyphenate(string) {
 module.exports = hyphenate;
 
 /***/ }),
-/* 24 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2111,7 +2175,7 @@ module.exports = hyphenate;
 
 
 
-var hyphenate = __webpack_require__(23);
+var hyphenate = __webpack_require__(27);
 
 var msPattern = /^ms-/;
 
@@ -2138,7 +2202,7 @@ function hyphenateStyleName(string) {
 module.exports = hyphenateStyleName;
 
 /***/ }),
-/* 25 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2166,7 +2230,7 @@ function isNode(object) {
 module.exports = isNode;
 
 /***/ }),
-/* 26 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2181,7 +2245,7 @@ module.exports = isNode;
  * @typechecks
  */
 
-var isNode = __webpack_require__(25);
+var isNode = __webpack_require__(29);
 
 /**
  * @param {*} object The object to check.
@@ -2194,7 +2258,7 @@ function isTextNode(object) {
 module.exports = isTextNode;
 
 /***/ }),
-/* 27 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2213,7 +2277,7 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 28 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2237,16 +2301,16 @@ if (process.env.NODE_ENV !== "production") {
 var invariant = __webpack_require__(3);
 var React = __webpack_require__(1);
 var warning = __webpack_require__(8);
-var ExecutionEnvironment = __webpack_require__(9);
+var ExecutionEnvironment = __webpack_require__(11);
 var _assign = __webpack_require__(5);
 var emptyFunction = __webpack_require__(2);
-var checkPropTypes = __webpack_require__(13);
-var getActiveElement = __webpack_require__(11);
-var shallowEqual = __webpack_require__(12);
-var containsNode = __webpack_require__(10);
+var checkPropTypes = __webpack_require__(15);
+var getActiveElement = __webpack_require__(13);
+var shallowEqual = __webpack_require__(14);
+var containsNode = __webpack_require__(12);
 var emptyObject = __webpack_require__(4);
-var hyphenateStyleName = __webpack_require__(24);
-var camelizeStyleName = __webpack_require__(22);
+var hyphenateStyleName = __webpack_require__(28);
+var camelizeStyleName = __webpack_require__(26);
 
 // Relying on the `invariant()` implementation lets us
 // have preserve the format and params in the www builds.
@@ -19527,7 +19591,7 @@ module.exports = reactDom;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 29 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19543,7 +19607,7 @@ module.exports = reactDom;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(3),ca=__webpack_require__(1),m=__webpack_require__(9),p=__webpack_require__(5),v=__webpack_require__(2),da=__webpack_require__(11),ea=__webpack_require__(12),fa=__webpack_require__(10),ha=__webpack_require__(4);
+var aa=__webpack_require__(3),ca=__webpack_require__(1),m=__webpack_require__(11),p=__webpack_require__(5),v=__webpack_require__(2),da=__webpack_require__(13),ea=__webpack_require__(14),fa=__webpack_require__(12),ha=__webpack_require__(4);
 function A(a){for(var b=arguments.length-1,c="https://reactjs.org/docs/error-decoder.html?invariant="+a,d=0;d<b;d++)c+="&args[]="+encodeURIComponent(arguments[d+1]);aa(!1,"Minified React error #"+a+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",c)}ca?void 0:A("227");
 function ia(a,b,c,d,e,f,g,h,k){this._hasCaughtError=!1;this._caughtError=null;var n=Array.prototype.slice.call(arguments,3);try{b.apply(c,n)}catch(r){this._caughtError=r,this._hasCaughtError=!0}}
 var B={_caughtError:null,_hasCaughtError:!1,_rethrowError:null,_hasRethrowError:!1,invokeGuardedCallback:function(a,b,c,d,e,f,g,h,k){ia.apply(B,arguments)},invokeGuardedCallbackAndCatchFirstError:function(a,b,c,d,e,f,g,h,k){B.invokeGuardedCallback.apply(this,arguments);if(B.hasCaughtError()){var n=B.clearCaughtError();B._hasRethrowError||(B._hasRethrowError=!0,B._rethrowError=n)}},rethrowCaughtError:function(){return ka.apply(B,arguments)},hasCaughtError:function(){return B._hasCaughtError},clearCaughtError:function(){if(B._hasCaughtError){var a=
@@ -19772,7 +19836,7 @@ var vi={default:qi},wi=vi&&qi||vi;module.exports=wi.default?wi.default:wi;
 
 
 /***/ }),
-/* 30 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19798,7 +19862,7 @@ var invariant = __webpack_require__(3);
 var emptyObject = __webpack_require__(4);
 var warning = __webpack_require__(8);
 var emptyFunction = __webpack_require__(2);
-var checkPropTypes = __webpack_require__(13);
+var checkPropTypes = __webpack_require__(15);
 
 // TODO: this is special because it gets imported during build.
 
@@ -21254,7 +21318,7 @@ module.exports = react;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 31 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

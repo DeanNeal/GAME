@@ -73,6 +73,7 @@ class App extends React.Component {
 
         <div id="info">Controls - > WASD/RF/QE + mouse </div>
         <div id="position"></div>
+        <div id="position-camera"></div>
         <div id="rotation"></div>
       </div>
     );

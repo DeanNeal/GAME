@@ -37,21 +37,12 @@ class UserList extends React.Component {
           users: users
         });
     });
-
-
-    window.addEventListener('click', ()=> {
-      let user =  UserService.getUser();
-      user.scores +=1;
-      window.socket.emit('updateUserData', user);
-    }, false);
   }
 
   render() {
     const listItems = this.state.users.map((item, i) =>
       <li key={i} className="new-message">{item.playerName} <span>Scores: {item.scores} </span></li>
     );
-    // console.log(this.state);
-    // console.log(listItems);
     return (
 
       <div className="sidebar">
