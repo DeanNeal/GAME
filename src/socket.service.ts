@@ -1,6 +1,7 @@
 // import * as socketIo from 'socket.io-client';
 // const SERVER_URL = 'http://localhost:8081';
-declare var io:any = io;
+// declare var window: any;
+declare var io;
 
 class SocketService {
     public socket: any;

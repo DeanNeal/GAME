@@ -26,6 +26,9 @@ export class Game {
 
     public allSpheres:any = [];
     public allCubes:any = [];
+    public bullets:any = [];
+    public othersBullets: any = [];
+
     // public COLLIDERS:any = [];
     public lastCollisionId: any;
     public InvisiblePlayer: any;
@@ -77,6 +80,29 @@ export class Game {
         this.cubeWasRemoved();
 
 
+        var loader = new THREE.TextureLoader();
+        var earthTexture = loader.load('img/earth-from-space.jpg', function(texture) {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.offset.set(0, 0);
+            texture.repeat.set(1, 1);
+        });
+
+        var earthMaterial = new THREE.MeshLambertMaterial({ map: earthTexture });
+        var earthPlane = new THREE.Mesh(new THREE.PlaneGeometry(150000, 150000), earthMaterial);
+        earthPlane.material.side = THREE.DoubleSide;
+        earthPlane.position.x = 70000;
+        earthPlane.position.z = 70000;
+        earthPlane.position.y = 40000;
+
+        // rotation.z is rotation around the z-axis, measured in radians (rather than degrees)
+        // Math.PI = 180 degrees, Math.PI / 2 = 90 degrees, etc.
+        earthPlane.rotation.z = 0.1 * Math.PI / 2;
+        earthPlane.rotation.y = 0.5 * Math.PI / 2;
+
+        this.scene.add(earthPlane);
+
+
+
         SocketService.socket.on('updateUsersCoords', (users: any[])=>{
             $.each(users, (i:any, player:any)=> {
                 if (player.id == UserService.getUser().id) return;
@@ -102,6 +128,37 @@ export class Game {
             });
         });
 
+        SocketService.socket.on('otherFire', (params:any)=> {
+            console.log('other fire');
+            // this.createBullet();
+            // var pLocal = new THREE.Vector3( 0, 0, -1 );
+            // //Now transform that point into world space:
+            // var pWorld = pLocal.applyMatrix4( this.camera.matrixWorld );
+            // //You can now construct the desired direction vector:
+            // var dir = pWorld.sub( this.camera.position ).normalize();
+            
+            let userMesh = this.players.filter(r=> r.user.id == params.userId)[0].mesh;
+
+            let bulletMesh = new THREE.Mesh(
+            new THREE.CubeGeometry(2, 2, 30),
+            new THREE.MeshBasicMaterial({ color:0xffffff }));
+            let pos = userMesh.position.clone();
+            // let rot = this.camera.rotation.clone();
+            bulletMesh.position.set(pos.x, pos.y - 20, pos.z);
+            // bullet.rotation.set(rot.x, rot.y, rot.z);
+            this.scene.add(bulletMesh);
+
+            this.othersBullets.push({
+                mesh: bulletMesh,
+                dir: params.dir
+            });
+
+            setTimeout(()=>{
+                this.scene.remove(bulletMesh);
+                this.othersBullets.splice(0, 1);
+            }, 10000);
+        });
+
         SocketService.socket.on('deletePlayer', (userId:any)=> {
             console.log('deletePlayer');
 
@@ -114,14 +171,9 @@ export class Game {
             }
         });
 
-        $(window).on('keyup', (e: KeyboardEvent)=> {
-            if(e.key === "Control") {
-                let bullet = new THREE.Mesh(
-                new THREE.SphereGeometry(20,8,8),
-                new THREE.MeshBasicMaterial({ color:0xffffff });
-                let pos = this.InvisiblePlayer.position.clone();
-                bullet.position.set(pos.x, pos.y, pos.z - 200);
-                this.scene.add(bullet);
+        $(window).on('keypress', (e: KeyboardEvent)=> {
+            if(e.keyCode === 32) {
+                this.createBullet();
             }
         });
 
@@ -164,6 +216,33 @@ export class Game {
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
     }
 
+    createBullet() {
+        let bullet = new THREE.Mesh(
+        new THREE.CubeGeometry(2, 2, 30),
+        new THREE.MeshBasicMaterial({ color:0xffffff }));
+        let pos = this.camera.position.clone();
+        let rot = this.camera.rotation.clone();
+        bullet.position.set(pos.x, pos.y - 20, pos.z);
+        bullet.rotation.set(rot.x, rot.y, rot.z);
+        this.scene.add(bullet);
+
+
+        let pLocal = new THREE.Vector3( 0, 0, -1 );
+        let pWorld = pLocal.applyMatrix4( this.camera.matrixWorld );
+        let dir = pWorld.sub( this.camera.position ).normalize();
+
+        this.bullets.push({
+            mesh: bullet,
+            dir: dir
+        });
+
+        SocketService.socket.emit('fire', {dir: dir, userId: UserService.getUser().id});
+
+        setTimeout(()=>{
+            this.scene.remove(bullet);
+            this.bullets.splice(0, 1);
+        }, 10000);
+    }
     // let drawSphere = function(x:any, z:any, material:any) {
     //     let cube = new THREE.Mesh(new THREE.SphereGeometry(70, 70, 20), material);
     //     cube.position.x = x;
@@ -357,6 +436,24 @@ export class Game {
             this.allCubes[i].rotation.y += 0.01;
             // allCubes[i].rotation.z += 0.2;
         };
+
+
+        for (let i = 0; i < this.bullets.length; i++) {
+            //Pick a point in front of the camera in camera space:
+            var pLocal = new THREE.Vector3( 0, 0, -1 );
+            //Now transform that point into world space:
+            var pWorld = pLocal.applyMatrix4( this.camera.matrixWorld );
+            //You can now construct the desired direction vector:
+            var dir = pWorld.sub( this.camera.position ).normalize();
+            this.bullets[i].mesh.position.add(dir.multiplyScalar(40));
+        };
+
+        for (let i = 0; i < this.othersBullets.length; i++) {
+            let d = this.othersBullets[i].dir;
+            let dir = new THREE.Vector3(d.x, d.y, d.z);
+            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(40));
+        };
+
 
 
         this.InvisiblePlayer.position.x = this.camera.position.x /* - this.InvisiblePlayer.geometry.parameters.radius*/ ;

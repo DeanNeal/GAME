@@ -54,6 +54,10 @@ io.sockets.on('connection', function(socket) {
         }, 5000);
     });
 
+    socket.on("fire", function(bullet) {
+       socket.broadcast.emit("otherFire", bullet);
+    });
+
     socket.on('chat message', function(data) {
         io.emit('chat message', data);
     });
