@@ -14,6 +14,8 @@
     "prod": "cross-env NODE_ENV=prod webpack --config webpack.config.js --progress --colors"
   },
   "devDependencies": {
+    "@types/socket.io-client": "^1.4.32",
+    "@types/three": "^0.92.3",
     "autoprefixer-loader": "^3.2.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.0.0",
@@ -40,10 +42,16 @@
     "react-dom": "^16.4.0",
     "resolve-url": "^0.2.1",
     "resolve-url-loader": "^1.4.3",
+    "rxjs": "^6.2.0",
     "sass-loader": "^3.2.3",
     "sass-resources-loader": "^1.0.2",
     "smart-banner-webpack-plugin": "^3.0.1",
+    "socket.io": "^2.1.1",
+    "socket.io-client": "^2.1.1",
     "style-loader": "^0.13.1",
+    "three": "^0.93.0",
+    "ts-loader": "^3.5.0",
+    "typescript": "^2.9.1",
     "url-loader": "^0.5.9",
     "webpack": "^2.4.1",
     "webpack-dev-server": "^2.4.5"
@@ -52,7 +60,6 @@
     "babel-preset-react": "^6.24.1",
     "jade": "^1.11.0",
     "react": "^16.4.0",
-    "socket.io": "^2.1.1",
     "webpack-cli": "^2.1.4",
     "webpack-command": "^0.2.0"
   },

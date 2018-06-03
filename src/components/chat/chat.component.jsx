@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import UserService from '../../user.service.js';
+import Helpers from '../../helper.js';
+import SocketService from '../../socket.service';
 
 class MessageBox extends React.Component {
   constructor(props) {
@@ -9,12 +11,19 @@ class MessageBox extends React.Component {
         opened: false
     };
   }
+  componentDidMount() {
+    //subscribe
+  }
 
   render(data) {
 
-    const listItems = this.props.messages.map((item, i) =>
-      <li key={i} className="new-message"><p>{item.name}<span className="date">12.05.2015</span></p> <span>{item.msg}</span></li>
-    );
+    const listItems = this.props.messages.map((item, i) =>{
+      let time = Helpers.getDateByFormat('hh:mm:ss');
+      return (
+        <li key={i} className="new-message"><p>{item.name}<span className="date">{time}</span></p> <span>{item.msg}</span></li>
+      )
+    });
+
     return (
       <ul id="messages" className="messages">    
          {listItems}
@@ -46,7 +55,7 @@ class Chat extends React.Component {
   keyUp(event) {
      event.preventDefault();
     if (event.key == 'Enter' &&  this.state.message){
-        window.socket.emit('chat message', { msg: this.state.message, name: UserService.getUser() ? UserService.getUser().playerName : 'new user' });
+        SocketService.socket.emit('chat message', { msg: this.state.message, name: UserService.getUser() ? UserService.getUser().playerName : 'new user' });
         this.setState({message: ''});
    
         return false;
@@ -56,7 +65,7 @@ class Chat extends React.Component {
   componentDidMount() {
     var self = this;
 
-    window.socket.on('chat message', function(data) {
+    SocketService.socket.on('chat message', function(data) {
         let a = self.state.messages.slice();
         a.push(data);
         self.setState({

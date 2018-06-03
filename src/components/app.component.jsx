@@ -1,9 +1,9 @@
 import React from "react";
 import Chat from './chat/chat.component.jsx';
 import UserList from './list/list.component.jsx';
-import socketIoInit from '../main.js';
-import {Game} from '../main.js';
-// let socket = io();
+// import socketIoInit from '../main';
+import {Game} from '../main';
+import SocketService from '../socket.service';
 
 class App extends React.Component {
   constructor(props) {
@@ -32,8 +32,13 @@ class App extends React.Component {
     this.setState({
       getReady: true
     });
-    socketIoInit(this.state.playerOptions);
-    window.socket.emit('add new player', this.state.playerOptions);
+    // socketIoInit(this.state.playerOptions);
+    let game = new Game(this.state.playerOptions);
+    SocketService.socket.emit('add new player', this.state.playerOptions);
+
+    // setInterval(()=>{
+    //   window.socket.emit('add new player', {name: Math.random(100,200)});
+    // }, 4000);
   }
 
   handleChange(event) {
@@ -70,10 +75,9 @@ class App extends React.Component {
           )
         }
 
-
+        <div id="timer"></div> 
         <div id="info">Controls - > WASD/RF/QE + mouse </div>
         <div id="position"></div>
-        <div id="position-camera"></div>
         <div id="rotation"></div>
       </div>
     );

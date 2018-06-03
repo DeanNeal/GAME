@@ -49,6 +49,20 @@ ul {
     }
 }
 
+#timer {
+    position: absolute;
+    width: 200px;
+    font-size: 180px;
+    color: #fff;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 200px;
+}
+
 #position {
     color: #fff;
     position: absolute;
@@ -56,13 +70,6 @@ ul {
     font-size: 14px;
 }
 
-#position-camera{
-    color: #fff;
-    position: absolute;
-    top: 20px;
-    font-size: 14px;
-    left: 200px;
-}
 
 #rotation {
     font-size: 14px;
@@ -124,6 +131,7 @@ ul {
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 999;
     }
     .popup {
         z-index: 1000;
@@ -221,13 +229,20 @@ ul {
         right: 0;
         border: 1px solid #999;
         background: #fff;
-        max-height: 200px;
-        overflow: auto;
+
         background: rgba(245, 245, 245, 0.8);
         #welcome {
             font-size: 12px;
         }
-        #users {
+        &__left-count {
+            float: left;
+            font-size: 20px;
+        }
+        &__users {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
             .title {
                 margin: 10px 0;
                 display: inline-block;
@@ -235,6 +250,9 @@ ul {
                 text-transform: uppercase;
             }
             ul {
+                width: 100%;
+                max-height: 200px;
+                overflow: auto;
                 li {
                     background: #eee;
                     padding: 3px 10px 3px 20px;
@@ -243,6 +261,10 @@ ul {
                     font-size: 12px;
                     position: relative;
                     height: 21px;
+                    &.current-player{
+                        color: green;
+                        font-weight: 700;
+                    }
                     i {
                         position: absolute;
                         left: 7px;
