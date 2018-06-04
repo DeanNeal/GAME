@@ -49,7 +49,7 @@ class UserList extends React.Component {
     const listItems = this.state.users.map((item, i) => {
       let className = (UserService.user.value && UserService.user.value.id === item.id) ? 'current-player' : ''; 
       return (
-        <li key={i} className={className}>{item.playerName}<span>Health: {item.health} Scores: {item.scores}</span></li>
+        <li key={i} className={className}>{item.playerName}<span>Health: {item.health} Scores: {item.scores} Death: {item.death}</span></li>
         )
 
     });

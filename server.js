@@ -5,15 +5,11 @@ var io = require('socket.io')(http);
 // var THREE = require('three');
 
 app.use(express.static(__dirname + '/public'));
-
 app.set('view engine', 'jade');
-
 app.get('/', function(req, res) {
     // res.sendFile(__dirname + '/lansflare.html');
     res.render('main');
 });
-
-
 
 
 /****LOGIC*****/
@@ -82,7 +78,9 @@ var addUser = function(id, playerOptions) {
         },
         rotation: {},
         scores: 0,
-        health: 100
+        health: 100,
+        death: 0
+
     }
     users.push(user);
     return user;
@@ -112,7 +110,8 @@ var updateUsersCoords = function(id, data, socket) {
 var increaseScores = function(curUser) {
     for (var i = 0; i < users.length; i++) {
         if (users[i].id == curUser.id) {
-            users[i].scores += 1;
+            // users[i].scores += 1;
+            users[i].health = 100;
         }
     }
     io.sockets.emit("userList", users);
@@ -122,6 +121,10 @@ var decreaseHealth = function(curUser) {
     for (var i = 0; i < users.length; i++) {
         if (users[i].id == curUser.id) {
             users[i].health -= 10;
+            if(users[i].health <= 0) {
+                users[i].health = 100;
+                users[i].death++;
+            }
         }
     }
     io.sockets.emit("userList", users);
