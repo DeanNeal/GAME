@@ -4452,6 +4452,8 @@ var App = function (_React$Component) {
   }, {
     key: 'start',
     value: function start() {
+      var _this2 = this;
+
       this.setState({
         getReady: true
       });
@@ -4459,14 +4461,13 @@ var App = function (_React$Component) {
       var game = new _main.Game(this.state.playerOptions);
       _socket2.default.socket.emit('add new player', this.state.playerOptions);
 
-      // GlobalService.users.subscribe(users=> {
-      //     this.setState({
-      //       user: users.filter(r=> r.id === UserService.user.value.id)[0]
-      //     });
-      // })
-      // setInterval(()=>{
-      //   window.socket.emit('add new player', {name: Math.random(100,200)});
-      // }, 4000);
+      _global2.default.users.subscribe(function (users) {
+        _this2.setState({
+          user: users.filter(function (r) {
+            return r.id === _user2.default.user.value.id;
+          })[0]
+        });
+      });
     }
   }, {
     key: 'handleChange',
@@ -76098,6 +76099,7 @@ var Game = /** @class */ (function () {
         this.addPlanet();
         this.addSky();
         this.addCubes();
+        this.addAsteroids();
         this.cubeWasRemoved();
         socket_service_1.default.socket.on('selfPlayer', function (user) {
             user_service_1.default.user.next(user);
@@ -76200,7 +76202,7 @@ var Game = /** @class */ (function () {
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
     };
     Game.prototype.createBullet = function () {
-        var bullet = new THREE.Mesh(new THREE.CubeGeometry(5, 5, 15), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        var bullet = new THREE.Mesh(new THREE.CubeGeometry(5, 5, 1000), new THREE.MeshBasicMaterial({ color: 0xffffff }));
         this.scene.add(bullet);
         return bullet;
     };
@@ -76331,6 +76333,21 @@ var Game = /** @class */ (function () {
             cubes_service_1.default.cubes.next(_this.allCubes);
         });
     };
+    Game.prototype.addAsteroids = function () {
+        var s = 1000 /** Math.random()*/;
+        for (var i = 0; i < 50; i++) {
+            var cube = new THREE.BoxGeometry(s, s, s);
+            var material = new THREE.MeshPhongMaterial({ color: 0xcccccc, wireframe: false, /*opacity: 0.5, transparent: true ,*/ specular: 0xffffff, shininess: 50 });
+            var mesh = new THREE.Mesh(cube, material);
+            mesh.position.x = 20000 * (2.0 * Math.random() - 1.0);
+            mesh.position.y = 20000 * (2.0 * Math.random() - 1.0);
+            mesh.position.z = 20000 * (2.0 * Math.random() - 1.0);
+            mesh.rotation.x = Math.random() * Math.PI;
+            mesh.rotation.y = Math.random() * Math.PI;
+            mesh.rotation.z = Math.random() * Math.PI;
+            this.scene.add(mesh);
+        }
+    };
     Game.prototype.cubeWasRemoved = function () {
         var _this = this;
         socket_service_1.default.socket.on('cubeWasRemoved', function (cube) {
@@ -76373,14 +76390,14 @@ var Game = /** @class */ (function () {
             var pWorld = pLocal.applyMatrix4(this.bullets[i].matrixWorld);
             // //You can now construct the desired direction vector:
             var dir = pWorld.sub(this.bullets[i].camPos).normalize();
-            this.bullets[i].mesh.position.add(dir.multiplyScalar(100));
+            this.bullets[i].mesh.position.add(dir.multiplyScalar(2000));
         }
         ;
         for (var i = 0; i < this.othersBullets.length; i++) {
             var pLocal = new THREE.Vector3(0, 0, -1);
             var pWorld = pLocal.applyMatrix4(this.othersBullets[i].matrixWorld);
             var dir = pWorld.sub(this.othersBullets[i].camPos).normalize();
-            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(100));
+            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(2000));
         }
         ;
         this.InvisiblePlayer.position.x = this.camera.position.x /* - this.InvisiblePlayer.geometry.parameters.radius*/;

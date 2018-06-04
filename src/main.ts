@@ -78,6 +78,7 @@ export class Game {
         this.addPlanet();
         this.addSky();
         this.addCubes();
+        this.addAsteroids();
         this.cubeWasRemoved();
 
         SocketService.socket.on('selfPlayer', (user)=> {
@@ -210,7 +211,7 @@ export class Game {
 
     createBullet() {
         let bullet = new THREE.Mesh(
-        new THREE.CubeGeometry(5, 5, 15),
+        new THREE.CubeGeometry(5, 5, 1000),
         new THREE.MeshBasicMaterial({ color:0xffffff }));
         this.scene.add(bullet);
         return bullet;
@@ -375,6 +376,25 @@ export class Game {
         });
     }
 
+    addAsteroids() {
+        let s = 1000 /** Math.random()*/;
+
+       for (let i = 0; i < 50; i++) {
+            let cube = new THREE.BoxGeometry(s, s, s);
+            let material = new THREE.MeshPhongMaterial({ color: 0xcccccc, wireframe: false,/*opacity: 0.5, transparent: true ,*/ specular: 0xffffff, shininess: 50 });
+            let mesh = new THREE.Mesh(cube, material);
+            mesh.position.x =  20000 * (2.0 * Math.random() - 1.0);
+            mesh.position.y =  20000 * (2.0 * Math.random() - 1.0);
+            mesh.position.z =  20000 * (2.0 * Math.random() - 1.0);
+
+            mesh.rotation.x = Math.random() * Math.PI;
+            mesh.rotation.y = Math.random() * Math.PI;
+            mesh.rotation.z = Math.random() * Math.PI;
+
+            this.scene.add(mesh);
+       }
+    }
+
     cubeWasRemoved() {
         SocketService.socket.on('cubeWasRemoved', (cube: any)=> {
             for (let i = 0; i < this.allCubes.length; i++) {
@@ -423,14 +443,14 @@ export class Game {
             var pWorld = pLocal.applyMatrix4(this.bullets[i].matrixWorld);
             // //You can now construct the desired direction vector:
             var dir = pWorld.sub(this.bullets[i].camPos).normalize();
-            this.bullets[i].mesh.position.add(dir.multiplyScalar(100));
+            this.bullets[i].mesh.position.add(dir.multiplyScalar(2000));
         };
 
         for (let i = 0; i < this.othersBullets.length; i++) {
             var pLocal = new THREE.Vector3( 0, 0, -1 );
             var pWorld = pLocal.applyMatrix4(this.othersBullets[i].matrixWorld);
             var dir = pWorld.sub(this.othersBullets[i].camPos).normalize();
-            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(100));
+            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(2000));
         };
 
 
