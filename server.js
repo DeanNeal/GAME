@@ -26,9 +26,10 @@ io.sockets.on('connection', function(socket) {
 
     socket.on('add new player', function(playerOptions) {
         user = addUser(socket.id, playerOptions);
-        socket.emit("selfPlayer", { users: users, currentPlayer: user });
-        io.sockets.emit("otherNewPlayer", { users: users, currentPlayer: user });
-        // io.sockets.emit('updateUserData', users);
+        socket.emit("selfPlayer", user );
+
+        io.sockets.emit("otherNewPlayer", users);
+        io.sockets.emit('userList', users);
         socket.emit("updateCubes", cubes);
     });
 
@@ -36,7 +37,7 @@ io.sockets.on('connection', function(socket) {
         removeUser(user);
     });
     socket.on("move", function(data) {
-        updateUsersCoords(user.id, data);
+        updateUsersCoords(user.id, data, socket);
     });
 
     socket.on("increaseScores", function() {
@@ -58,6 +59,10 @@ io.sockets.on('connection', function(socket) {
        socket.broadcast.emit("otherFire", bullet);
     });
 
+    socket.on("demage", function() {
+       decreaseHealth(user);
+    });
+
     socket.on('chat message', function(data) {
         io.emit('chat message', data);
     });
@@ -76,10 +81,10 @@ var addUser = function(id, playerOptions) {
             z: 0
         },
         rotation: {},
-        scores: 0
+        scores: 0,
+        health: 100
     }
     users.push(user);
-    //io.sockets.emit("newPlayer", user);
     return user;
 }
 var removeUser = function(user) {
@@ -91,7 +96,7 @@ var removeUser = function(user) {
         }
     }
 }
-var updateUsersCoords = function(id, data) {
+var updateUsersCoords = function(id, data, socket) {
 
     for (var i = 0; i < users.length; i++) {
         var user = users[i];
@@ -100,7 +105,8 @@ var updateUsersCoords = function(id, data) {
             user.rotation = data.rotation;
         }
     }
-    io.sockets.emit("updateUsersCoords", users);
+    socket.broadcast.emit("updateUsersCoords", users);
+    // io.sockets.emit("updateUsersCoords", users);
 }
 
 var increaseScores = function(curUser) {
@@ -109,17 +115,18 @@ var increaseScores = function(curUser) {
             users[i].scores += 1;
         }
     }
-    io.sockets.emit("updateUsersData", users);
+    io.sockets.emit("userList", users);
 }
 
-// var updateUserData = function(data) {
-//   for(var i=0; i<users.length; i++) {
-//       if(users[i].id == data.id){
-//         users[i] = data;
-//       }
-//   }
-//   io.sockets.emit("updateUsersData", users);
-// }
+var decreaseHealth = function(curUser) {
+    for (var i = 0; i < users.length; i++) {
+        if (users[i].id == curUser.id) {
+            users[i].health -= 10;
+        }
+    }
+    io.sockets.emit("userList", users);
+}
+
 /****LOGIC*****/
 
 

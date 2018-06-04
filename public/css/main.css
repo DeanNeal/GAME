@@ -50,6 +50,19 @@ ul {
   margin: auto;
   height: 200px; }
 
+#gui {
+  position: absolute;
+  width: 200px;
+  text-align: left;
+  font-size: 48px;
+  color: #fff;
+  text-align: center;
+  bottom: 40px;
+  left: 10px;
+  margin: auto;
+  height: 50px;
+  white-space: nowrap; }
+
 #position {
   color: #fff;
   position: absolute;
