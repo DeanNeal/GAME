@@ -4524,8 +4524,7 @@ var App = function (_React$Component) {
             this.state.user.health
           ),
           _react2.default.createElement('div', { id: 'timer' }),
-          _react2.default.createElement(_list2.default, null),
-          _react2.default.createElement(_chat2.default, null)
+          _react2.default.createElement(_list2.default, null)
         )
       );
     }
@@ -4568,6 +4567,7 @@ exports.default = function (object, domElement) {
 	this.dragToLook = false;
 	this.autoForward = false;
 
+	this.movementSpeedMultiplier = 1;
 	// disable default target object behavior
 
 	// internals
@@ -4594,7 +4594,7 @@ exports.default = function (object, domElement) {
 
 			return;
 		}
-
+		// console.log( event.keyCode);
 		//event.preventDefault();
 
 		switch (event.keyCode) {
@@ -4636,6 +4636,10 @@ exports.default = function (object, domElement) {
 
 		this.updateMovementVector();
 		this.updateRotationVector();
+	};
+
+	this.keypress = function (event) {
+		// console.log( event.keyCode);
 	};
 
 	this.keyup = function (event) {
@@ -4682,33 +4686,34 @@ exports.default = function (object, domElement) {
 	};
 
 	this.mousedown = function (event) {
-		if (!document.querySelector('.chatRoom').contains(event.target)) {
+		//if (!document.querySelector('.chatRoom').contains(event.target)) {
 
-			if (this.domElement !== document) {
 
-				this.domElement.focus();
-			}
+		if (this.domElement !== document) {
 
-			event.preventDefault();
-			event.stopPropagation();
-
-			if (this.dragToLook) {
-
-				this.mouseStatus++;
-			} else {
-
-				switch (event.button) {
-
-					case 0:
-						this.moveState.forward = 1;break;
-					case 2:
-						this.moveState.back = 1;break;
-
-				}
-
-				this.updateMovementVector();
-			}
+			this.domElement.focus();
 		}
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		if (this.dragToLook) {
+
+			this.mouseStatus++;
+		} else {
+
+			switch (event.button) {
+
+				case 0:
+					this.moveState.forward = 1;break;
+				case 2:
+					this.moveState.back = 1;break;
+
+			}
+
+			this.updateMovementVector();
+		}
+		//}
 	};
 
 	this.mousemove = function (event) {
@@ -4727,36 +4732,36 @@ exports.default = function (object, domElement) {
 	};
 
 	this.mouseup = function (event) {
-		if (!document.querySelector('.chatRoom').contains(event.target)) {
-			event.preventDefault();
-			event.stopPropagation();
+		//if (!document.querySelector('.chatRoom').contains(event.target)) {
+		event.preventDefault();
+		event.stopPropagation();
 
-			if (this.dragToLook) {
+		if (this.dragToLook) {
 
-				this.mouseStatus--;
+			this.mouseStatus--;
 
-				this.moveState.yawLeft = this.moveState.pitchDown = 0;
-			} else {
+			this.moveState.yawLeft = this.moveState.pitchDown = 0;
+		} else {
 
-				switch (event.button) {
+			switch (event.button) {
 
-					case 0:
-						this.moveState.forward = 0;break;
-					case 2:
-						this.moveState.back = 0;break;
+				case 0:
+					this.moveState.forward = 0;break;
+				case 2:
+					this.moveState.back = 0;break;
 
-				}
-
-				this.updateMovementVector();
 			}
 
-			this.updateRotationVector();
+			this.updateMovementVector();
 		}
+
+		this.updateRotationVector();
+		//}
 	};
 
 	this.update = function (delta) {
 
-		var moveMult = delta * this.movementSpeed;
+		var moveMult = delta * this.movementSpeed + this.movementSpeedMultiplier;
 		var rotMult = delta * this.rollSpeed;
 
 		this.object.translateX(this.moveVector.x * moveMult);
@@ -4825,9 +4830,14 @@ exports.default = function (object, domElement) {
 
 	window.addEventListener('keydown', bind(this, this.keydown), false);
 	window.addEventListener('keyup', bind(this, this.keyup), false);
+	window.addEventListener('keypress', bind(this, this.keypress), false);
 
 	this.updateMovementVector();
 	this.updateRotationVector();
+
+	this.reset = function () {
+		this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0 };
+	};
 };
 
 ; /**
@@ -4841,11 +4851,31 @@ exports.default = function (object, domElement) {
 "use strict";
 
 
+__webpack_require__(274);
+
+__webpack_require__(283);
+
+__webpack_require__(286);
+
 __webpack_require__(244);
 
 __webpack_require__(254);
 
+__webpack_require__(265);
+
+__webpack_require__(268);
+
+__webpack_require__(277);
+
+__webpack_require__(271);
+
+__webpack_require__(280);
+
 __webpack_require__(136);
+
+__webpack_require__(260);
+
+__webpack_require__(262);
 
 /***/ }),
 /* 71 */
@@ -76108,6 +76138,11 @@ class Game {
         this.isMove = false;
         this.startPosition = { x: 1000, y: 1000, z: 1000 };
         this.playerPosition = { x: 0, y: 0, z: 0 };
+        this.rate = 10;
+        this.start = new Date().getTime();
+        this.duration = 150;
+        this.lastFrameNumber = 0;
+        this.isShooting = false;
         this.init();
         this.animate();
     }
@@ -76119,13 +76154,14 @@ class Game {
         this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 200000);
         this.camera.position.set(this.startPosition.x, this.startPosition.y, this.startPosition.z);
         this.controls = new FlyControls_1.default(this.camera);
+        // setInterval(()=>{
+        //     this.controls.reset();
+        // }, 5000)
         this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
         this.controls.rollSpeed = Math.PI / 3;
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
-        // controls.dragToLook = false;
-        // controls.rollSpeed = Math.PI / 6;
         this.scene = new THREE.Scene();
         this.addInvisiblePlayer();
         this.addPlanet();
@@ -76185,10 +76221,17 @@ class Game {
             }
         });
         rxjs_1.Observable
-            .fromEvent(document, 'keypress')
-            .throttleTime(100)
+            .fromEvent(document, 'keydown')
             .subscribe((e) => {
-            this.shot(e);
+            if (!this.isShooting) {
+                this.start = new Date().getTime() - this.duration;
+                this.isShooting = e;
+            }
+        });
+        rxjs_1.Observable
+            .fromEvent(document, 'keyup')
+            .subscribe((e) => {
+            this.isShooting = null;
         });
         // lights
         let dLight = new THREE.DirectionalLight(0xffffff);
@@ -76218,19 +76261,19 @@ class Game {
     shot(e) {
         if (e.keyCode === 32 && user_service_1.default.user.value) {
             let bullet = this.createBullet();
-            let pos = this.camera.position.clone();
-            let rot = this.camera.rotation.clone();
-            bullet.position.set(pos.x, pos.y - 50, pos.z);
+            let pos = this.InvisiblePlayer.position.clone();
+            let rot = this.InvisiblePlayer.rotation.clone();
+            bullet.position.set(pos.x - 200, pos.y - 200, pos.z - 200);
             bullet.rotation.set(rot.x, rot.y, rot.z);
             this.bullets.push({
                 mesh: bullet,
-                matrixWorld: this.camera.matrixWorld.clone(),
-                camPos: this.camera.position.clone()
+                matrixWorld: this.InvisiblePlayer.matrixWorld.clone(),
+                camPos: this.InvisiblePlayer.position.clone()
             });
             socket_service_1.default.socket.emit('fire', {
                 userId: user_service_1.default.user.value.id,
-                matrixWorld: this.camera.matrixWorld.clone(),
-                camPos: this.camera.position.clone(),
+                matrixWorld: this.InvisiblePlayer.matrixWorld.clone(),
+                camPos: this.InvisiblePlayer.position.clone(),
                 rotation: rot
             });
             setTimeout(() => {
@@ -76454,6 +76497,18 @@ class Game {
             this.damageDetection();
         }
         this.render();
+        this.shotAnimate();
+    }
+    shotAnimate() {
+        let cl = this.clock.getElapsedTime();
+        var elapsed = new Date().getTime() - this.start;
+        // console.log(elapsed);
+        if (elapsed > this.duration) {
+            if (this.isShooting) {
+                this.shot(this.isShooting);
+            }
+            this.start = new Date().getTime();
+        }
     }
     collisionDetection() {
         let originPoint = this.InvisiblePlayer.position.clone();
@@ -76466,7 +76521,7 @@ class Game {
             if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
                 let obj = collisionResults[0].object;
                 if (obj.id !== this.lastCollisionId) {
-                    console.log(obj.id);
+                    // console.log(obj.id);
                     this.lastCollisionId = obj.id;
                     // obj.material.opacity = 0.4;
                     // obj.material.transparent = true;
@@ -76484,12 +76539,12 @@ class Game {
             let globalVertex = localVertex.applyMatrix4(this.InvisiblePlayer.matrix);
             let directionVector = globalVertex.sub(this.InvisiblePlayer.position);
             let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-            let collisionResults = ray.intersectObjects(this.othersBullets.map(r => r.mesh));
+            let collisionResults = ray.intersectObjects(this.othersBullets.map((r) => r.mesh));
             if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
                 let obj = collisionResults[0].object;
                 if (obj.id !== this.lastBulletCollisionId) {
                     this.lastBulletCollisionId = obj.id;
-                    console.log(1);
+                    // console.log(1);
                     // this.scene.remove(obj);
                     socket_service_1.default.socket.emit('demage');
                 }
@@ -86625,6 +86680,723 @@ try {
 
 module.exports = g;
 
+
+/***/ }),
+/* 256 */,
+/* 257 */,
+/* 258 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var skip_1 = __webpack_require__(259);
+rxjs_1.Observable.prototype.skip = skip_1.skip;
+//# sourceMappingURL=skip.js.map
+
+/***/ }),
+/* 259 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/**
+ * Returns an Observable that skips the first `count` items emitted by the source Observable.
+ *
+ * <img src="./img/skip.png" width="100%">
+ *
+ * @param {Number} count - The number of times, items emitted by source Observable should be skipped.
+ * @return {Observable} An Observable that skips values emitted by the source Observable.
+ *
+ * @method skip
+ * @owner Observable
+ */
+function skip(count) {
+    return operators_1.skip(count)(this);
+}
+exports.skip = skip;
+//# sourceMappingURL=skip.js.map
+
+/***/ }),
+/* 260 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(258);
+//# sourceMappingURL=skip.js.map
+
+/***/ }),
+/* 261 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+rxjs_1.Observable.from = rxjs_1.from;
+//# sourceMappingURL=from.js.map
+
+/***/ }),
+/* 262 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(261);
+//# sourceMappingURL=from.js.map
+
+/***/ }),
+/* 263 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var throttle_1 = __webpack_require__(264);
+rxjs_1.Observable.prototype.throttle = throttle_1.throttle;
+//# sourceMappingURL=throttle.js.map
+
+/***/ }),
+/* 264 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+var internal_compatibility_1 = __webpack_require__(250);
+/**
+ * Emits a value from the source Observable, then ignores subsequent source
+ * values for a duration determined by another Observable, then repeats this
+ * process.
+ *
+ * <span class="informal">It's like {@link throttleTime}, but the silencing
+ * duration is determined by a second Observable.</span>
+ *
+ * <img src="./img/throttle.png" width="100%">
+ *
+ * `throttle` emits the source Observable values on the output Observable
+ * when its internal timer is disabled, and ignores source values when the timer
+ * is enabled. Initially, the timer is disabled. As soon as the first source
+ * value arrives, it is forwarded to the output Observable, and then the timer
+ * is enabled by calling the `durationSelector` function with the source value,
+ * which returns the "duration" Observable. When the duration Observable emits a
+ * value or completes, the timer is disabled, and this process repeats for the
+ * next source value.
+ *
+ * @example <caption>Emit clicks at a rate of at most one click per second</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var result = clicks.throttle(ev => Rx.Observable.interval(1000));
+ * result.subscribe(x => console.log(x));
+ *
+ * @see {@link audit}
+ * @see {@link debounce}
+ * @see {@link delayWhen}
+ * @see {@link sample}
+ * @see {@link throttleTime}
+ *
+ * @param {function(value: T): SubscribableOrPromise} durationSelector A function
+ * that receives a value from the source Observable, for computing the silencing
+ * duration for each source value, returned as an Observable or a Promise.
+ * @param {Object} config a configuration object to define `leading` and `trailing` behavior. Defaults
+ * to `{ leading: true, trailing: false }`.
+ * @return {Observable<T>} An Observable that performs the throttle operation to
+ * limit the rate of emissions from the source.
+ * @method throttle
+ * @owner Observable
+ */
+function throttle(durationSelector, config) {
+    if (config === void 0) { config = internal_compatibility_1.defaultThrottleConfig; }
+    return operators_1.throttle(durationSelector, config)(this);
+}
+exports.throttle = throttle;
+//# sourceMappingURL=throttle.js.map
+
+/***/ }),
+/* 265 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(263);
+//# sourceMappingURL=throttle.js.map
+
+/***/ }),
+/* 266 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var merge_1 = __webpack_require__(267);
+rxjs_1.Observable.prototype.merge = merge_1.merge;
+//# sourceMappingURL=merge.js.map
+
+/***/ }),
+/* 267 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+/* tslint:enable:max-line-length */
+/**
+ * Creates an output Observable which concurrently emits all values from every
+ * given input Observable.
+ *
+ * <span class="informal">Flattens multiple Observables together by blending
+ * their values into one Observable.</span>
+ *
+ * <img src="./img/merge.png" width="100%">
+ *
+ * `merge` subscribes to each given input Observable (either the source or an
+ * Observable given as argument), and simply forwards (without doing any
+ * transformation) all the values from all the input Observables to the output
+ * Observable. The output Observable only completes once all input Observables
+ * have completed. Any error delivered by an input Observable will be immediately
+ * emitted on the output Observable.
+ *
+ * @example <caption>Merge together two Observables: 1s interval and clicks</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var timer = Rx.Observable.interval(1000);
+ * var clicksOrTimer = clicks.merge(timer);
+ * clicksOrTimer.subscribe(x => console.log(x));
+ *
+ * @example <caption>Merge together 3 Observables, but only 2 run concurrently</caption>
+ * var timer1 = Rx.Observable.interval(1000).take(10);
+ * var timer2 = Rx.Observable.interval(2000).take(6);
+ * var timer3 = Rx.Observable.interval(500).take(10);
+ * var concurrent = 2; // the argument
+ * var merged = timer1.merge(timer2, timer3, concurrent);
+ * merged.subscribe(x => console.log(x));
+ *
+ * @see {@link mergeAll}
+ * @see {@link mergeMap}
+ * @see {@link mergeMapTo}
+ * @see {@link mergeScan}
+ *
+ * @param {ObservableInput} other An input Observable to merge with the source
+ * Observable. More than one input Observables may be given as argument.
+ * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of input
+ * Observables being subscribed to concurrently.
+ * @param {Scheduler} [scheduler=null] The IScheduler to use for managing
+ * concurrency of input Observables.
+ * @return {Observable} An Observable that emits items that are the result of
+ * every input Observable.
+ * @method merge
+ * @owner Observable
+ */
+function merge() {
+    var observables = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        observables[_i] = arguments[_i];
+    }
+    return this.lift.call(rxjs_1.merge.apply(void 0, [this].concat(observables)));
+}
+exports.merge = merge;
+//# sourceMappingURL=merge.js.map
+
+/***/ }),
+/* 268 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(266);
+//# sourceMappingURL=merge.js.map
+
+/***/ }),
+/* 269 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var groupBy_1 = __webpack_require__(270);
+rxjs_1.Observable.prototype.groupBy = groupBy_1.groupBy;
+//# sourceMappingURL=groupBy.js.map
+
+/***/ }),
+/* 270 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/* tslint:enable:max-line-length */
+/**
+ * Groups the items emitted by an Observable according to a specified criterion,
+ * and emits these grouped items as `GroupedObservables`, one
+ * {@link GroupedObservable} per group.
+ *
+ * <img src="./img/groupBy.png" width="100%">
+ *
+ * @example <caption>Group objects by id and return as array</caption>
+ * Observable.of<Obj>({id: 1, name: 'aze1'},
+ *                    {id: 2, name: 'sf2'},
+ *                    {id: 2, name: 'dg2'},
+ *                    {id: 1, name: 'erg1'},
+ *                    {id: 1, name: 'df1'},
+ *                    {id: 2, name: 'sfqfb2'},
+ *                    {id: 3, name: 'qfs3'},
+ *                    {id: 2, name: 'qsgqsfg2'}
+ *     )
+ *     .groupBy(p => p.id)
+ *     .flatMap( (group$) => group$.reduce((acc, cur) => [...acc, cur], []))
+ *     .subscribe(p => console.log(p));
+ *
+ * // displays:
+ * // [ { id: 1, name: 'aze1' },
+ * //   { id: 1, name: 'erg1' },
+ * //   { id: 1, name: 'df1' } ]
+ * //
+ * // [ { id: 2, name: 'sf2' },
+ * //   { id: 2, name: 'dg2' },
+ * //   { id: 2, name: 'sfqfb2' },
+ * //   { id: 2, name: 'qsgqsfg2' } ]
+ * //
+ * // [ { id: 3, name: 'qfs3' } ]
+ *
+ * @example <caption>Pivot data on the id field</caption>
+ * Observable.of<Obj>({id: 1, name: 'aze1'},
+ *                    {id: 2, name: 'sf2'},
+ *                    {id: 2, name: 'dg2'},
+ *                    {id: 1, name: 'erg1'},
+ *                    {id: 1, name: 'df1'},
+ *                    {id: 2, name: 'sfqfb2'},
+ *                    {id: 3, name: 'qfs1'},
+ *                    {id: 2, name: 'qsgqsfg2'}
+ *                   )
+ *     .groupBy(p => p.id, p => p.name)
+ *     .flatMap( (group$) => group$.reduce((acc, cur) => [...acc, cur], ["" + group$.key]))
+ *     .map(arr => ({'id': parseInt(arr[0]), 'values': arr.slice(1)}))
+ *     .subscribe(p => console.log(p));
+ *
+ * // displays:
+ * // { id: 1, values: [ 'aze1', 'erg1', 'df1' ] }
+ * // { id: 2, values: [ 'sf2', 'dg2', 'sfqfb2', 'qsgqsfg2' ] }
+ * // { id: 3, values: [ 'qfs1' ] }
+ *
+ * @param {function(value: T): K} keySelector A function that extracts the key
+ * for each item.
+ * @param {function(value: T): R} [elementSelector] A function that extracts the
+ * return element for each item.
+ * @param {function(grouped: GroupedObservable<K,R>): Observable<any>} [durationSelector]
+ * A function that returns an Observable to determine how long each group should
+ * exist.
+ * @return {Observable<GroupedObservable<K,R>>} An Observable that emits
+ * GroupedObservables, each of which corresponds to a unique key value and each
+ * of which emits those items from the source Observable that share that key
+ * value.
+ * @method groupBy
+ * @owner Observable
+ */
+function groupBy(keySelector, elementSelector, durationSelector, subjectSelector) {
+    return operators_1.groupBy(keySelector, elementSelector, durationSelector, subjectSelector)(this);
+}
+exports.groupBy = groupBy;
+//# sourceMappingURL=groupBy.js.map
+
+/***/ }),
+/* 271 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(269);
+//# sourceMappingURL=groupBy.js.map
+
+/***/ }),
+/* 272 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var map_1 = __webpack_require__(273);
+rxjs_1.Observable.prototype.map = map_1.map;
+//# sourceMappingURL=map.js.map
+
+/***/ }),
+/* 273 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/**
+ * Applies a given `project` function to each value emitted by the source
+ * Observable, and emits the resulting values as an Observable.
+ *
+ * <span class="informal">Like [Array.prototype.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map),
+ * it passes each source value through a transformation function to get
+ * corresponding output values.</span>
+ *
+ * <img src="./img/map.png" width="100%">
+ *
+ * Similar to the well known `Array.prototype.map` function, this operator
+ * applies a projection to each value and emits that projection in the output
+ * Observable.
+ *
+ * @example <caption>Map every click to the clientX position of that click</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var positions = clicks.map(ev => ev.clientX);
+ * positions.subscribe(x => console.log(x));
+ *
+ * @see {@link mapTo}
+ * @see {@link pluck}
+ *
+ * @param {function(value: T, index: number): R} project The function to apply
+ * to each `value` emitted by the source Observable. The `index` parameter is
+ * the number `i` for the i-th emission that has happened since the
+ * subscription, starting from the number `0`.
+ * @param {any} [thisArg] An optional argument to define what `this` is in the
+ * `project` function.
+ * @return {Observable<R>} An Observable that emits the values from the source
+ * Observable transformed by the given `project` function.
+ * @method map
+ * @owner Observable
+ */
+function map(project, thisArg) {
+    return operators_1.map(project, thisArg)(this);
+}
+exports.map = map;
+//# sourceMappingURL=map.js.map
+
+/***/ }),
+/* 274 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(272);
+//# sourceMappingURL=map.js.map
+
+/***/ }),
+/* 275 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var mergeAll_1 = __webpack_require__(276);
+rxjs_1.Observable.prototype.mergeAll = mergeAll_1.mergeAll;
+//# sourceMappingURL=mergeAll.js.map
+
+/***/ }),
+/* 276 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/**
+ * Converts a higher-order Observable into a first-order Observable which
+ * concurrently delivers all values that are emitted on the inner Observables.
+ *
+ * <span class="informal">Flattens an Observable-of-Observables.</span>
+ *
+ * <img src="./img/mergeAll.png" width="100%">
+ *
+ * `mergeAll` subscribes to an Observable that emits Observables, also known as
+ * a higher-order Observable. Each time it observes one of these emitted inner
+ * Observables, it subscribes to that and delivers all the values from the
+ * inner Observable on the output Observable. The output Observable only
+ * completes once all inner Observables have completed. Any error delivered by
+ * a inner Observable will be immediately emitted on the output Observable.
+ *
+ * @example <caption>Spawn a new interval Observable for each click event, and blend their outputs as one Observable</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var higherOrder = clicks.map((ev) => Rx.Observable.interval(1000));
+ * var firstOrder = higherOrder.mergeAll();
+ * firstOrder.subscribe(x => console.log(x));
+ *
+ * @example <caption>Count from 0 to 9 every second for each click, but only allow 2 concurrent timers</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var higherOrder = clicks.map((ev) => Rx.Observable.interval(1000).take(10));
+ * var firstOrder = higherOrder.mergeAll(2);
+ * firstOrder.subscribe(x => console.log(x));
+ *
+ * @see {@link combineAll}
+ * @see {@link concatAll}
+ * @see {@link exhaust}
+ * @see {@link merge}
+ * @see {@link mergeMap}
+ * @see {@link mergeMapTo}
+ * @see {@link mergeScan}
+ * @see {@link switch}
+ * @see {@link zipAll}
+ *
+ * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of inner
+ * Observables being subscribed to concurrently.
+ * @return {Observable} An Observable that emits values coming from all the
+ * inner Observables emitted by the source Observable.
+ * @method mergeAll
+ * @owner Observable
+ */
+function mergeAll(concurrent) {
+    if (concurrent === void 0) { concurrent = Number.POSITIVE_INFINITY; }
+    return operators_1.mergeAll(concurrent)(this);
+}
+exports.mergeAll = mergeAll;
+//# sourceMappingURL=mergeAll.js.map
+
+/***/ }),
+/* 277 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(275);
+//# sourceMappingURL=mergeAll.js.map
+
+/***/ }),
+/* 278 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var distinctUntilChanged_1 = __webpack_require__(279);
+rxjs_1.Observable.prototype.distinctUntilChanged = distinctUntilChanged_1.distinctUntilChanged;
+//# sourceMappingURL=distinctUntilChanged.js.map
+
+/***/ }),
+/* 279 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/* tslint:enable:max-line-length */
+/**
+ * Returns an Observable that emits all items emitted by the source Observable that are distinct by comparison from the previous item.
+ *
+ * If a comparator function is provided, then it will be called for each item to test for whether or not that value should be emitted.
+ *
+ * If a comparator function is not provided, an equality check is used by default.
+ *
+ * @example <caption>A simple example with numbers</caption>
+ * Observable.of(1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4)
+ *   .distinctUntilChanged()
+ *   .subscribe(x => console.log(x)); // 1, 2, 1, 2, 3, 4
+ *
+ * @example <caption>An example using a compare function</caption>
+ * interface Person {
+ *    age: number,
+ *    name: string
+ * }
+ *
+ * Observable.of<Person>(
+ *     { age: 4, name: 'Foo'},
+ *     { age: 7, name: 'Bar'},
+ *     { age: 5, name: 'Foo'})
+ *     { age: 6, name: 'Foo'})
+ *     .distinctUntilChanged((p: Person, q: Person) => p.name === q.name)
+ *     .subscribe(x => console.log(x));
+ *
+ * // displays:
+ * // { age: 4, name: 'Foo' }
+ * // { age: 7, name: 'Bar' }
+ * // { age: 5, name: 'Foo' }
+ *
+ * @see {@link distinct}
+ * @see {@link distinctUntilKeyChanged}
+ *
+ * @param {function} [compare] Optional comparison function called to test if an item is distinct from the previous item in the source.
+ * @return {Observable} An Observable that emits items from the source Observable with distinct values.
+ * @method distinctUntilChanged
+ * @owner Observable
+ */
+function distinctUntilChanged(compare, keySelector) {
+    return operators_1.distinctUntilChanged(compare, keySelector)(this);
+}
+exports.distinctUntilChanged = distinctUntilChanged;
+//# sourceMappingURL=distinctUntilChanged.js.map
+
+/***/ }),
+/* 280 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(278);
+//# sourceMappingURL=distinctUntilChanged.js.map
+
+/***/ }),
+/* 281 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var first_1 = __webpack_require__(282);
+rxjs_1.Observable.prototype.first = first_1.first;
+//# sourceMappingURL=first.js.map
+
+/***/ }),
+/* 282 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/**
+ * Emits only the first value (or the first value that meets some condition)
+ * emitted by the source Observable.
+ *
+ * <span class="informal">Emits only the first value. Or emits only the first
+ * value that passes some test.</span>
+ *
+ * <img src="./img/first.png" width="100%">
+ *
+ * If called with no arguments, `first` emits the first value of the source
+ * Observable, then completes. If called with a `predicate` function, `first`
+ * emits the first value of the source that matches the specified condition. It
+ * may also take a `resultSelector` function to produce the output value from
+ * the input value, and a `defaultValue` to emit in case the source completes
+ * before it is able to emit a valid value. Throws an error if `defaultValue`
+ * was not provided and a matching element is not found.
+ *
+ * @example <caption>Emit only the first click that happens on the DOM</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var result = clicks.first();
+ * result.subscribe(x => console.log(x));
+ *
+ * @example <caption>Emits the first click that happens on a DIV</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var result = clicks.first(ev => ev.target.tagName === 'DIV');
+ * result.subscribe(x => console.log(x));
+ *
+ * @see {@link filter}
+ * @see {@link find}
+ * @see {@link take}
+ *
+ * @throws {EmptyError} Delivers an EmptyError to the Observer's `error`
+ * callback if the Observable completes before any `next` notification was sent.
+ *
+ * @param {function(value: T, index: number, source: Observable<T>): boolean} [predicate]
+ * An optional function called with each item to test for condition matching.
+ * @param {T} [defaultValue] The default value emitted in case no valid value
+ * was found on the source.
+ * @return {Observable<T>} An Observable of the first item that matches the
+ * condition.
+ * @method first
+ * @owner Observable
+ */
+function first() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    return operators_1.first.apply(void 0, args)(this);
+}
+exports.first = first;
+//# sourceMappingURL=first.js.map
+
+/***/ }),
+/* 283 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(281);
+//# sourceMappingURL=first.js.map
+
+/***/ }),
+/* 284 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(24);
+var take_1 = __webpack_require__(285);
+rxjs_1.Observable.prototype.take = take_1.take;
+//# sourceMappingURL=take.js.map
+
+/***/ }),
+/* 285 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(243);
+/**
+ * Emits only the first `count` values emitted by the source Observable.
+ *
+ * <span class="informal">Takes the first `count` values from the source, then
+ * completes.</span>
+ *
+ * <img src="./img/take.png" width="100%">
+ *
+ * `take` returns an Observable that emits only the first `count` values emitted
+ * by the source Observable. If the source emits fewer than `count` values then
+ * all of its values are emitted. After that, it completes, regardless if the
+ * source completes.
+ *
+ * @example <caption>Take the first 5 seconds of an infinite 1-second interval Observable</caption>
+ * var interval = Rx.Observable.interval(1000);
+ * var five = interval.take(5);
+ * five.subscribe(x => console.log(x));
+ *
+ * @see {@link takeLast}
+ * @see {@link takeUntil}
+ * @see {@link takeWhile}
+ * @see {@link skip}
+ *
+ * @throws {ArgumentOutOfRangeError} When using `take(i)`, it delivers an
+ * ArgumentOutOrRangeError to the Observer's `error` callback if `i < 0`.
+ *
+ * @param {number} count The maximum number of `next` values to emit.
+ * @return {Observable<T>} An Observable that emits only the first `count`
+ * values emitted by the source Observable, or all of the values from the source
+ * if the source emits fewer than `count` values.
+ * @method take
+ * @owner Observable
+ */
+function take(count) {
+    return operators_1.take(count)(this);
+}
+exports.take = take;
+//# sourceMappingURL=take.js.map
+
+/***/ }),
+/* 286 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(284);
+//# sourceMappingURL=take.js.map
 
 /***/ })
 /******/ ]);

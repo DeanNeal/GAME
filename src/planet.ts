@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export default function(options) {
+export default function(options: any) {
   // EARTH
   var container = new THREE.Object3D();
 
@@ -29,7 +29,7 @@ export default function(options) {
   // earthGlow.scale.multiplyScalar(1.02);
   // earthGlow.position = earth.position;
 
-  container.add(earth);
+  // container.add(earth);
   // container.add(earthGlow);
 
 

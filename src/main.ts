@@ -10,6 +10,7 @@ declare var document: any;
 declare var $: any;
 import * as THREE from 'three'
 import FlyControls from './FlyControls';
+import PersonControl from './3dPersonControl';
 
 import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
 
@@ -49,6 +50,12 @@ export class Game {
     public playerPosition:any = { x: 0, y: 0, z: 0 };
     public Earth: any;
 
+    public rate = 10;
+    public start = new Date().getTime();
+    public duration = 150;
+    public lastFrameNumber = 0;
+    public isShooting: any = false;
+
     constructor(opts: any) {
         this.init();
         this.animate();
@@ -67,15 +74,14 @@ export class Game {
 
         this.controls = new FlyControls(this.camera);
 
-
+        // setInterval(()=>{
+        //     this.controls.reset();
+        // }, 5000)
         this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
         this.controls.rollSpeed = Math.PI / 3;
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
-
-        // controls.dragToLook = false;
-        // controls.rollSpeed = Math.PI / 6;
 
 
         this.scene = new THREE.Scene();
@@ -86,7 +92,7 @@ export class Game {
         this.addAsteroids();
         this.cubeWasRemoved();
 
-        SocketService.socket.on('selfPlayer', (user)=> {
+        SocketService.socket.on('selfPlayer', (user: any)=> {
             UserService.user.next(user);
             this.players.push({ mesh: null, user: user });
         });
@@ -147,10 +153,18 @@ export class Game {
         });
 
         Observable
-            .fromEvent(document, 'keypress')
-            .throttleTime(100)
+            .fromEvent(document, 'keydown')
             .subscribe((e:KeyboardEvent)=>{
-                this.shot(e);
+                if(!this.isShooting) {
+                    this.start = new Date().getTime() - this.duration;
+                    this.isShooting = e;
+                }
+            })
+
+        Observable
+            .fromEvent(document, 'keyup')
+            .subscribe((e:KeyboardEvent)=>{
+                this.isShooting = null;
             })
 
         // lights
@@ -194,21 +208,21 @@ export class Game {
         if(e.keyCode === 32 && UserService.user.value) {
             let bullet = this.createBullet();
 
-            let pos = this.camera.position.clone();
-            let rot = this.camera.rotation.clone();
-            bullet.position.set(pos.x, pos.y - 50, pos.z);
+            let pos = this.InvisiblePlayer.position.clone();
+            let rot = this.InvisiblePlayer.rotation.clone();
+            bullet.position.set(pos.x - 200, pos.y - 200, pos.z - 200);
             bullet.rotation.set(rot.x, rot.y, rot.z);
 
             this.bullets.push({
                 mesh: bullet,
-                matrixWorld:  this.camera.matrixWorld.clone(),
-                camPos: this.camera.position.clone()
+                matrixWorld:  this.InvisiblePlayer.matrixWorld.clone(),
+                camPos: this.InvisiblePlayer.position.clone()
             });
 
             SocketService.socket.emit('fire', {
                 userId: UserService.user.value.id,
-                matrixWorld:  this.camera.matrixWorld.clone(),
-                camPos: this.camera.position.clone(), 
+                matrixWorld:  this.InvisiblePlayer.matrixWorld.clone(),
+                camPos: this.InvisiblePlayer.position.clone(), 
                 rotation: rot
             });
 
@@ -463,8 +477,7 @@ export class Game {
             this.othersBullets[i].mesh.position.add(dir.multiplyScalar(1000));
         };
 
-
-
+        
 
         this.InvisiblePlayer.position.x = this.camera.position.x /* - this.InvisiblePlayer.geometry.parameters.radius*/ ;
         this.InvisiblePlayer.position.y = this.camera.position.y /* - this.InvisiblePlayer.geometry.parameters.radius*/ ;
@@ -491,6 +504,21 @@ export class Game {
         
 
         this.render();
+
+        this.shotAnimate();
+    }
+
+    shotAnimate() {
+        let cl =  this.clock.getElapsedTime();
+
+        var elapsed = new Date().getTime() - this.start;
+// console.log(elapsed);
+       if (elapsed > this.duration) {
+            if(this.isShooting) {
+                this.shot(this.isShooting);
+            }
+            this.start = new Date().getTime();
+       }
     }
 
     collisionDetection() {
@@ -505,7 +533,7 @@ export class Game {
             if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
                 let obj = collisionResults[0].object;
                 if (obj.id !== this.lastCollisionId) {
-                    console.log(obj.id);
+                    // console.log(obj.id);
                     this.lastCollisionId = obj.id;
 
                     // obj.material.opacity = 0.4;
@@ -528,12 +556,12 @@ export class Game {
             let directionVector = globalVertex.sub(this.InvisiblePlayer.position);
             let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
 
-            let collisionResults = ray.intersectObjects(this.othersBullets.map(r=> r.mesh));
+            let collisionResults = ray.intersectObjects(this.othersBullets.map((r: any)=> r.mesh));
             if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
                 let obj = collisionResults[0].object;
                 if (obj.id !== this.lastBulletCollisionId) {
                     this.lastBulletCollisionId = obj.id;
-                    console.log(1);
+                    // console.log(1);
                     // this.scene.remove(obj);
                     SocketService.socket.emit('demage'); 
                 }

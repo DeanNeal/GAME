@@ -17,6 +17,7 @@ export default function ( object, domElement ) {
 	this.dragToLook = false;
 	this.autoForward = false;
 
+this.movementSpeedMultiplier = 1;
 	// disable default target object behavior
 
 	// internals
@@ -46,7 +47,7 @@ export default function ( object, domElement ) {
 			return;
 
 		}
-
+ // console.log( event.keyCode);
 		//event.preventDefault();
 
 		switch ( event.keyCode ) {
@@ -77,6 +78,10 @@ export default function ( object, domElement ) {
 		this.updateRotationVector();
 
 	};
+
+	this.keypress = function(event) {
+		// console.log( event.keyCode);
+	}
 
 	this.keyup = function( event ) {
 
@@ -110,7 +115,7 @@ export default function ( object, domElement ) {
 	};
 
 	this.mousedown = function( event ) {
-		if (!document.querySelector('.chatRoom').contains(event.target)) {
+		//if (!document.querySelector('.chatRoom').contains(event.target)) {
 	
 
 			if ( this.domElement !== document ) {
@@ -138,7 +143,7 @@ export default function ( object, domElement ) {
 				this.updateMovementVector();
 
 			}
-		}
+		//}
 	};
 
 	this.mousemove = function( event ) {
@@ -159,7 +164,7 @@ export default function ( object, domElement ) {
 	};
 
 	this.mouseup = function( event ) {
-		if (!document.querySelector('.chatRoom').contains(event.target)) {
+		//if (!document.querySelector('.chatRoom').contains(event.target)) {
 			event.preventDefault();
 			event.stopPropagation();
 
@@ -183,13 +188,13 @@ export default function ( object, domElement ) {
 			}
 
 			this.updateRotationVector();
-		}
+		//}
 
 	};
 
 	this.update = function( delta ) {
 
-		var moveMult = delta * this.movementSpeed;
+		var moveMult = delta * this.movementSpeed + this.movementSpeedMultiplier;
 		var rotMult = delta * this.rollSpeed;
 
 		this.object.translateX( this.moveVector.x * moveMult );
@@ -265,8 +270,13 @@ export default function ( object, domElement ) {
 
 	window.addEventListener( 'keydown', bind( this, this.keydown ), false );
 	window.addEventListener( 'keyup',   bind( this, this.keyup ), false );
+	window.addEventListener( 'keypress',   bind( this, this.keypress ), false );
 
 	this.updateMovementVector();
 	this.updateRotationVector();
 
+
+	this.reset = function() {
+		this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0 };
+	}
 };

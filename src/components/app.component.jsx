@@ -82,7 +82,7 @@ class App extends React.Component {
               <div id="gui">HP {this.state.user.health}</div>
               <div id="timer"></div> 
               <UserList/> 
-              <Chat/>
+            
             </div>
           )
         }
