@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+// import webpackRxjsExternals from 'webpack-rxjs-externals';
+// const webpackRxjsExternals = require('webpack-rxjs-externals');
 
 module.exports = {
     context: path.resolve(__dirname, './src'),
@@ -46,6 +48,10 @@ module.exports = {
             }
         ]
     },
+    // externals: [
+    //   webpackRxjsExternals(),
+    //   // other externals here
+    // ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.jsx']
     },

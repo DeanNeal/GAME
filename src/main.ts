@@ -1,3 +1,4 @@
+import './polyfills';
 import Helpers from './helper';
 import UserService from './user.service';
 import CubesService from './cubes.service';
@@ -9,6 +10,10 @@ declare var document: any;
 declare var $: any;
 import * as THREE from 'three'
 import FlyControls from './FlyControls';
+
+import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
+
+
 
 export class Game {
     public container: any;
@@ -22,7 +27,7 @@ export class Game {
     public controls: any;
 
     public mouse:any = new THREE.Vector2();
-    public INTERSECTED:any;
+    // public INTERSECTED:any;
 
     public clock:any = new THREE.Clock();
 
@@ -141,36 +146,12 @@ export class Game {
             }
         });
 
-        $(window).on('keypress', (e: KeyboardEvent)=> {
-            if(e.keyCode === 32 && UserService.user.value) {
-                let bullet = this.createBullet();
-
-                let pos = this.camera.position.clone();
-                let rot = this.camera.rotation.clone();
-                bullet.position.set(pos.x, pos.y - 20, pos.z);
-                bullet.rotation.set(rot.x, rot.y, rot.z);
-
-                this.bullets.push({
-                    mesh: bullet,
-                    matrixWorld:  this.camera.matrixWorld.clone(),
-                    camPos: this.camera.position.clone()
-                });
-
-                SocketService.socket.emit('fire', {
-                    userId: UserService.user.value.id,
-                    matrixWorld:  this.camera.matrixWorld.clone(),
-                    camPos: this.camera.position.clone(), 
-                    rotation: rot
-                });
-
-                setTimeout(()=>{
-                    this.scene.remove(bullet);
-                    this.bullets.splice(0, 1);
-                }, 10000);
-            }
-        });
-
-
+        Observable
+            .fromEvent(document, 'keypress')
+            .throttleTime(100)
+            .subscribe((e:KeyboardEvent)=>{
+                this.shot(e);
+            })
 
         // lights
         let dLight:any = new THREE.DirectionalLight(0xffffff);
@@ -209,9 +190,38 @@ export class Game {
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
     }
 
+    shot(e:KeyboardEvent) {
+        if(e.keyCode === 32 && UserService.user.value) {
+            let bullet = this.createBullet();
+
+            let pos = this.camera.position.clone();
+            let rot = this.camera.rotation.clone();
+            bullet.position.set(pos.x, pos.y - 50, pos.z);
+            bullet.rotation.set(rot.x, rot.y, rot.z);
+
+            this.bullets.push({
+                mesh: bullet,
+                matrixWorld:  this.camera.matrixWorld.clone(),
+                camPos: this.camera.position.clone()
+            });
+
+            SocketService.socket.emit('fire', {
+                userId: UserService.user.value.id,
+                matrixWorld:  this.camera.matrixWorld.clone(),
+                camPos: this.camera.position.clone(), 
+                rotation: rot
+            });
+
+            setTimeout(()=>{
+                this.scene.remove(bullet);
+                this.bullets.splice(0, 1);
+            }, 10000);
+        }
+    }
+
     createBullet() {
         let bullet = new THREE.Mesh(
-        new THREE.CubeGeometry(5, 5, 1000),
+        new THREE.CubeGeometry(5, 5, 2000),
         new THREE.MeshBasicMaterial({ color:0xffffff }));
         this.scene.add(bullet);
         return bullet;
@@ -443,14 +453,14 @@ export class Game {
             var pWorld = pLocal.applyMatrix4(this.bullets[i].matrixWorld);
             // //You can now construct the desired direction vector:
             var dir = pWorld.sub(this.bullets[i].camPos).normalize();
-            this.bullets[i].mesh.position.add(dir.multiplyScalar(2000));
+            this.bullets[i].mesh.position.add(dir.multiplyScalar(1000));
         };
 
         for (let i = 0; i < this.othersBullets.length; i++) {
             var pLocal = new THREE.Vector3( 0, 0, -1 );
             var pWorld = pLocal.applyMatrix4(this.othersBullets[i].matrixWorld);
             var dir = pWorld.sub(this.othersBullets[i].camPos).normalize();
-            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(2000));
+            this.othersBullets[i].mesh.position.add(dir.multiplyScalar(1000));
         };
 
 

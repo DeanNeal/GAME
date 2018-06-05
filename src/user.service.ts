@@ -1,6 +1,7 @@
-import { Observable, Subject, ReplaySubject,BehaviorSubject, from, of, range } from 'rxjs';
+import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
+
 class UserService {
-	public user: any = new BehaviorSubject();
+	public user: any = new BehaviorSubject(null);
     constructor() {
 
     }
