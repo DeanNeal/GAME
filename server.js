@@ -18,6 +18,7 @@ app.get('/', function(req, res) {
 
 var users = [];
 var cubes = createCubes();
+var asteroids = createAsteroids();
 
 io.sockets.on('connection', function(socket) {
     var user = {};
@@ -29,6 +30,7 @@ io.sockets.on('connection', function(socket) {
         io.sockets.emit("otherNewPlayer", users);
         io.sockets.emit('userList', users);
         socket.emit("updateCubes", cubes);
+        socket.emit("updateAsteroids", asteroids);
 
 
         setInterval(function(){
@@ -173,6 +175,29 @@ function createCubes() {
             x: 5000 * (2.0 * Math.random() - 1.0),
             y: 5000 * (2.0 * Math.random() - 1.0),
             z: 5000 * (2.0 * Math.random() - 1.0)
+          },
+          rotation: {
+            x: Math.random() * Math.PI,
+            y: Math.random() * Math.PI,
+            z: Math.random() * Math.PI
+          }
+        });
+    }
+
+    return cubes;
+}
+
+function createAsteroids() {
+    var cubes = [];
+    for (var i = 0; i < 50; i++) {
+        var cube = {};
+        cubes.push({
+          id: i,
+          color: 0xcccccc,//getRandColor(),
+          position: {
+            x: 20000 * (2.0 * Math.random() - 1.0),
+            y: 20000 * (2.0 * Math.random() - 1.0),
+            z: 20000 * (2.0 * Math.random() - 1.0)
           },
           rotation: {
             x: Math.random() * Math.PI,

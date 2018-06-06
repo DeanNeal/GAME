@@ -37,6 +37,7 @@ export class Game {
 
     public allSpheres:any = [];
     public allCubes:any = [];
+    public allAsteroids:any = [];
     public bullets:any = [];
     public othersBullets: any = [];
 
@@ -397,9 +398,9 @@ export class Game {
                 mesh.position.y = c.position.y;
                 mesh.position.z = c.position.z;
 
-                mesh.rotation.x = Math.random() * Math.PI;
-                mesh.rotation.y = Math.random() * Math.PI;
-                mesh.rotation.z = Math.random() * Math.PI;
+                mesh.rotation.x = c.position.x;
+                mesh.rotation.y = c.position.y;
+                mesh.rotation.z = c.position.z;
 
                 // var spritey = Helpers.makeTextSprite(c.id, { fontsize: 50, fontface: "Georgia" });
                 // spritey.position.set(50, 100, 0);
@@ -418,22 +419,32 @@ export class Game {
     }
 
     addAsteroids() {
-        let s = 1000 /** Math.random()*/;
+    
+       let s = 1000;
+       let cube = new THREE.BoxGeometry(s, s, s);
 
-       for (let i = 0; i < 50; i++) {
-            let cube = new THREE.BoxGeometry(s, s, s);
-            let material = new THREE.MeshPhongMaterial({ color: 0xcccccc, wireframe: false,/*opacity: 0.5, transparent: true ,*/ specular: 0xffffff, shininess: 50 });
-            let mesh = new THREE.Mesh(cube, material);
-            mesh.position.x =  20000 * (2.0 * Math.random() - 1.0);
-            mesh.position.y =  20000 * (2.0 * Math.random() - 1.0);
-            mesh.position.z =  20000 * (2.0 * Math.random() - 1.0);
+       SocketService.socket.on('updateAsteroids', (asteroids: any[])=> {
 
-            mesh.rotation.x = Math.random() * Math.PI;
-            mesh.rotation.y = Math.random() * Math.PI;
-            mesh.rotation.z = Math.random() * Math.PI;
+           asteroids.forEach(c => {
+               let material = new THREE.MeshPhongMaterial({ color: c.color, wireframe: false,/*opacity: 0.5, transparent: true ,*/ specular: 0xffffff, shininess: 50 });
+               let mesh = new THREE.Mesh(cube, material);
 
-            this.scene.add(mesh);
-       }
+               mesh.userData = c;
+               mesh.position.x = c.position.x;
+               mesh.position.y = c.position.y;
+               mesh.position.z = c.position.z;
+
+               mesh.rotation.x = c.position.x;
+               mesh.rotation.y = c.position.y;
+               mesh.rotation.z = c.position.z;
+
+
+               this.scene.add(mesh);
+               this.allAsteroids.push(mesh);
+           });
+
+           // CubesService.cubes.next(this.allCubes);
+       });
     }
 
     cubeWasRemoved() {
