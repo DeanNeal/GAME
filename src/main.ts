@@ -50,8 +50,8 @@ export class Game {
     public isMove: boolean = false;
     public earthMesh:any;
     public cloudMesh: any;
-    public startPosition:any = { x: 0, y: 0, z: 0 };
-    public playerPosition:any = { x: 0, y: 0, z: 0 };
+    public startPosition:any = { x: 0, y: 100, z: 100 };
+    // public playerPosition:any = { x: 0, y: 0, z: 0 };
     public Earth: any;
 
     public rate = 10;
@@ -74,8 +74,10 @@ export class Game {
 
         // camera
 
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 300000);
         this.camera.position.set(this.startPosition.x, this.startPosition.y, this.startPosition.z);
+        // this.camera.position.set(0, 100, 100);
+        // this.camera.rotation.set(0, 0, 0);
 
         this.scene = new THREE.Scene();
         this.addInvisiblePlayer();
@@ -119,7 +121,7 @@ export class Game {
             let pos = userMesh.position.clone();
             let bulletMesh = this.createBullet();
 
-            bulletMesh.position.set(pos.x, pos.y - 20, pos.z);
+            bulletMesh.position.set(pos.x, pos.y, pos.z);
             bulletMesh.rotation.set(params.rotation._x, params.rotation._y, params.rotation._z);
 
             this.othersBullets.push({
@@ -270,7 +272,7 @@ export class Game {
         });
 
 
-        return new THREE.Mesh(
+        let userMesh = new THREE.Mesh(
             new THREE.SphereGeometry(70, 15, 15),
             new THREE.MeshPhongMaterial({
                 // map: texture,
@@ -283,19 +285,22 @@ export class Game {
                 // transparent: true
             })
         );
+
+        userMesh.add(this.createGun());
+
+        return userMesh;
     }
 
     addInvisiblePlayer() {
         this.InvisiblePlayer = this.createUserMesh();
 
-        this.controls = new FlyControls(/*this.camera, */this.InvisiblePlayer);
+        this.controls = new FlyControls(this.InvisiblePlayer, this.camera);
         // this.controls.enablePan = false;
-        this.camera.position.set(0, 100, 100);
-        this.camera.rotation.set(0, 0, 0);
+
 
         // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
-        this.controls.rollSpeed = Math.PI / 4;
+        this.controls.rollSpeed = Math.PI / 3.5;
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
 
@@ -308,21 +313,21 @@ export class Game {
         var spriteMap = new THREE.TextureLoader().load( "img/aim.png" );
         var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
         var sprite = new THREE.Sprite( spriteMaterial );
-        sprite.position.set(0, -10, -300);
+        sprite.position.set(0, 0, -300);
         sprite.scale.set(15, 15, 15);
-
-
-        let cube = new THREE.BoxGeometry(25, 25, 200);
-        let material = new THREE.MeshPhongMaterial({ color: 0x333333 , wireframe: false,specular: 0xffffff, shininess: 50 });
-        let mesh = new THREE.Mesh(cube, material);
-
-        mesh.position.set(0, 0, -260);
-
-        this.InvisiblePlayer.add(mesh);
 
         this.camera.add(sprite);
         // this.camera.position.set(0, 100, 200);        
         this.scene.add(this.InvisiblePlayer);
+    }
+
+    createGun() {
+        let cube = new THREE.BoxGeometry(25, 25, 100);
+        let material = new THREE.MeshPhongMaterial({ color: 0x333333 , wireframe: false,specular: 0xffffff, shininess: 50 });
+        let gun = new THREE.Mesh(cube, material);
+
+        gun.position.set(0, 0, -50);
+        return gun;
     }
 
     addPlanet() {
@@ -361,9 +366,9 @@ export class Game {
     addSky() {
         let loader = new THREE.TextureLoader();
         // create the geometry sphere
-        let geometry = new THREE.SphereGeometry(150000, 100, 100)
+        let geometry = new THREE.SphereGeometry(250000, 100, 100)
         let skyTexture = loader.load('img/galaxy_starfield.png', function(texture) {
-            texture.repeat.set(7, 7);
+            texture.repeat.set(10, 10);
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         });
         // create the material, using a texture of startfield

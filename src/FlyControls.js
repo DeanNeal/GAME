@@ -2,12 +2,14 @@
  * @author James Baicoianu / http://www.baicoianu.com/
  */
 
-export default function ( object, domElement ) {
+export default function ( object, camera ) {
 
 	this.object = object;
 
-	this.domElement = ( domElement !== undefined ) ? domElement : document;
-	if ( domElement ) this.domElement.setAttribute( 'tabindex', -1 );
+	this.cameraInitPosition = camera.position.clone();
+
+	this.domElement = /*( domElement !== undefined ) ? domElement : */document;
+/*	if ( domElement ) this.domElement.setAttribute( 'tabindex', -1 );*/
 
 	// API
 
@@ -25,7 +27,7 @@ export default function ( object, domElement ) {
 
 	// internals
 	this.maxSpeed = 45;
-	this.acceleration = 0.55;
+	this.acceleration = 0.45;
 	this.tmpQuaternion = new THREE.Quaternion();
 
 	this.mouseStatus = 0;
@@ -243,9 +245,13 @@ export default function ( object, domElement ) {
 		// expose the rotation vector for convenience
 		this.object.rotation.setFromQuaternion( this.object.quaternion, this.object.rotation.order );
 
-
+		this.cameraUpdate();
 		
 	};
+
+	this.cameraUpdate = function () {
+		camera.position.z = this.cameraInitPosition.z + (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier * 5 : 0);
+	}
 
 	this.updateSpeedValue = function(val) {
 

@@ -1,10 +1,10 @@
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+let express = require('express');
+let app = express();
+let http = require('http').Server(app);
+let io = require('socket.io')(http);
 io.set('heartbeat timeout', 5000);
 io.set('heartbeat interval', 2000);
-// var THREE = require('three');
+// let THREE = require('three');
 
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'jade');
@@ -16,15 +16,17 @@ app.get('/', function(req, res) {
 
 /****LOGIC*****/
 
-var users = [];
-var cubes = createCubes();
-var asteroids = createAsteroids();
+let users = [];
+let cubes = createCubes();
+let asteroids = createAsteroids();
 
 io.sockets.on('connection', function(socket) {
-    var user = {};
+    let user = {
+        id: socket.id.slice(0, 4)
+    };
 
     socket.on('add new player', function(playerOptions) {
-        user = addUser(socket.id, playerOptions);
+        addUser(user, playerOptions);
         socket.emit("selfPlayer", user );
 
         io.sockets.emit("otherNewPlayer", users);
@@ -75,9 +77,8 @@ io.sockets.on('connection', function(socket) {
 });
 
 
-var addUser = function(id, playerOptions) {
-    var user = {
-        id: id.slice(0, 4),
+let addUser = function(user, playerOptions) {
+    user = Object.assign(user, {
         playerName: playerOptions.name,
         size: 80,
         position: {
@@ -90,12 +91,13 @@ var addUser = function(id, playerOptions) {
         health: 100,
         death: 0
 
-    }
+    });
     users.push(user);
     return user;
 }
-var removeUser = function(user) {
-    for (var i = 0; i < users.length; i++) {
+let removeUser = function(user) {
+    console.log('deletePlayer', user);
+    for (let i = 0; i < users.length; i++) {
         if (user.id === users[i].id) {
             users.splice(i, 1);
             io.sockets.emit("deletePlayer", user.id);
@@ -103,10 +105,10 @@ var removeUser = function(user) {
         }
     }
 }
-var updateUsersCoords = function(id, data, socket) {
+let updateUsersCoords = function(id, data, socket) {
 
-    for (var i = 0; i < users.length; i++) {
-        var user = users[i];
+    for (let i = 0; i < users.length; i++) {
+        let user = users[i];
         if (user.id == id) {
             user.position = data.position;
             user.rotation = data.rotation;
@@ -116,8 +118,8 @@ var updateUsersCoords = function(id, data, socket) {
     // io.sockets.emit("updateUsersCoords", users);
 }
 
-var increaseScores = function(curUser) {
-    for (var i = 0; i < users.length; i++) {
+let increaseScores = function(curUser) {
+    for (let i = 0; i < users.length; i++) {
         if (users[i].id == curUser.id) {
             // users[i].scores += 1;
             users[i].health = 100;
@@ -126,8 +128,8 @@ var increaseScores = function(curUser) {
     io.sockets.emit("userList", users);
 }
 
-var decreaseHealth = function(userId) {
-    for (var i = 0; i < users.length; i++) {
+let decreaseHealth = function(userId) {
+    for (let i = 0; i < users.length; i++) {
         if (users[i].id == userId) {
             users[i].health -= 10;
             if(users[i].health <= 0) {
@@ -144,7 +146,7 @@ var decreaseHealth = function(userId) {
 
 
 function getRandColor() {
-    var colors = [
+    let colors = [
         '#FF62B0',
         '#9A03FE',
         '#62D0FF',
@@ -165,9 +167,9 @@ function getRandColor() {
 
 
 function createCubes() {
-    var cubes = [];
-    for (var i = 0; i < 5; i++) {
-        var cube = {};
+    let cubes = [];
+    for (let i = 0; i < 5; i++) {
+        let cube = {};
         cubes.push({
           id: i,
           color: getRandColor(),
@@ -188,9 +190,9 @@ function createCubes() {
 }
 
 function createAsteroids() {
-    var cubes = [];
-    for (var i = 0; i < 50; i++) {
-        var cube = {};
+    let cubes = [];
+    for (let i = 0; i < 50; i++) {
+        let cube = {};
         cubes.push({
           id: i,
           color: 0xcccccc,//getRandColor(),
@@ -211,7 +213,7 @@ function createAsteroids() {
 }
 
 function removeCube(cube) {
-  for (var i = 0; i < cubes.length; i++) {
+  for (let i = 0; i < cubes.length; i++) {
       if (cube.id === cubes[i].id) {
           io.sockets.emit("cubeWasRemoved", cubes[i]);
           cubes.splice(i, 1);

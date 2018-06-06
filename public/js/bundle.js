@@ -10160,16 +10160,14 @@ var App = function (_React$Component) {
       var _this2 = this;
 
       var game = new _main.Game(this.state.playerOptions);
+      this.setState({
+        getReady: true
+      });
+
       _socket2.default.socket.emit('add new player', this.state.playerOptions);
 
-      // SocketService.socket.on('selfPlayer', user=> {
-      //   this.setState({
-      //     user: user
-      //   });
-      // });
       _global2.default.users.subscribe(function (users) {
         _this2.setState({
-          getReady: true,
           user: users.filter(function (r) {
             return r.id === _user2.default.user.value.id;
           })[0]
@@ -10270,12 +10268,14 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-exports.default = function (object, domElement) {
+exports.default = function (object, camera) {
 
 	this.object = object;
 
-	this.domElement = domElement !== undefined ? domElement : document;
-	if (domElement) this.domElement.setAttribute('tabindex', -1);
+	this.cameraInitPosition = camera.position.clone();
+
+	this.domElement = /*( domElement !== undefined ) ? domElement : */document;
+	/*	if ( domElement ) this.domElement.setAttribute( 'tabindex', -1 );*/
 
 	// API
 
@@ -10293,7 +10293,7 @@ exports.default = function (object, domElement) {
 
 	// internals
 	this.maxSpeed = 45;
-	this.acceleration = 0.55;
+	this.acceleration = 0.45;
 	this.tmpQuaternion = new THREE.Quaternion();
 
 	this.mouseStatus = 0;
@@ -10522,6 +10522,12 @@ exports.default = function (object, domElement) {
 
 		// expose the rotation vector for convenience
 		this.object.rotation.setFromQuaternion(this.object.quaternion, this.object.rotation.order);
+
+		this.cameraUpdate();
+	};
+
+	this.cameraUpdate = function () {
+		camera.position.z = this.cameraInitPosition.z + (this.movementSpeedMultiplier >= 0 ? this.movementSpeedMultiplier * 5 : 0);
 	};
 
 	this.updateSpeedValue = function (val) {
@@ -87006,8 +87012,7 @@ class Game {
         // public currentPlayer: any;
         this.players = [];
         this.isMove = false;
-        this.startPosition = { x: 0, y: 0, z: 0 };
-        this.playerPosition = { x: 0, y: 0, z: 0 };
+        this.startPosition = { x: 0, y: 100, z: 100 };
         this.rate = 10;
         this.start = new Date().getTime();
         this.duration = 120;
@@ -87021,8 +87026,10 @@ class Game {
         this.container.className = 'canvas';
         document.body.appendChild(this.container);
         // camera
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 300000);
         this.camera.position.set(this.startPosition.x, this.startPosition.y, this.startPosition.z);
+        // this.camera.position.set(0, 100, 100);
+        // this.camera.rotation.set(0, 0, 0);
         this.scene = new THREE.Scene();
         this.addInvisiblePlayer();
         this.addPlanet();
@@ -87057,7 +87064,7 @@ class Game {
             let userMesh = this.players.filter((r) => r.user.id == params.userId)[0].mesh;
             let pos = userMesh.position.clone();
             let bulletMesh = this.createBullet();
-            bulletMesh.position.set(pos.x, pos.y - 20, pos.z);
+            bulletMesh.position.set(pos.x, pos.y, pos.z);
             bulletMesh.rotation.set(params.rotation._x, params.rotation._y, params.rotation._z);
             this.othersBullets.push({
                 mesh: bulletMesh,
@@ -87174,23 +87181,23 @@ class Game {
             // textureBump.needsUpdate = true;
             // texture.minFilter = THREE.LinearFilter;
         });
-        return new THREE.Mesh(new THREE.SphereGeometry(70, 15, 15), new THREE.MeshPhongMaterial({
+        let userMesh = new THREE.Mesh(new THREE.SphereGeometry(70, 15, 15), new THREE.MeshPhongMaterial({
             // map: texture,
             // bumpMap: textureBump,
             color: 0xffff00,
             // specular: 0x0022ff,
             shininess: 1,
         }));
+        userMesh.add(this.createGun());
+        return userMesh;
     }
     addInvisiblePlayer() {
         this.InvisiblePlayer = this.createUserMesh();
-        this.controls = new FlyControls_1.default(/*this.camera, */ this.InvisiblePlayer);
+        this.controls = new FlyControls_1.default(this.InvisiblePlayer, this.camera);
         // this.controls.enablePan = false;
-        this.camera.position.set(0, 100, 100);
-        this.camera.rotation.set(0, 0, 0);
         // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
-        this.controls.rollSpeed = Math.PI / 4;
+        this.controls.rollSpeed = Math.PI / 3.5;
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
         this.InvisiblePlayer.add(this.camera);
@@ -87199,16 +87206,18 @@ class Game {
         var spriteMap = new THREE.TextureLoader().load("img/aim.png");
         var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
         var sprite = new THREE.Sprite(spriteMaterial);
-        sprite.position.set(0, -10, -300);
+        sprite.position.set(0, 0, -300);
         sprite.scale.set(15, 15, 15);
-        let cube = new THREE.BoxGeometry(25, 25, 200);
-        let material = new THREE.MeshPhongMaterial({ color: 0x333333, wireframe: false, specular: 0xffffff, shininess: 50 });
-        let mesh = new THREE.Mesh(cube, material);
-        mesh.position.set(0, 0, -260);
-        this.InvisiblePlayer.add(mesh);
         this.camera.add(sprite);
         // this.camera.position.set(0, 100, 200);        
         this.scene.add(this.InvisiblePlayer);
+    }
+    createGun() {
+        let cube = new THREE.BoxGeometry(25, 25, 100);
+        let material = new THREE.MeshPhongMaterial({ color: 0x333333, wireframe: false, specular: 0xffffff, shininess: 50 });
+        let gun = new THREE.Mesh(cube, material);
+        gun.position.set(0, 0, -50);
+        return gun;
     }
     addPlanet() {
         var loader = new THREE.TextureLoader();
@@ -87238,9 +87247,9 @@ class Game {
     addSky() {
         let loader = new THREE.TextureLoader();
         // create the geometry sphere
-        let geometry = new THREE.SphereGeometry(150000, 100, 100);
+        let geometry = new THREE.SphereGeometry(250000, 100, 100);
         let skyTexture = loader.load('img/galaxy_starfield.png', function (texture) {
-            texture.repeat.set(7, 7);
+            texture.repeat.set(10, 10);
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         });
         // create the material, using a texture of startfield
