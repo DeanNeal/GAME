@@ -10062,7 +10062,7 @@ const rxjs_1 = __webpack_require__(5);
 class GlobalService {
     constructor() {
         this.users = new rxjs_1.ReplaySubject();
-        this.speed = new rxjs_1.ReplaySubject();
+        this.sceneControls = new rxjs_1.ReplaySubject();
         socket_service_1.default.socket.on('userList', (users) => {
             this.users.next(users);
         });
@@ -10134,7 +10134,9 @@ var App = function (_React$Component) {
       user: {
         health: 100
       },
-      speed: 0
+      sceneControls: {
+        movementSpeedMultiplier: 0
+      }
     };
 
     _this.submit = _this.submit.bind(_this);
@@ -10173,12 +10175,6 @@ var App = function (_React$Component) {
           })[0]
         });
       });
-
-      // GlobalService.speed.subscribe(speed=> {
-      //     this.setState({
-      //       speed: Math.abs(speed.toFixed(0))
-      //     });
-      // });
     }
   }, {
     key: 'handleChange',
@@ -10242,7 +10238,7 @@ var App = function (_React$Component) {
           _react2.default.createElement(
             'div',
             { id: 'gui-speed' },
-            this.state.speed,
+            _react2.default.createElement('span', { id: 'gui-speed-value' }),
             ' KM/H'
           ),
           _react2.default.createElement('div', { id: 'timer' }),
@@ -10283,19 +10279,21 @@ exports.default = function (object, domElement) {
 
 	// API
 
-	this.direction = undefined;
+	// this.direction = undefined;
 
-	this.movementSpeed = 0;
+	// this.movementSpeed = 0;
 	this.rollSpeed = 0.005;
 
 	this.dragToLook = false;
+	this.isMoving = false;
 	// this.autoForward = false;
 
 	this.movementSpeedMultiplier = 0;
 	// disable default target object behavior
 
 	// internals
-	this.maxSpeed = 50;
+	this.maxSpeed = 45;
+	this.acceleration = 0.55;
 	this.tmpQuaternion = new THREE.Quaternion();
 
 	this.mouseStatus = 0;
@@ -10303,6 +10301,8 @@ exports.default = function (object, domElement) {
 	this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0 };
 	this.moveVector = new THREE.Vector3(0, 0, 0);
 	this.rotationVector = new THREE.Vector3(0, 0, 0);
+
+	var movementKeyCodes = [87, 83, 65, 68, 82, 70, 38, 40];
 
 	this.handleEvent = function (event) {
 
@@ -10356,6 +10356,9 @@ exports.default = function (object, domElement) {
 				/*E*/this.moveState.rollRight = 1;break;
 
 		}
+		if (movementKeyCodes.indexOf(event.keyCode) > -1) {
+			this.isMoving = true;
+		}
 
 		// this.updateMovementVector();
 		this.updateRotationVector();
@@ -10402,7 +10405,9 @@ exports.default = function (object, domElement) {
 				/*E*/this.moveState.rollRight = 0;break;
 
 		}
-
+		if (movementKeyCodes.indexOf(event.keyCode) > -1) {
+			this.isMoving = false;
+		}
 		// this.updateMovementVector();
 		this.updateRotationVector();
 	};
@@ -10482,30 +10487,30 @@ exports.default = function (object, domElement) {
 	};
 
 	this.update = function (delta) {
-		this.updateMovementVector();
+		if (this.isMoving) {
+			this.updateMovementVector();
+		}
 
 		if (this.moveState.forward) {
-			this.movementSpeedMultiplier += this.movementSpeedMultiplier < this.maxSpeed ? 0.4 : 0;
+			this.movementSpeedMultiplier += this.movementSpeedMultiplier < this.maxSpeed ? this.acceleration : 0;
 		}
 		if (this.moveState.back) {
-			this.movementSpeedMultiplier -= this.movementSpeedMultiplier > -this.maxSpeed ? 0.4 : 0;
+			this.movementSpeedMultiplier -= this.movementSpeedMultiplier > -this.maxSpeed ? this.acceleration : 0;
 		}
 
 		if (!this.moveState.forward && !this.moveState.back) {
 			if (this.movementSpeedMultiplier > 0) {
-				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? 0.1 : 0;
+				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? this.acceleration / 10 : 0;
 			} else {
-				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? 0.1 : 0;
+				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? this.acceleration / 10 : 0;
 			}
 		}
+
 		this.movementSpeedMultiplier = Math.round(this.movementSpeedMultiplier * 100) / 100;
-		console.log(this.moveVector, this.movementSpeedMultiplier);
 
-		var moveMult = delta * this.movementSpeed + Math.abs(this.movementSpeedMultiplier);
+		var moveMult = Math.round(delta /** this.movementSpeed*/ + Math.abs(this.movementSpeedMultiplier));
 		var rotMult = delta * this.rollSpeed;
-
-		// console.log(moveMult.toFixed(1));
-
+		this.updateSpeedValue(moveMult);
 
 		// console.log(moveMult, this.moveVector.z);	
 		this.object.translateX(this.moveVector.x * moveMult);
@@ -10519,12 +10524,22 @@ exports.default = function (object, domElement) {
 		this.object.rotation.setFromQuaternion(this.object.quaternion, this.object.rotation.order);
 	};
 
+	this.updateSpeedValue = function (val) {
+
+		if (document.querySelector('#gui-speed-value')) {
+			document.querySelector('#gui-speed-value').innerHTML = val.toFixed(0);
+		}
+	};
+
 	this.updateMovementVector = function () {
 
 		// var forward = (this.moveState.forward && !this.moveState.back) ? 1 : 0;
 		// forward = (!this.moveState.forward && this.moveState.back) ? -1 : 0;
 
-		var forward = this.movementSpeedMultiplier > 0 ? 1 : -1; //( this.moveState.forward || ( /*this.autoForward */ false && !this.moveState.back ) ) ? 1 : 0;
+		var forward = this.movementSpeedMultiplier >= 1 ? 1 : -1;
+
+		// console.log(this.movementSpeedMultiplier);
+		//( this.moveState.forward || ( /*this.autoForward */ false && !this.moveState.back ) ) ? 1 : 0;
 
 		this.moveVector.x = -this.moveState.left + this.moveState.right;
 		this.moveVector.y = -this.moveState.down + this.moveState.up;
@@ -86976,6 +86991,7 @@ const THREE = __webpack_require__(279);
 const FlyControls_1 = __webpack_require__(123);
 // import PersonControl from './3dPersonControl';
 // import ShipControls from './shipControls';
+// var ww = new Worker(getInlineJS());
 const rxjs_1 = __webpack_require__(5);
 class Game {
     constructor(opts) {
@@ -87088,7 +87104,7 @@ class Game {
         let ambient = new THREE.AmbientLight(0x000000);
         ambient.color.setHSL(0.01, 0.01, 0.4);
         this.scene.add(ambient);
-        helper_1.default.addLight(this.scene, 0.55, 0.9, 0.5, 2000, 2000, -25000);
+        // Helpers.addLight(this.scene, 0.55, 0.9, 0.5, 2000, 2000, -25000);
         // renderer
         this.raycaster = new THREE.Raycaster();
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -87158,7 +87174,7 @@ class Game {
             // textureBump.needsUpdate = true;
             // texture.minFilter = THREE.LinearFilter;
         });
-        return new THREE.Mesh(new THREE.SphereGeometry(50, 15, 15), new THREE.MeshPhongMaterial({
+        return new THREE.Mesh(new THREE.SphereGeometry(70, 15, 15), new THREE.MeshPhongMaterial({
             // map: texture,
             // bumpMap: textureBump,
             color: 0xffff00,
@@ -87170,7 +87186,7 @@ class Game {
         this.InvisiblePlayer = this.createUserMesh();
         this.controls = new FlyControls_1.default(/*this.camera, */ this.InvisiblePlayer);
         // this.controls.enablePan = false;
-        this.camera.position.set(0, 70, 100);
+        this.camera.position.set(0, 100, 100);
         this.camera.rotation.set(0, 0, 0);
         // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
@@ -87178,10 +87194,19 @@ class Game {
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
         this.InvisiblePlayer.add(this.camera);
-        // this.camera.add(this.InvisiblePlayer);
         this.InvisiblePlayer.position.set(0, 0, 0);
         this.InvisiblePlayer.rotation.set(0, 0, 0);
-        // this.InvisiblePlayer.add(this.camera);
+        var spriteMap = new THREE.TextureLoader().load("img/aim.png");
+        var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
+        var sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.set(0, -10, -300);
+        sprite.scale.set(15, 15, 15);
+        let cube = new THREE.BoxGeometry(25, 25, 200);
+        let material = new THREE.MeshPhongMaterial({ color: 0x333333, wireframe: false, specular: 0xffffff, shininess: 50 });
+        let mesh = new THREE.Mesh(cube, material);
+        mesh.position.set(0, 0, -260);
+        this.InvisiblePlayer.add(mesh);
+        this.camera.add(sprite);
         // this.camera.position.set(0, 100, 200);        
         this.scene.add(this.InvisiblePlayer);
     }
@@ -87301,7 +87326,6 @@ class Game {
     }
     animate() {
         requestAnimationFrame(this.animate.bind(this));
-        // GlobalService.speed.next(this.controls.movementSpeedMultiplier);
         for (let i = 0; i < this.allCubes.length; i++) {
             // allCubes[i].position.x += 1;
             this.allCubes[i].rotation.y += 0.01;

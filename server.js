@@ -2,6 +2,8 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+io.set('heartbeat timeout', 5000);
+io.set('heartbeat interval', 2000);
 // var THREE = require('three');
 
 app.use(express.static(__dirname + '/public'));

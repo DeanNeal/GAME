@@ -3,7 +3,7 @@ import Helpers from './helper';
 import UserService from './user.service';
 import CubesService from './cubes.service';
 import SocketService from './socket.service';
-import GlobalService from './global.service';
+// import GlobalService from './global.service';
 import createPlanet from './planet';
 declare var window: any;
 declare var document: any;
@@ -13,6 +13,7 @@ import FlyControls from './FlyControls';
 // import PersonControl from './3dPersonControl';
 // import ShipControls from './shipControls';
 
+// var ww = new Worker(getInlineJS());
 
 import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
 
@@ -179,7 +180,7 @@ export class Game {
         ambient.color.setHSL(0.01, 0.01, 0.4);
         this.scene.add(ambient);
 
-        Helpers.addLight(this.scene, 0.55, 0.9, 0.5, 2000, 2000, -25000);
+        // Helpers.addLight(this.scene, 0.55, 0.9, 0.5, 2000, 2000, -25000);
 
 
         // renderer
@@ -274,7 +275,7 @@ export class Game {
 
 
         return new THREE.Mesh(
-            new THREE.SphereGeometry(50, 15, 15),
+            new THREE.SphereGeometry(70, 15, 15),
             new THREE.MeshPhongMaterial({
                 // map: texture,
                 // bumpMap: textureBump,
@@ -293,7 +294,7 @@ export class Game {
 
         this.controls = new FlyControls(/*this.camera, */this.InvisiblePlayer);
         // this.controls.enablePan = false;
-        this.camera.position.set(0, 70, 100);
+        this.camera.position.set(0, 100, 100);
         this.camera.rotation.set(0, 0, 0);
 
         // this.controls.movementSpeed = 1000;
@@ -304,11 +305,26 @@ export class Game {
 
 
         this.InvisiblePlayer.add(this.camera);
-        // this.camera.add(this.InvisiblePlayer);
         this.InvisiblePlayer.position.set(0, 0, 0);
         this.InvisiblePlayer.rotation.set(0, 0, 0);
 
-        // this.InvisiblePlayer.add(this.camera);
+
+        var spriteMap = new THREE.TextureLoader().load( "img/aim.png" );
+        var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
+        var sprite = new THREE.Sprite( spriteMaterial );
+        sprite.position.set(0, -10, -300);
+        sprite.scale.set(15, 15, 15);
+
+
+        let cube = new THREE.BoxGeometry(25, 25, 200);
+        let material = new THREE.MeshPhongMaterial({ color: 0x333333 , wireframe: false,specular: 0xffffff, shininess: 50 });
+        let mesh = new THREE.Mesh(cube, material);
+
+        mesh.position.set(0, 0, -260);
+
+        this.InvisiblePlayer.add(mesh);
+
+        this.camera.add(sprite);
         // this.camera.position.set(0, 100, 200);        
         this.scene.add(this.InvisiblePlayer);
     }
@@ -459,8 +475,7 @@ export class Game {
     animate() {
         requestAnimationFrame(this.animate.bind(this));
 
-        // GlobalService.speed.next(this.controls.movementSpeedMultiplier);
-
+      
         for (let i = 0; i < this.allCubes.length; i++) {
             // allCubes[i].position.x += 1;
             this.allCubes[i].rotation.y += 0.01;

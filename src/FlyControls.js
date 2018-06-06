@@ -11,19 +11,21 @@ export default function ( object, domElement ) {
 
 	// API
 
-	this.direction = undefined;
+	// this.direction = undefined;
 
-	this.movementSpeed = 0;
+	// this.movementSpeed = 0;
 	this.rollSpeed = 0.005;
 
 	this.dragToLook = false;
+	this.isMoving = false;
 	// this.autoForward = false;
 
 	this.movementSpeedMultiplier = 0;
 	// disable default target object behavior
 
 	// internals
-	this.maxSpeed = 50;
+	this.maxSpeed = 45;
+	this.acceleration = 0.55;
 	this.tmpQuaternion = new THREE.Quaternion();
 
 	this.mouseStatus = 0;
@@ -31,6 +33,9 @@ export default function ( object, domElement ) {
 	this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0 };
 	this.moveVector = new THREE.Vector3( 0, 0, 0 );
 	this.rotationVector = new THREE.Vector3( 0, 0, 0 );
+
+
+	var movementKeyCodes = [87,83,65,68,82,70,38,40]
 
 	this.handleEvent = function ( event ) {
 
@@ -53,7 +58,7 @@ export default function ( object, domElement ) {
 		// event.preventDefault();
 
 		switch ( event.keyCode ) {
-
+			
 			// case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
 
 			case 87: /*W*/ this.moveState.forward = 1; break;
@@ -75,7 +80,10 @@ export default function ( object, domElement ) {
 			case 69: /*E*/ this.moveState.rollRight = 1; break;
 
 		}
-
+		if(movementKeyCodes.indexOf(event.keyCode) > -1) {
+			this.isMoving = true;
+		}
+		
 		// this.updateMovementVector();
 		this.updateRotationVector();
 
@@ -88,7 +96,7 @@ export default function ( object, domElement ) {
 	this.keyup = function( event ) {
 
 		switch ( event.keyCode ) {
-
+			
 			// case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
 
 			case 87: /*W*/ this.moveState.forward = 0; break;
@@ -110,7 +118,9 @@ export default function ( object, domElement ) {
 			case 69: /*E*/ this.moveState.rollRight = 0; break;
 
 		}
-
+		if(movementKeyCodes.indexOf(event.keyCode) > -1) {
+			this.isMoving = false;
+		}
 		// this.updateMovementVector();
 		this.updateRotationVector();
 
@@ -195,30 +205,31 @@ export default function ( object, domElement ) {
 	};
 
 	this.update = function( delta ) {
-		this.updateMovementVector();
-
+		if (this.isMoving){
+			this.updateMovementVector();
+		}
 
 		if(this.moveState.forward) {
-			this.movementSpeedMultiplier += this.movementSpeedMultiplier < this.maxSpeed ? 0.4 : 0;
+			this.movementSpeedMultiplier += this.movementSpeedMultiplier < this.maxSpeed ? this.acceleration : 0;
 		}
 		if(this.moveState.back) {
-			this.movementSpeedMultiplier -= this.movementSpeedMultiplier > -this.maxSpeed ? 0.4 : 0;
+			this.movementSpeedMultiplier -= this.movementSpeedMultiplier > -this.maxSpeed ? this.acceleration : 0;
 		}
 
 		if(!this.moveState.forward  && !this.moveState.back) {
 			if(this.movementSpeedMultiplier > 0) {
-				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? 0.1 : 0;
+				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? (this.acceleration / 10) : 0;
 			} else {
-				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? 0.1 : 0;
+				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? (this.acceleration / 10) : 0;
 			}
 		}
+
 		this.movementSpeedMultiplier = Math.round(this.movementSpeedMultiplier * 100) / 100;
-console.log(this.moveVector, this.movementSpeedMultiplier);
 
-		var moveMult = delta * this.movementSpeed + Math.abs(this.movementSpeedMultiplier);
+
+		var moveMult = Math.round(delta /** this.movementSpeed*/ + Math.abs(this.movementSpeedMultiplier));
 		var rotMult = delta * this.rollSpeed;
-
-		// console.log(moveMult.toFixed(1));
+		this.updateSpeedValue(moveMult);
 
 
 		// console.log(moveMult, this.moveVector.z);	
@@ -233,14 +244,26 @@ console.log(this.moveVector, this.movementSpeedMultiplier);
 		this.object.rotation.setFromQuaternion( this.object.quaternion, this.object.rotation.order );
 
 
+		
 	};
+
+	this.updateSpeedValue = function(val) {
+
+		if(document.querySelector('#gui-speed-value')) {
+			document.querySelector('#gui-speed-value').innerHTML = val.toFixed(0);
+		}
+	}
 
 	this.updateMovementVector = function() {
 
 		// var forward = (this.moveState.forward && !this.moveState.back) ? 1 : 0;
 		// forward = (!this.moveState.forward && this.moveState.back) ? -1 : 0;
 
-			var forward = this.movementSpeedMultiplier > 0 ? 1 : -1;//( this.moveState.forward || ( /*this.autoForward */ false && !this.moveState.back ) ) ? 1 : 0;
+			var forward = this.movementSpeedMultiplier >= 1 ? 1 : -1;
+
+
+			// console.log(this.movementSpeedMultiplier);
+			//( this.moveState.forward || ( /*this.autoForward */ false && !this.moveState.back ) ) ? 1 : 0;
 
 			this.moveVector.x = ( -this.moveState.left    + this.moveState.right );
 			this.moveVector.y = ( -this.moveState.down    + this.moveState.up );
