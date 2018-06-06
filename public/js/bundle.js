@@ -87035,7 +87035,6 @@ class Game {
         });
         socket_service_1.default.socket.on('updateUsersCoords', (users) => {
             users.forEach((user, i) => {
-                // if (user.id == UserService.user.value.id) return;
                 this.players.forEach((p) => {
                     if (p.mesh && p.user.id === user.id) {
                         p.mesh.position.set(user.position.x, user.position.y, user.position.z);
@@ -87190,7 +87189,7 @@ class Game {
         this.camera.rotation.set(0, 0, 0);
         // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
-        this.controls.rollSpeed = Math.PI / 3;
+        this.controls.rollSpeed = Math.PI / 4;
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
         this.InvisiblePlayer.add(this.camera);

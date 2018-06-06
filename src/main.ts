@@ -76,9 +76,6 @@ export class Game {
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
         this.camera.position.set(this.startPosition.x, this.startPosition.y, this.startPosition.z);
 
-
-
-
         this.scene = new THREE.Scene();
         this.addInvisiblePlayer();
         this.addPlanet();
@@ -95,8 +92,6 @@ export class Game {
 
         SocketService.socket.on('updateUsersCoords', (users: any[])=>{
             users.forEach((user:any, i:any)=> {
-                // if (user.id == UserService.user.value.id) return;
-
                 this.players.forEach((p:any) => {
                     if (p.mesh && p.user.id === user.id) {
                         p.mesh.position.set(user.position.x, user.position.y , user.position.z );
@@ -299,7 +294,7 @@ export class Game {
 
         // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
-        this.controls.rollSpeed = Math.PI / 3;
+        this.controls.rollSpeed = Math.PI / 4;
         this.controls.autoForward = false;
         this.controls.dragToLook = true;
 
