@@ -27,13 +27,18 @@ io.sockets.on('connection', function(socket) {
         io.sockets.emit("otherNewPlayer", users);
         io.sockets.emit('userList', users);
         socket.emit("updateCubes", cubes);
+
+
+        setInterval(function(){
+            io.sockets.emit("updateUsersCoords", users);
+        }, 20);
     });
 
     socket.on('disconnect', function() {
         removeUser(user);
     });
     socket.on("move", function(data) {
-        updateUsersCoords(user.id, data, socket);
+        updateUsersCoords(user.id, data);
     });
 
     socket.on("increaseScores", function() {
@@ -103,7 +108,7 @@ var updateUsersCoords = function(id, data, socket) {
             user.rotation = data.rotation;
         }
     }
-    socket.broadcast.emit("updateUsersCoords", users);
+    // socket.broadcast.emit("updateUsersCoords", users);
     // io.sockets.emit("updateUsersCoords", users);
 }
 

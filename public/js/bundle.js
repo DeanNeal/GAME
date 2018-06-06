@@ -10062,6 +10062,7 @@ const rxjs_1 = __webpack_require__(5);
 class GlobalService {
     constructor() {
         this.users = new rxjs_1.ReplaySubject();
+        this.speed = new rxjs_1.ReplaySubject();
         socket_service_1.default.socket.on('userList', (users) => {
             this.users.next(users);
         });
@@ -10132,7 +10133,8 @@ var App = function (_React$Component) {
       },
       user: {
         health: 100
-      }
+      },
+      speed: 0
     };
 
     _this.submit = _this.submit.bind(_this);
@@ -10171,6 +10173,12 @@ var App = function (_React$Component) {
           })[0]
         });
       });
+
+      // GlobalService.speed.subscribe(speed=> {
+      //     this.setState({
+      //       speed: Math.abs(speed.toFixed(0))
+      //     });
+      // });
     }
   }, {
     key: 'handleChange',
@@ -10231,6 +10239,12 @@ var App = function (_React$Component) {
             'HP ',
             this.state.user.health
           ),
+          _react2.default.createElement(
+            'div',
+            { id: 'gui-speed' },
+            this.state.speed,
+            ' KM/H'
+          ),
           _react2.default.createElement('div', { id: 'timer' }),
           _react2.default.createElement(_list2.default, null)
         )
@@ -10269,17 +10283,19 @@ exports.default = function (object, domElement) {
 
 	// API
 
-	this.movementSpeed = 1.0;
+	this.direction = undefined;
+
+	this.movementSpeed = 0;
 	this.rollSpeed = 0.005;
 
 	this.dragToLook = false;
-	this.autoForward = false;
+	// this.autoForward = false;
 
-	this.movementSpeedMultiplier = 1;
+	this.movementSpeedMultiplier = 0;
 	// disable default target object behavior
 
 	// internals
-
+	this.maxSpeed = 50;
 	this.tmpQuaternion = new THREE.Quaternion();
 
 	this.mouseStatus = 0;
@@ -10307,8 +10323,7 @@ exports.default = function (object, domElement) {
 
 		switch (event.keyCode) {
 
-			case 16:
-				/* shift */this.movementSpeedMultiplier = .1;break;
+			// case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
 
 			case 87:
 				/*W*/this.moveState.forward = 1;break;
@@ -10342,7 +10357,7 @@ exports.default = function (object, domElement) {
 
 		}
 
-		this.updateMovementVector();
+		// this.updateMovementVector();
 		this.updateRotationVector();
 	};
 
@@ -10354,8 +10369,7 @@ exports.default = function (object, domElement) {
 
 		switch (event.keyCode) {
 
-			case 16:
-				/* shift */this.movementSpeedMultiplier = 1;break;
+			// case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
 
 			case 87:
 				/*W*/this.moveState.forward = 0;break;
@@ -10389,7 +10403,7 @@ exports.default = function (object, domElement) {
 
 		}
 
-		this.updateMovementVector();
+		// this.updateMovementVector();
 		this.updateRotationVector();
 	};
 
@@ -10468,10 +10482,32 @@ exports.default = function (object, domElement) {
 	};
 
 	this.update = function (delta) {
+		this.updateMovementVector();
 
-		var moveMult = delta * this.movementSpeed + this.movementSpeedMultiplier;
+		if (this.moveState.forward) {
+			this.movementSpeedMultiplier += this.movementSpeedMultiplier < this.maxSpeed ? 0.4 : 0;
+		}
+		if (this.moveState.back) {
+			this.movementSpeedMultiplier -= this.movementSpeedMultiplier > -this.maxSpeed ? 0.4 : 0;
+		}
+
+		if (!this.moveState.forward && !this.moveState.back) {
+			if (this.movementSpeedMultiplier > 0) {
+				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? 0.1 : 0;
+			} else {
+				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? 0.1 : 0;
+			}
+		}
+		this.movementSpeedMultiplier = Math.round(this.movementSpeedMultiplier * 100) / 100;
+		console.log(this.moveVector, this.movementSpeedMultiplier);
+
+		var moveMult = delta * this.movementSpeed + Math.abs(this.movementSpeedMultiplier);
 		var rotMult = delta * this.rollSpeed;
 
+		// console.log(moveMult.toFixed(1));
+
+
+		// console.log(moveMult, this.moveVector.z);	
 		this.object.translateX(this.moveVector.x * moveMult);
 		this.object.translateY(this.moveVector.y * moveMult);
 		this.object.translateZ(this.moveVector.z * moveMult);
@@ -10485,11 +10521,16 @@ exports.default = function (object, domElement) {
 
 	this.updateMovementVector = function () {
 
-		var forward = this.moveState.forward || this.autoForward && !this.moveState.back ? 1 : 0;
+		// var forward = (this.moveState.forward && !this.moveState.back) ? 1 : 0;
+		// forward = (!this.moveState.forward && this.moveState.back) ? -1 : 0;
+
+		var forward = this.movementSpeedMultiplier > 0 ? 1 : -1; //( this.moveState.forward || ( /*this.autoForward */ false && !this.moveState.back ) ) ? 1 : 0;
 
 		this.moveVector.x = -this.moveState.left + this.moveState.right;
 		this.moveVector.y = -this.moveState.down + this.moveState.up;
-		this.moveVector.z = -forward + this.moveState.back;
+		this.moveVector.z = -forward /*+ this.moveState.back */;
+
+		// this.direction = !this.direction;
 
 		//console.log( 'move:', [ this.moveVector.x, this.moveVector.y, this.moveVector.z ] );
 	};
@@ -86952,7 +86993,7 @@ class Game {
         this.playerPosition = { x: 0, y: 0, z: 0 };
         this.rate = 10;
         this.start = new Date().getTime();
-        this.duration = 150;
+        this.duration = 120;
         this.lastFrameNumber = 0;
         this.isShooting = false;
         this.init();
@@ -87089,15 +87130,6 @@ class Game {
         this.scene.add(bullet);
         return bullet;
     }
-    // let drawSphere = function(x:any, z:any, material:any) {
-    //     let cube = new THREE.Mesh(new THREE.SphereGeometry(70, 70, 20), material);
-    //     cube.position.x = x;
-    //     cube.position.y = 0;
-    //     cube.position.z = z;
-    //     cube.castShadow = cube.receiveShadow = true;
-    //     this.scene.add(cube);
-    //     this.allSpheres.push(cube);
-    // }
     createNewPlayer(user) {
         let newPlayer = this.createUserMesh();
         newPlayer.userData = {
@@ -87139,7 +87171,8 @@ class Game {
         this.controls = new FlyControls_1.default(/*this.camera, */ this.InvisiblePlayer);
         // this.controls.enablePan = false;
         this.camera.position.set(0, 70, 100);
-        this.controls.movementSpeed = 1000;
+        this.camera.rotation.set(0, 0, 0);
+        // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
         this.controls.rollSpeed = Math.PI / 3;
         this.controls.autoForward = false;
@@ -87147,6 +87180,7 @@ class Game {
         this.InvisiblePlayer.add(this.camera);
         // this.camera.add(this.InvisiblePlayer);
         this.InvisiblePlayer.position.set(0, 0, 0);
+        this.InvisiblePlayer.rotation.set(0, 0, 0);
         // this.InvisiblePlayer.add(this.camera);
         // this.camera.position.set(0, 100, 200);        
         this.scene.add(this.InvisiblePlayer);
@@ -87267,6 +87301,7 @@ class Game {
     }
     animate() {
         requestAnimationFrame(this.animate.bind(this));
+        // GlobalService.speed.next(this.controls.movementSpeedMultiplier);
         for (let i = 0; i < this.allCubes.length; i++) {
             // allCubes[i].position.x += 1;
             this.allCubes[i].rotation.y += 0.01;

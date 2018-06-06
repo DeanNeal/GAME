@@ -3,6 +3,8 @@ import { Observable, Subject, ReplaySubject, from, of, range } from 'rxjs';
 
 class GlobalService {
     public users: any = new ReplaySubject();
+    public speed: any = new ReplaySubject();
+    
     constructor() {
     	SocketService.socket.on('userList', (users: any) =>{
     		this.users.next(users);

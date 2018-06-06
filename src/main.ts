@@ -3,7 +3,7 @@ import Helpers from './helper';
 import UserService from './user.service';
 import CubesService from './cubes.service';
 import SocketService from './socket.service';
-// import GlobalService from './global.service';
+import GlobalService from './global.service';
 import createPlanet from './planet';
 declare var window: any;
 declare var document: any;
@@ -54,7 +54,7 @@ export class Game {
 
     public rate = 10;
     public start = new Date().getTime();
-    public duration = 150;
+    public duration = 120;
     public lastFrameNumber = 0;
     public isShooting: any = false;
 
@@ -238,15 +238,6 @@ export class Game {
         this.scene.add(bullet);
         return bullet;
     }
-    // let drawSphere = function(x:any, z:any, material:any) {
-    //     let cube = new THREE.Mesh(new THREE.SphereGeometry(70, 70, 20), material);
-    //     cube.position.x = x;
-    //     cube.position.y = 0;
-    //     cube.position.z = z;
-    //     cube.castShadow = cube.receiveShadow = true;
-    //     this.scene.add(cube);
-    //     this.allSpheres.push(cube);
-    // }
 
     createNewPlayer(user:any) {
         let newPlayer = this.createUserMesh();
@@ -303,9 +294,9 @@ export class Game {
         this.controls = new FlyControls(/*this.camera, */this.InvisiblePlayer);
         // this.controls.enablePan = false;
         this.camera.position.set(0, 70, 100);
+        this.camera.rotation.set(0, 0, 0);
 
-
-        this.controls.movementSpeed = 1000;
+        // this.controls.movementSpeed = 1000;
         this.controls.domElement = this.container;
         this.controls.rollSpeed = Math.PI / 3;
         this.controls.autoForward = false;
@@ -315,6 +306,7 @@ export class Game {
         this.InvisiblePlayer.add(this.camera);
         // this.camera.add(this.InvisiblePlayer);
         this.InvisiblePlayer.position.set(0, 0, 0);
+        this.InvisiblePlayer.rotation.set(0, 0, 0);
 
         // this.InvisiblePlayer.add(this.camera);
         // this.camera.position.set(0, 100, 200);        
@@ -466,6 +458,8 @@ export class Game {
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
+
+        // GlobalService.speed.next(this.controls.movementSpeedMultiplier);
 
         for (let i = 0; i < this.allCubes.length; i++) {
             // allCubes[i].position.x += 1;

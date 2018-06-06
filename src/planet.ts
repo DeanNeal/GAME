@@ -47,3 +47,13 @@ export default function(options: any) {
 
   return container;
 };
+
+    // let drawSphere = function(x:any, z:any, material:any) {
+    //     let cube = new THREE.Mesh(new THREE.SphereGeometry(70, 70, 20), material);
+    //     cube.position.x = x;
+    //     cube.position.y = 0;
+    //     cube.position.z = z;
+    //     cube.castShadow = cube.receiveShadow = true;
+    //     this.scene.add(cube);
+    //     this.allSpheres.push(cube);
+    // }

@@ -16,7 +16,8 @@ class App extends React.Component {
       },
       user: {
         health: 100
-      }
+      },
+      speed: 0
     };
 
     this.submit = this.submit.bind(this);
@@ -47,7 +48,13 @@ class App extends React.Component {
           getReady: true,
           user: users.filter(r=> r.id === UserService.user.value.id)[0]
         });
-    })
+    });
+
+    // GlobalService.speed.subscribe(speed=> {
+    //     this.setState({
+    //       speed: Math.abs(speed.toFixed(0))
+    //     });
+    // });
 
   }
 
@@ -84,6 +91,7 @@ class App extends React.Component {
               <div id="position"></div>
               <div id="rotation"></div>
               <div id="gui">HP {this.state.user.health}</div>
+              <div id="gui-speed">{this.state.speed} KM/H</div>
               <div id="timer"></div> 
               <UserList/> 
             
