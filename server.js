@@ -70,7 +70,7 @@ var addUser = function(id, playerOptions) {
     var user = {
         id: id.slice(0, 4),
         playerName: playerOptions.name,
-        size: 25,
+        size: 80,
         position: {
             x: 0,
             y: 0,

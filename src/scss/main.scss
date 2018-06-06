@@ -20,6 +20,7 @@ body {
     height: 100%;
     background: #000;
     font-family: 'Source Sans Pro', sans-serif;
+    cursor: url(../images/aim.png), auto;
 }
 
 ul {
@@ -62,18 +63,19 @@ ul {
     margin: auto;
     height: 200px;
 }
+
 #gui {
-   position: absolute;
-   width: 200px;
-   text-align: left;
-   font-size: 48px;
-   color: #fff;
-   text-align: center;
-   bottom: 40px;
-   left: 10px;
-   margin: auto;
-   height: 50px; 
-   white-space: nowrap;
+    position: absolute;
+    width: 200px;
+    text-align: left;
+    font-size: 48px;
+    color: #fff;
+    text-align: center;
+    bottom: 40px;
+    left: 10px;
+    margin: auto;
+    height: 50px;
+    white-space: nowrap;
 }
 
 #position {
@@ -274,7 +276,7 @@ ul {
                     font-size: 12px;
                     position: relative;
                     height: 21px;
-                    &.current-player{
+                    &.current-player {
                         color: green;
                         font-weight: 700;
                     }

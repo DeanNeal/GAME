@@ -28,26 +28,26 @@ class App extends React.Component {
 
   }
 
-  submit() {
+  submit(e) {
+    e.preventDefault();
     this.start();
   }
 
   start() {
-    this.setState({
-      getReady: true
-    });
-    // socketIoInit(this.state.playerOptions);
     let game = new Game(this.state.playerOptions);
     SocketService.socket.emit('add new player', this.state.playerOptions);
 
-
-    SocketService.socket.on('selfPlayer', user=> {
-      GlobalService.users.subscribe(users=> {
-          this.setState({
-            user: users.filter(r=> r.id === UserService.user.value.id)[0]
-          });
-      })
-    });
+    // SocketService.socket.on('selfPlayer', user=> {
+    //   this.setState({
+    //     user: user
+    //   });
+    // });
+    GlobalService.users.subscribe(users=> {
+        this.setState({
+          getReady: true,
+          user: users.filter(r=> r.id === UserService.user.value.id)[0]
+        });
+    })
 
   }
 
@@ -63,6 +63,7 @@ class App extends React.Component {
   }
  
   render() {
+
     return (
       <div>      
         { !this.state.getReady ? (

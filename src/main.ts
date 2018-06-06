@@ -90,16 +90,18 @@ export class Game {
             UserService.user.next(user);
             this.players.push({ mesh: null, user: user });
 
-            SocketService.socket.on('updateUsersCoords', (users: any[])=>{
-                users.forEach((user:any, i:any)=> {
-                    if (user.id == UserService.user.value.id) return;
-                    this.players.forEach((p:any) => {
-                        if (p.user.id === user.id) {
-                            p.mesh.position.set(user.position.x, user.position.y , user.position.z );
-                            p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
-                        }
-                    })
-                });
+        });
+
+        SocketService.socket.on('updateUsersCoords', (users: any[])=>{
+            users.forEach((user:any, i:any)=> {
+                // if (user.id == UserService.user.value.id) return;
+
+                this.players.forEach((p:any) => {
+                    if (p.mesh && p.user.id === user.id) {
+                        p.mesh.position.set(user.position.x, user.position.y , user.position.z );
+                        p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
+                    }
+                })
             });
         });
 
@@ -108,7 +110,7 @@ export class Game {
             users.forEach(( user:any, i:any)=>  {
                 let exists = this.players.map((x: any)=> { return x.user.id; }).indexOf(user.id);
                
-                if (exists === -1 && user.id !== UserService.user.getValue().id) {
+                if (exists === -1 && user.id) {
                     this.createNewPlayer(user);
                 }
             });
@@ -522,7 +524,7 @@ export class Game {
         // this.camera.position.z = this.InvisiblePlayer.position.z + 0.5 + 20*4;
 
         if (UserService.user.value) {
-            SocketService.socket.emit("move", { position: this.camera.position, rotation: this.camera.rotation });
+            SocketService.socket.emit("move", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
         }
 
         $('#position').html('Position: ' + this.InvisiblePlayer.position.x.toFixed(0) + ' ' + this.InvisiblePlayer.position.y.toFixed(0) + ' ' + this.InvisiblePlayer.position.z.toFixed(0));
@@ -594,11 +596,14 @@ export class Game {
 
                 let collisionResults = ray.intersectObjects(this.bullets.map((r: any)=> r.mesh));
                 if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
-                    let obj = collisionResults[0].object;
+                    let obj:any = collisionResults[0].object;
 
                     if (obj.id !== this.lastBulletCollisionId) {
                         this.lastBulletCollisionId = obj.id;
-                        SocketService.socket.emit('demage', player.user.id); 
+                        SocketService.socket.emit('demage', player.user.id);
+                        // this.scene.remove(obj);
+                        obj.material.opacity = 0;
+                        obj.material.transparent = true;
                     }
                 }
             }
