@@ -4457,11 +4457,13 @@ var App = function (_React$Component) {
       var game = new _main.Game(this.state.playerOptions);
       _socket2.default.socket.emit('add new player', this.state.playerOptions);
 
-      _global2.default.users.subscribe(function (users) {
-        _this2.setState({
-          user: users.filter(function (r) {
-            return r.id === _user2.default.user.value.id;
-          })[0]
+      _socket2.default.socket.on('selfPlayer', function (user) {
+        _global2.default.users.subscribe(function (users) {
+          _this2.setState({
+            user: users.filter(function (r) {
+              return r.id === _user2.default.user.value.id;
+            })[0]
+          });
         });
       });
     }
@@ -4595,7 +4597,7 @@ exports.default = function (object, domElement) {
 			return;
 		}
 		// console.log( event.keyCode);
-		//event.preventDefault();
+		// event.preventDefault();
 
 		switch (event.keyCode) {
 
@@ -76123,6 +76125,8 @@ const cubes_service_1 = __webpack_require__(38);
 const socket_service_1 = __webpack_require__(21);
 const THREE = __webpack_require__(137);
 const FlyControls_1 = __webpack_require__(69);
+// import PersonControl from './3dPersonControl';
+// import ShipControls from './shipControls';
 const rxjs_1 = __webpack_require__(24);
 class Game {
     constructor(opts) {
@@ -76136,7 +76140,7 @@ class Game {
         // public currentPlayer: any;
         this.players = [];
         this.isMove = false;
-        this.startPosition = { x: 1000, y: 1000, z: 1000 };
+        this.startPosition = { x: 0, y: 0, z: 0 };
         this.playerPosition = { x: 0, y: 0, z: 0 };
         this.rate = 10;
         this.start = new Date().getTime();
@@ -76151,17 +76155,8 @@ class Game {
         this.container.className = 'canvas';
         document.body.appendChild(this.container);
         // camera
-        this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 200000);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
         this.camera.position.set(this.startPosition.x, this.startPosition.y, this.startPosition.z);
-        this.controls = new FlyControls_1.default(this.camera);
-        // setInterval(()=>{
-        //     this.controls.reset();
-        // }, 5000)
-        this.controls.movementSpeed = 1000;
-        this.controls.domElement = this.container;
-        this.controls.rollSpeed = Math.PI / 3;
-        this.controls.autoForward = false;
-        this.controls.dragToLook = true;
         this.scene = new THREE.Scene();
         this.addInvisiblePlayer();
         this.addPlanet();
@@ -76172,16 +76167,16 @@ class Game {
         socket_service_1.default.socket.on('selfPlayer', (user) => {
             user_service_1.default.user.next(user);
             this.players.push({ mesh: null, user: user });
-        });
-        socket_service_1.default.socket.on('updateUsersCoords', (users) => {
-            users.forEach((user, i) => {
-                if (user.id == user_service_1.default.user.value.id)
-                    return;
-                this.players.forEach((p) => {
-                    if (p.user.id === user.id) {
-                        p.mesh.position.set(user.position.x, user.position.y, user.position.z);
-                        p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
-                    }
+            socket_service_1.default.socket.on('updateUsersCoords', (users) => {
+                users.forEach((user, i) => {
+                    if (user.id == user_service_1.default.user.value.id)
+                        return;
+                    this.players.forEach((p) => {
+                        if (p.user.id === user.id) {
+                            p.mesh.position.set(user.position.x, user.position.y, user.position.z);
+                            p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
+                        }
+                    });
                 });
             });
         });
@@ -76208,7 +76203,7 @@ class Game {
             setTimeout(() => {
                 this.scene.remove(bulletMesh);
                 this.othersBullets.splice(0, 1);
-            }, 10000);
+            }, 3000);
         });
         socket_service_1.default.socket.on('deletePlayer', (userId) => {
             console.log('deletePlayer');
@@ -76263,7 +76258,7 @@ class Game {
             let bullet = this.createBullet();
             let pos = this.InvisiblePlayer.position.clone();
             let rot = this.InvisiblePlayer.rotation.clone();
-            bullet.position.set(pos.x - 200, pos.y - 200, pos.z - 200);
+            bullet.position.set(pos.x, pos.y, pos.z);
             bullet.rotation.set(rot.x, rot.y, rot.z);
             this.bullets.push({
                 mesh: bullet,
@@ -76279,7 +76274,7 @@ class Game {
             setTimeout(() => {
                 this.scene.remove(bullet);
                 this.bullets.splice(0, 1);
-            }, 10000);
+            }, 3000);
         }
     }
     createBullet() {
@@ -76297,6 +76292,18 @@ class Game {
     //     this.allSpheres.push(cube);
     // }
     createNewPlayer(user) {
+        let newPlayer = this.createUserMesh();
+        newPlayer.userData = {
+            id: user.id
+        };
+        newPlayer.position.set(0, 0, 0);
+        let spritey = helper_1.default.makeTextSprite(user.playerName, { fontsize: 32, fontface: "Georgia" });
+        spritey.position.set(50, 100, 0);
+        newPlayer.add(spritey);
+        this.players.push({ mesh: newPlayer, user: user });
+        this.scene.add(newPlayer);
+    }
+    createUserMesh() {
         let loader = new THREE.TextureLoader();
         let texture = loader.load('img/sphere.png', function (texture) {
             texture.repeat.set(10, 10);
@@ -76312,32 +76319,29 @@ class Game {
             // textureBump.needsUpdate = true;
             // texture.minFilter = THREE.LinearFilter;
         });
-        let newPlayer = new THREE.Mesh(new THREE.SphereGeometry(80, 20, 20), new THREE.MeshPhongMaterial({
-            map: texture,
-            bumpMap: textureBump,
-            color: 0x00ff00,
-            specular: 0x0022ff,
-            shininess: 3
-        }));
-        newPlayer.position.set(0, 0, 0);
-        let spritey = helper_1.default.makeTextSprite(user.playerName, { fontsize: 32, fontface: "Georgia" });
-        spritey.position.set(50, 100, 0);
-        newPlayer.add(spritey);
-        this.players.push({ mesh: newPlayer, user: user });
-        this.scene.add(newPlayer);
-    }
-    addInvisiblePlayer() {
-        this.InvisiblePlayer = new THREE.Mesh(new THREE.SphereGeometry(80, 9, 9), new THREE.MeshPhongMaterial({
+        return new THREE.Mesh(new THREE.SphereGeometry(50, 15, 15), new THREE.MeshPhongMaterial({
             // map: texture,
             // bumpMap: textureBump,
-            color: 0x00ff00,
+            color: 0xffff00,
             // specular: 0x0022ff,
-            // shininess: 3
-            // side: THREE.BackSide,
-            opacity: 1,
-            transparent: true
+            shininess: 1,
         }));
+    }
+    addInvisiblePlayer() {
+        this.InvisiblePlayer = this.createUserMesh();
+        this.controls = new FlyControls_1.default(/*this.camera, */ this.InvisiblePlayer);
+        // this.controls.enablePan = false;
+        this.camera.position.set(0, 70, 100);
+        this.controls.movementSpeed = 1000;
+        this.controls.domElement = this.container;
+        this.controls.rollSpeed = Math.PI / 3;
+        this.controls.autoForward = false;
+        this.controls.dragToLook = true;
+        this.InvisiblePlayer.add(this.camera);
+        // this.camera.add(this.InvisiblePlayer);
         this.InvisiblePlayer.position.set(0, 0, 0);
+        // this.InvisiblePlayer.add(this.camera);
+        // this.camera.position.set(0, 100, 200);        
         this.scene.add(this.InvisiblePlayer);
     }
     addPlanet() {
@@ -76479,22 +76483,38 @@ class Game {
             this.othersBullets[i].mesh.position.add(dir.multiplyScalar(1000));
         }
         ;
-        this.InvisiblePlayer.position.x = this.camera.position.x /* - this.InvisiblePlayer.geometry.parameters.radius*/;
-        this.InvisiblePlayer.position.y = this.camera.position.y /* - this.InvisiblePlayer.geometry.parameters.radius*/;
-        this.InvisiblePlayer.position.z = this.camera.position.z /* - this.InvisiblePlayer.geometry.parameters.radius*/;
-        this.InvisiblePlayer.rotation.x = this.camera.rotation.x;
-        this.InvisiblePlayer.rotation.y = this.camera.rotation.y;
-        this.InvisiblePlayer.rotation.z = this.camera.rotation.z;
+        // var vec = new THREE.Vector3( 0, 0, 150 );
+        // vec.applyQuaternion( this.camera.quaternion );
+        // var vector = new THREE.Vector3( 0, 0, -1 );
+        // vector.applyQuaternion( this.camera.quaternion );
+        // this.InvisiblePlayer.position.copy( vector );
+        // this.InvisiblePlayer.position.x = this.camera.position.x /* - this.InvisiblePlayer.geometry.parameters.radius*/ ;
+        // this.InvisiblePlayer.position.y = this.camera.position.y /* - this.InvisiblePlayer.geometry.parameters.radius*/ ;
+        // this.InvisiblePlayer.position.z = this.camera.position.z /* - this.InvisiblePlayer.geometry.parameters.radius*/ ;
+        // this.InvisiblePlayer.rotation.x = this.camera.rotation.x;
+        // this.InvisiblePlayer.rotation.y = this.camera.rotation.y;
+        // this.InvisiblePlayer.rotation.z = this.camera.rotation.z;
+        // if(this.speedUp) {
+        //     this.spaceshipSpeed = Math.min(this.topSpeed, this.spaceshipSpeed + 0.001);
+        // } else if(this.slowDown) {
+        //     this.spaceshipSpeed = Math.max(0.003, this.spaceshipSpeed - 0.002);
+        // }
+        // this.InvisiblePlayer.position.z -= this.spaceshipSpeed;
+        // this.camera.position.z = this.InvisiblePlayer.position.z + 0.5 + this.spaceshipSpeed*4;
+        // this.camera.lookAt(new THREE.Vector3(0, 0, this.camera.position.z -1));
+        // this.camera.position.x = this.InvisiblePlayer.position.x + 0.5 + 20*4;
+        // this.camera.position.y = this.InvisiblePlayer.position.y + 0.5 + 20*4;
+        // this.camera.position.z = this.InvisiblePlayer.position.z + 0.5 + 20*4;
         if (user_service_1.default.user.value) {
             socket_service_1.default.socket.emit("move", { position: this.camera.position, rotation: this.camera.rotation });
         }
-        $('#position').html('Position: ' + this.camera.position.x.toFixed(0) + ' ' + this.camera.position.y.toFixed(0) + ' ' + this.camera.position.z.toFixed(0));
-        $('#rotation').html('Rotation: ' + this.camera.rotation.x.toFixed(2) + ' ' + this.camera.rotation.y.toFixed(2) + ' ' + this.camera.rotation.z.toFixed(2));
+        $('#position').html('Position: ' + this.InvisiblePlayer.position.x.toFixed(0) + ' ' + this.InvisiblePlayer.position.y.toFixed(0) + ' ' + this.InvisiblePlayer.position.z.toFixed(0));
+        $('#rotation').html('Rotation: ' + this.InvisiblePlayer.rotation.x.toFixed(2) + ' ' + this.InvisiblePlayer.rotation.y.toFixed(2) + ' ' + this.InvisiblePlayer.rotation.z.toFixed(2));
         if (this.allCubes.length) {
-            this.collisionDetection();
+            this.cubesCollisionDetection();
         }
-        if (this.othersBullets.length) {
-            this.damageDetection();
+        if (this.bullets.length) {
+            this.damageCollisionDetection();
         }
         this.render();
         this.shotAnimate();
@@ -76510,7 +76530,7 @@ class Game {
             this.start = new Date().getTime();
         }
     }
-    collisionDetection() {
+    cubesCollisionDetection() {
         let originPoint = this.InvisiblePlayer.position.clone();
         for (let vertexIndex = 0; vertexIndex < this.InvisiblePlayer.geometry.vertices.length; vertexIndex++) {
             let localVertex = this.InvisiblePlayer.geometry.vertices[vertexIndex].clone();
@@ -76532,28 +76552,30 @@ class Game {
             }
         }
     }
-    damageDetection() {
-        let originPoint = this.InvisiblePlayer.position.clone();
-        for (let vertexIndex = 0; vertexIndex < this.InvisiblePlayer.geometry.vertices.length; vertexIndex++) {
-            let localVertex = this.InvisiblePlayer.geometry.vertices[vertexIndex].clone();
-            let globalVertex = localVertex.applyMatrix4(this.InvisiblePlayer.matrix);
-            let directionVector = globalVertex.sub(this.InvisiblePlayer.position);
-            let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-            let collisionResults = ray.intersectObjects(this.othersBullets.map((r) => r.mesh));
-            if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
-                let obj = collisionResults[0].object;
-                if (obj.id !== this.lastBulletCollisionId) {
-                    this.lastBulletCollisionId = obj.id;
-                    // console.log(1);
-                    // this.scene.remove(obj);
-                    socket_service_1.default.socket.emit('demage');
+    damageCollisionDetection() {
+        this.players.filter((r) => r.mesh).forEach((player) => {
+            let plMesh = player.mesh;
+            let originPoint = plMesh.position.clone();
+            for (let vertexIndex = 0; vertexIndex < plMesh.geometry.vertices.length; vertexIndex++) {
+                let localVertex = plMesh.geometry.vertices[vertexIndex].clone();
+                let globalVertex = localVertex.applyMatrix4(plMesh.matrix);
+                let directionVector = globalVertex.sub(plMesh.position);
+                let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+                let collisionResults = ray.intersectObjects(this.bullets.map((r) => r.mesh));
+                if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
+                    let obj = collisionResults[0].object;
+                    if (obj.id !== this.lastBulletCollisionId) {
+                        this.lastBulletCollisionId = obj.id;
+                        socket_service_1.default.socket.emit('demage', player.user.id);
+                    }
                 }
             }
-        }
+        });
     }
     render() {
         let delta = this.clock.getDelta();
         this.controls.update(delta);
+        // this.controls.updateShip(delta);
         this.renderer.render(this.scene, this.camera);
     }
 }

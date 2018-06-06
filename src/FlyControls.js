@@ -48,7 +48,7 @@ this.movementSpeedMultiplier = 1;
 
 		}
  // console.log( event.keyCode);
-		//event.preventDefault();
+		// event.preventDefault();
 
 		switch ( event.keyCode ) {
 

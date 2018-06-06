@@ -40,11 +40,14 @@ class App extends React.Component {
     let game = new Game(this.state.playerOptions);
     SocketService.socket.emit('add new player', this.state.playerOptions);
 
-    GlobalService.users.subscribe(users=> {
-        this.setState({
-          user: users.filter(r=> r.id === UserService.user.value.id)[0]
-        });
-    })
+
+    SocketService.socket.on('selfPlayer', user=> {
+      GlobalService.users.subscribe(users=> {
+          this.setState({
+            user: users.filter(r=> r.id === UserService.user.value.id)[0]
+          });
+      })
+    });
 
   }
 

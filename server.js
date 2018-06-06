@@ -55,8 +55,8 @@ io.sockets.on('connection', function(socket) {
        socket.broadcast.emit("otherFire", bullet);
     });
 
-    socket.on("demage", function() {
-       decreaseHealth(user);
+    socket.on("demage", function(userId) {
+       decreaseHealth(userId);
     });
 
     socket.on('chat message', function(data) {
@@ -117,9 +117,9 @@ var increaseScores = function(curUser) {
     io.sockets.emit("userList", users);
 }
 
-var decreaseHealth = function(curUser) {
+var decreaseHealth = function(userId) {
     for (var i = 0; i < users.length; i++) {
-        if (users[i].id == curUser.id) {
+        if (users[i].id == userId) {
             users[i].health -= 10;
             if(users[i].health <= 0) {
                 users[i].health = 100;
