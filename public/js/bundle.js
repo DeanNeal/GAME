@@ -4457,22 +4457,7 @@ function pipeFromArray(fns) {
 
 
 /***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const rxjs_1 = __webpack_require__(5);
-class UserService {
-    constructor() {
-        this.user = new rxjs_1.BehaviorSubject(null);
-    }
-}
-exports.default = new UserService();
-
-
-/***/ }),
+/* 51 */,
 /* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10062,9 +10047,11 @@ const rxjs_1 = __webpack_require__(5);
 class GlobalService {
     constructor() {
         this.users = new rxjs_1.ReplaySubject();
+        this.user = new rxjs_1.BehaviorSubject(null);
         this.sceneControls = new rxjs_1.ReplaySubject();
-        socket_service_1.default.socket.on('userList', (users) => {
+        socket_service_1.default.socket.on('userList', (users, user) => {
             this.users.next(users);
+            this.user.next(users.filter(r => r.id === this.user.value.id)[0]);
         });
     }
 }
@@ -10102,10 +10089,6 @@ var _socket = __webpack_require__(38);
 
 var _socket2 = _interopRequireDefault(_socket);
 
-var _user = __webpack_require__(51);
-
-var _user2 = _interopRequireDefault(_user);
-
 var _global = __webpack_require__(120);
 
 var _global2 = _interopRequireDefault(_global);
@@ -10117,6 +10100,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+// import UserService from '../user.service';
+
 
 var App = function (_React$Component) {
   _inherits(App, _React$Component);
@@ -10142,6 +10127,7 @@ var App = function (_React$Component) {
     _this.submit = _this.submit.bind(_this);
     _this.handleChange = _this.handleChange.bind(_this);
     _this.keyPress = _this.keyPress.bind(_this);
+    _this.timeout = undefined;
     return _this;
   }
 
@@ -10159,19 +10145,33 @@ var App = function (_React$Component) {
     value: function start() {
       var _this2 = this;
 
-      var game = new _main.Game(this.state.playerOptions);
       this.setState({
         getReady: true
       });
 
+      var game = new _main.Game(this.state.playerOptions);
+
       _socket2.default.socket.emit('add new player', this.state.playerOptions);
 
-      _global2.default.users.subscribe(function (users) {
+      _socket2.default.socket.on('userIsReady', function (user) {
+        _global2.default.user.next(user);
+      });
+
+      _global2.default.user.filter(function (r) {
+        return r;
+      }).subscribe(function (user) {
         _this2.setState({
-          user: users.filter(function (r) {
-            return r.id === _user2.default.user.value.id;
-          })[0]
+          user: user
         });
+      });
+
+      _socket2.default.socket.on('gotDemage', function (userId) {
+        clearTimeout(_this2.timeout);
+        var c = document.querySelector('.controls');
+        c.classList.add('damage');
+        _this2.timeout = setTimeout(function () {
+          c.classList.remove('damage');
+        }, 100);
       });
     }
   }, {
@@ -10212,14 +10212,14 @@ var App = function (_React$Component) {
               _react2.default.createElement('input', { type: 'text', value: this.state.playerOptions.name, onKeyDown: this.keyPress, onChange: this.handleChange, required: true }),
               _react2.default.createElement(
                 'button',
-                { className: 'btn', type: 'submit' },
+                { className: 'btn', disabled: this.state.getReady, type: 'submit' },
                 'START'
               )
             )
           )
         ) : _react2.default.createElement(
           'div',
-          null,
+          { className: 'controls' },
           _react2.default.createElement(
             'div',
             { id: 'info' },
@@ -10240,6 +10240,7 @@ var App = function (_React$Component) {
             ' KM/H'
           ),
           _react2.default.createElement('div', { id: 'timer' }),
+          _react2.default.createElement('div', { className: 'damage' }),
           _react2.default.createElement(_list2.default, null)
         )
       );
@@ -10608,6 +10609,10 @@ exports.default = function (object, camera) {
 	this.reset = function () {
 		this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0 };
 	};
+
+	// window.addEventListener('visibilitychange', ()=> {
+	// 	this.reset();
+	// }, false);
 };
 
 ; /**
@@ -10624,6 +10629,8 @@ exports.default = function (object, camera) {
 __webpack_require__(272);
 
 __webpack_require__(270);
+
+__webpack_require__(288);
 
 __webpack_require__(276);
 
@@ -10693,10 +10700,6 @@ var _reactDom = __webpack_require__(52);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _user = __webpack_require__(51);
-
-var _user2 = _interopRequireDefault(_user);
-
 var _helper = __webpack_require__(81);
 
 var _helper2 = _interopRequireDefault(_helper);
@@ -10712,6 +10715,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+// import UserService from '../../user.service';
+
 
 var MessageBox = function (_React$Component) {
   _inherits(MessageBox, _React$Component);
@@ -10802,7 +10807,7 @@ var Chat = function (_React$Component2) {
     value: function keyUp(event) {
       event.preventDefault();
       if (event.key == 'Enter' && this.state.message) {
-        _socket2.default.socket.emit('chat message', { msg: this.state.message, name: _user2.default.user.value ? _user2.default.user.value.playerName : 'new user' });
+        // SocketService.socket.emit('chat message', { msg: this.state.message, name: UserService.user.value ? UserService.user.value.playerName : 'new user' });
         this.setState({ message: '' });
 
         return false;
@@ -10875,10 +10880,6 @@ var _reactDom = __webpack_require__(52);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _user = __webpack_require__(51);
-
-var _user2 = _interopRequireDefault(_user);
-
 var _cubes = __webpack_require__(80);
 
 var _cubes2 = _interopRequireDefault(_cubes);
@@ -10898,6 +10899,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+// import UserService from '../../user.service';
+
 
 var UserList = function (_React$Component) {
   _inherits(UserList, _React$Component);
@@ -10926,19 +10929,11 @@ var UserList = function (_React$Component) {
         });
       });
 
-      _socket2.default.socket.on('deletePlayer', function (userId) {
-        var a = self.state.users.slice();
-        a = a.filter(function (r) {
-          return r.id !== userId;
-        });
-        self.setState({
-          users: a
-        });
-      });
-
-      // SocketService.socket.on('updateUsersData', function(users) {
+      // SocketService.socket.on('deletePlayer', function(userId) {
+      //     let a = self.state.users.slice();
+      //     a = a.filter(r=> r.id !== userId);
       //     self.setState({
-      //       users: users
+      //       users: a
       //     });
       // });
 
@@ -10952,11 +10947,13 @@ var UserList = function (_React$Component) {
     key: "render",
     value: function render() {
       var listItems = this.state.users.map(function (item, i) {
-        var className = _user2.default.user.value && _user2.default.user.value.id === item.id ? 'current-player' : '';
+        var className = _global2.default.user.value && _global2.default.user.value.id === item.id ? 'current-player' : '';
         return _react2.default.createElement(
           "li",
           { key: i, className: className },
           item.playerName,
+          " - ",
+          item.id,
           _react2.default.createElement(
             "span",
             null,
@@ -86990,14 +86987,18 @@ function LensFlare() {
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(124);
 const helper_1 = __webpack_require__(81);
-const user_service_1 = __webpack_require__(51);
+// import UserService from './user.service';
 const cubes_service_1 = __webpack_require__(80);
 const socket_service_1 = __webpack_require__(38);
+const global_service_1 = __webpack_require__(120);
 const THREE = __webpack_require__(279);
 const FlyControls_1 = __webpack_require__(123);
 // import PersonControl from './3dPersonControl';
 // import ShipControls from './shipControls';
 // var ww = new Worker(getInlineJS());
+var worker = new Worker("./js/test.worker.js");
+// worker.postMessage(0);
+// Triggered by postMessage in the Web Worker
 const rxjs_1 = __webpack_require__(5);
 class Game {
     constructor(opts) {
@@ -87018,6 +87019,7 @@ class Game {
         this.duration = 120;
         this.lastFrameNumber = 0;
         this.isShooting = false;
+        this.documentIsActive = true;
         this.init();
         this.animate();
     }
@@ -87037,14 +87039,14 @@ class Game {
         this.addCubes();
         this.addAsteroids();
         this.cubeWasRemoved();
-        socket_service_1.default.socket.on('selfPlayer', (user) => {
-            user_service_1.default.user.next(user);
+        socket_service_1.default.socket.on('userIsReady', (user) => {
+            // UserService.user.next(user);
             this.players.push({ mesh: null, user: user });
         });
         socket_service_1.default.socket.on('updateUsersCoords', (users) => {
             users.forEach((user, i) => {
                 this.players.forEach((p) => {
-                    if (p.mesh && p.user.id === user.id) {
+                    if (p.mesh && p.user.id === user.id) { //console.log(user.position);
                         p.mesh.position.set(user.position.x, user.position.y, user.position.z);
                         p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
                     }
@@ -87054,7 +87056,7 @@ class Game {
         socket_service_1.default.socket.on('otherNewPlayer', (users) => {
             users.forEach((user, i) => {
                 let exists = this.players.map((x) => { return x.user.id; }).indexOf(user.id);
-                if (exists === -1 && user.id) {
+                if (exists === -1) {
                     this.createNewPlayer(user);
                 }
             });
@@ -87119,13 +87121,29 @@ class Game {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.container.appendChild(this.renderer.domElement);
         //
+        worker.postMessage(1);
+        worker.onmessage = (evt) => {
+            // var interval = setInterval(()=> {
+            // evt.data is the values from the Web Worker
+            // console.log(123);
+            //  if(!this.documentIsActive) {
+            //      this.InvisiblePlayer.position.set(this.InvisiblePlayer.position.x+10, this.InvisiblePlayer.position.y+10, this.InvisiblePlayer.position.z+10);
+            //      // this.controls.update(this.clock.getDelta());
+            //     SocketService.socket.emit("user-position", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
+            //     worker.postMessage(2);
+            // }
+            // }, 50);
+        };
+        window.addEventListener('visibilitychange', () => {
+            this.documentIsActive = !document.hidden;
+        }, false);
         // stats
         // this.stats = new THREE.Stats();
         // this.container.appendChild(this.stats.domElement);
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
     }
     shot(e) {
-        if (e.keyCode === 32 && user_service_1.default.user.value) {
+        if (e.keyCode === 32 && global_service_1.default.user.value) {
             let bullet = this.createBullet();
             let pos = this.InvisiblePlayer.position.clone();
             let rot = this.InvisiblePlayer.rotation.clone();
@@ -87137,7 +87155,7 @@ class Game {
                 camPos: this.InvisiblePlayer.position.clone()
             });
             socket_service_1.default.socket.emit('fire', {
-                userId: user_service_1.default.user.value.id,
+                userId: global_service_1.default.user.value.id,
                 matrixWorld: this.InvisiblePlayer.matrixWorld.clone(),
                 camPos: this.InvisiblePlayer.position.clone(),
                 rotation: rot
@@ -87385,7 +87403,7 @@ class Game {
         // this.camera.position.x = this.InvisiblePlayer.position.x + 0.5 + 20*4;
         // this.camera.position.y = this.InvisiblePlayer.position.y + 0.5 + 20*4;
         // this.camera.position.z = this.InvisiblePlayer.position.z + 0.5 + 20*4;
-        if (user_service_1.default.user.value) {
+        if (global_service_1.default.user.value && this.documentIsActive) {
             socket_service_1.default.socket.emit("move", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
         }
         $('#position').html('Position: ' + this.InvisiblePlayer.position.x.toFixed(0) + ' ' + this.InvisiblePlayer.position.y.toFixed(0) + ' ' + this.InvisiblePlayer.position.z.toFixed(0));
@@ -87446,7 +87464,7 @@ class Game {
                     let obj = collisionResults[0].object;
                     if (obj.id !== this.lastBulletCollisionId) {
                         this.lastBulletCollisionId = obj.id;
-                        socket_service_1.default.socket.emit('demage', player.user.id);
+                        socket_service_1.default.socket.emit('demage', player.user);
                         // this.scene.remove(obj);
                         obj.material.opacity = 0;
                         obj.material.transparent = true;
@@ -87491,6 +87509,86 @@ try {
 
 module.exports = g;
 
+
+/***/ }),
+/* 282 */,
+/* 283 */,
+/* 284 */,
+/* 285 */,
+/* 286 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var rxjs_1 = __webpack_require__(5);
+var filter_1 = __webpack_require__(287);
+rxjs_1.Observable.prototype.filter = filter_1.filter;
+//# sourceMappingURL=filter.js.map
+
+/***/ }),
+/* 287 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var operators_1 = __webpack_require__(16);
+/* tslint:enable:max-line-length */
+/**
+ * Filter items emitted by the source Observable by only emitting those that
+ * satisfy a specified predicate.
+ *
+ * <span class="informal">Like
+ * [Array.prototype.filter()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter),
+ * it only emits a value from the source if it passes a criterion function.</span>
+ *
+ * <img src="./img/filter.png" width="100%">
+ *
+ * Similar to the well-known `Array.prototype.filter` method, this operator
+ * takes values from the source Observable, passes them through a `predicate`
+ * function and only emits those values that yielded `true`.
+ *
+ * @example <caption>Emit only click events whose target was a DIV element</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var clicksOnDivs = clicks.filter(ev => ev.target.tagName === 'DIV');
+ * clicksOnDivs.subscribe(x => console.log(x));
+ *
+ * @see {@link distinct}
+ * @see {@link distinctUntilChanged}
+ * @see {@link distinctUntilKeyChanged}
+ * @see {@link ignoreElements}
+ * @see {@link partition}
+ * @see {@link skip}
+ *
+ * @param {function(value: T, index: number): boolean} predicate A function that
+ * evaluates each value emitted by the source Observable. If it returns `true`,
+ * the value is emitted, if `false` the value is not passed to the output
+ * Observable. The `index` parameter is the number `i` for the i-th source
+ * emission that has happened since the subscription, starting from the number
+ * `0`.
+ * @param {any} [thisArg] An optional argument to determine the value of `this`
+ * in the `predicate` function.
+ * @return {Observable} An Observable of values from the source that were
+ * allowed by the `predicate` function.
+ * @method filter
+ * @owner Observable
+ */
+function filter(predicate, thisArg) {
+    return operators_1.filter(predicate, thisArg)(this);
+}
+exports.filter = filter;
+//# sourceMappingURL=filter.js.map
+
+/***/ }),
+/* 288 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(286);
+//# sourceMappingURL=filter.js.map
 
 /***/ })
 /******/ ]);

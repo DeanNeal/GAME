@@ -1,9 +1,9 @@
 import './polyfills';
 import Helpers from './helper';
-import UserService from './user.service';
+// import UserService from './user.service';
 import CubesService from './cubes.service';
 import SocketService from './socket.service';
-// import GlobalService from './global.service';
+import GlobalService from './global.service';
 import createPlanet from './planet';
 declare var window: any;
 declare var document: any;
@@ -14,6 +14,10 @@ import FlyControls from './FlyControls';
 // import ShipControls from './shipControls';
 
 // var ww = new Worker(getInlineJS());
+var worker = new Worker("./js/test.worker.js");
+// worker.postMessage(0);
+// Triggered by postMessage in the Web Worker
+
 
 import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
 
@@ -60,7 +64,7 @@ export class Game {
     public lastFrameNumber = 0;
     public isShooting: any = false;
 
-
+    public documentIsActive: boolean = true;
 
     constructor(opts: any) {
         this.init();
@@ -87,16 +91,15 @@ export class Game {
         this.addAsteroids();
         this.cubeWasRemoved();
 
-        SocketService.socket.on('selfPlayer', (user: any)=> {
-            UserService.user.next(user);
+        SocketService.socket.on('userIsReady', (user: any)=> {
+            // UserService.user.next(user);
             this.players.push({ mesh: null, user: user });
-
         });
 
         SocketService.socket.on('updateUsersCoords', (users: any[])=>{
             users.forEach((user:any, i:any)=> {
                 this.players.forEach((p:any) => {
-                    if (p.mesh && p.user.id === user.id) {
+                    if (p.mesh && p.user.id === user.id) {        //console.log(user.position);
                         p.mesh.position.set(user.position.x, user.position.y , user.position.z );
                         p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
                     }
@@ -108,8 +111,8 @@ export class Game {
         SocketService.socket.on('otherNewPlayer', (users:any)=> {
             users.forEach(( user:any, i:any)=>  {
                 let exists = this.players.map((x: any)=> { return x.user.id; }).indexOf(user.id);
-               
-                if (exists === -1 && user.id) {
+                
+                if (exists === -1) {
                     this.createNewPlayer(user);
                 }
             });
@@ -191,7 +194,24 @@ export class Game {
         this.container.appendChild(this.renderer.domElement);
 
         //
+        worker.postMessage(1);
+        worker.onmessage = (evt)=> {
 
+            // var interval = setInterval(()=> {
+                // evt.data is the values from the Web Worker
+            // console.log(123);
+         
+               //  if(!this.documentIsActive) {
+               //      this.InvisiblePlayer.position.set(this.InvisiblePlayer.position.x+10, this.InvisiblePlayer.position.y+10, this.InvisiblePlayer.position.z+10);
+               //      // this.controls.update(this.clock.getDelta());
+               //     SocketService.socket.emit("user-position", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
+               //     worker.postMessage(2);
+               // }
+            // }, 50);
+        };
+        window.addEventListener('visibilitychange', ()=> {
+              this.documentIsActive = !document.hidden;
+        }, false);
 
         // stats
 
@@ -202,7 +222,7 @@ export class Game {
     }
 
     shot(e:KeyboardEvent) {
-        if(e.keyCode === 32 && UserService.user.value) {
+        if(e.keyCode === 32 && GlobalService.user.value) {
             let bullet = this.createBullet();
 
             let pos = this.InvisiblePlayer.position.clone();
@@ -217,7 +237,7 @@ export class Game {
             });
 
             SocketService.socket.emit('fire', {
-                userId: UserService.user.value.id,
+                userId: GlobalService.user.value.id,
                 matrixWorld:  this.InvisiblePlayer.matrixWorld.clone(),
                 camPos: this.InvisiblePlayer.position.clone(), 
                 rotation: rot
@@ -543,7 +563,7 @@ export class Game {
         // this.camera.position.y = this.InvisiblePlayer.position.y + 0.5 + 20*4;
         // this.camera.position.z = this.InvisiblePlayer.position.z + 0.5 + 20*4;
 
-        if (UserService.user.value) {
+        if (GlobalService.user.value && this.documentIsActive) {
             SocketService.socket.emit("move", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
         }
 
@@ -620,7 +640,7 @@ export class Game {
 
                     if (obj.id !== this.lastBulletCollisionId) {
                         this.lastBulletCollisionId = obj.id;
-                        SocketService.socket.emit('demage', player.user.id);
+                        SocketService.socket.emit('demage', player.user);
                         // this.scene.remove(obj);
                         obj.material.opacity = 0;
                         obj.material.transparent = true;

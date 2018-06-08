@@ -22,12 +22,13 @@ let asteroids = createAsteroids();
 
 io.sockets.on('connection', function(socket) {
     let user = {
-        id: socket.id.slice(0, 4)
+        id: socket.id.slice(0, 4),
+        _id: socket.id
     };
 
     socket.on('add new player', function(playerOptions) {
         addUser(user, playerOptions);
-        socket.emit("selfPlayer", user );
+        socket.emit("userIsReady", user );
 
         io.sockets.emit("otherNewPlayer", users);
         io.sockets.emit('userList', users);
@@ -43,7 +44,10 @@ io.sockets.on('connection', function(socket) {
     socket.on('disconnect', function() {
         removeUser(user);
     });
-    socket.on("move", function(data) {
+    socket.on("move", function(data, log) {
+        // if(log ){
+        //     console.log(data, user.id)
+        // }
         updateUsersCoords(user.id, data);
     });
 
@@ -66,8 +70,8 @@ io.sockets.on('connection', function(socket) {
        socket.broadcast.emit("otherFire", bullet);
     });
 
-    socket.on("demage", function(userId) {
-       decreaseHealth(userId);
+    socket.on("demage", function(user) {
+       decreaseHealth(user);
     });
 
     socket.on('chat message', function(data) {
@@ -96,11 +100,12 @@ let addUser = function(user, playerOptions) {
     return user;
 }
 let removeUser = function(user) {
-    console.log('deletePlayer', user);
+    // console.log('deletePlayer', user);
     for (let i = 0; i < users.length; i++) {
         if (user.id === users[i].id) {
             users.splice(i, 1);
             io.sockets.emit("deletePlayer", user.id);
+            io.sockets.emit("userList", users);
             return;
         }
     }
@@ -128,10 +133,12 @@ let increaseScores = function(curUser) {
     io.sockets.emit("userList", users);
 }
 
-let decreaseHealth = function(userId) {
+let decreaseHealth = function(user) {
     for (let i = 0; i < users.length; i++) {
-        if (users[i].id == userId) {
+        if (users[i].id == user.id) {
             users[i].health -= 10;
+            // console.log(user);
+            io.sockets.to(user._id).emit("gotDemage", users);
             if(users[i].health <= 0) {
                 users[i].health = 100;
                 users[i].death++;

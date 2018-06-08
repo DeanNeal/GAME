@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import UserService from '../../user.service';
+// import UserService from '../../user.service';
 import Helpers from '../../helper';
 import SocketService from '../../socket.service';
 
@@ -55,7 +55,7 @@ class Chat extends React.Component {
   keyUp(event) {
      event.preventDefault();
     if (event.key == 'Enter' &&  this.state.message){
-        SocketService.socket.emit('chat message', { msg: this.state.message, name: UserService.user.value ? UserService.user.value.playerName : 'new user' });
+        // SocketService.socket.emit('chat message', { msg: this.state.message, name: UserService.user.value ? UserService.user.value.playerName : 'new user' });
         this.setState({message: ''});
    
         return false;

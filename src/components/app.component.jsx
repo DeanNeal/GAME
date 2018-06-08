@@ -3,7 +3,7 @@ import Chat from './chat/chat.component';
 import UserList from './list/list.component';
 import {Game} from '../main';
 import SocketService from '../socket.service';
-import UserService from '../user.service';
+// import UserService from '../user.service';
 import GlobalService from '../global.service';
 
 class App extends React.Component {
@@ -25,6 +25,7 @@ class App extends React.Component {
     this.submit = this.submit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.keyPress = this.keyPress.bind(this);
+    this.timeout = undefined;
   }
 
   componentDidMount() {
@@ -38,19 +39,34 @@ class App extends React.Component {
 
   start() {
 
-    let game = new Game(this.state.playerOptions);
     this.setState({
-      getReady: true
+      getReady:true
     });
+
+    let game = new Game(this.state.playerOptions);
 
     SocketService.socket.emit('add new player', this.state.playerOptions);
 
-    GlobalService.users.subscribe(users=> {
+    SocketService.socket.on('userIsReady', (user)=> {
+      GlobalService.user.next(user);
+
+    });
+    
+    GlobalService.user.filter(r=> r).subscribe(user=> {
         this.setState({
-          user: users.filter(r=> r.id === UserService.user.value.id)[0]
+          user: user
         });
+ 
     });
 
+    SocketService.socket.on('gotDemage', (userId) => {
+        clearTimeout(this.timeout);
+        var c = document.querySelector('.controls');
+        c.classList.add('damage');
+        this.timeout = setTimeout(()=>{
+          c.classList.remove('damage');
+        },100);
+    });
   }
 
   handleChange(event) {
@@ -75,19 +91,20 @@ class App extends React.Component {
               <form className="popup__content" onSubmit={this.submit}>
                  <label> Username</label>
                  <input type="text" value={this.state.playerOptions.name} onKeyDown={this.keyPress} onChange={this.handleChange} required/>
-                 <button className="btn" type="submit">START</button>
+                 <button className="btn" disabled={this.state.getReady} type="submit">START</button>
               </form>
             </div> 
           </div>
 
           ) :  (
-            <div>
+            <div className="controls">
               <div id="info">Controls - > WASD/RF/QE + mouse </div>
               <div id="position"></div>
               <div id="rotation"></div>
               <div id="gui">HP {this.state.user.health}</div>
               <div id="gui-speed"><span id="gui-speed-value"></span> KM/H</div>
               <div id="timer"></div> 
+              <div className="damage"></div>
               <UserList/> 
             
             </div>

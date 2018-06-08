@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import UserService from '../../user.service';
+// import UserService from '../../user.service';
 import CubesService from '../../cubes.service';
 import SocketService from '../../socket.service';
 import GlobalService from '../../global.service';
@@ -24,17 +24,11 @@ class UserList extends React.Component {
           });
     })
 
-    SocketService.socket.on('deletePlayer', function(userId) {
-        let a = self.state.users.slice();
-        a = a.filter(r=> r.id !== userId);
-        self.setState({
-          users: a
-        });
-    });
-
-    // SocketService.socket.on('updateUsersData', function(users) {
+    // SocketService.socket.on('deletePlayer', function(userId) {
+    //     let a = self.state.users.slice();
+    //     a = a.filter(r=> r.id !== userId);
     //     self.setState({
-    //       users: users
+    //       users: a
     //     });
     // });
 
@@ -47,9 +41,9 @@ class UserList extends React.Component {
 
   render() {
     const listItems = this.state.users.map((item, i) => {
-      let className = (UserService.user.value && UserService.user.value.id === item.id) ? 'current-player' : ''; 
+      let className = (GlobalService.user.value && GlobalService.user.value.id === item.id) ? 'current-player' : ''; 
       return (
-        <li key={i} className={className}>{item.playerName}<span>Health: {item.health} Scores: {item.scores} Death: {item.death}</span></li>
+        <li key={i} className={className}>{item.playerName} - {item.id}<span>Health: {item.health} Scores: {item.scores} Death: {item.death}</span></li>
         )
 
     });
