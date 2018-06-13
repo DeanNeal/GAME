@@ -250,7 +250,7 @@ export default function ( object, camera ) {
 	};
 
 	this.cameraUpdate = function () {
-		camera.position.z = this.cameraInitPosition.z + (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier * 5 : 0);
+		camera.position.z = this.cameraInitPosition.z+ (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier / 2 : 0);
 	}
 
 	this.updateSpeedValue = function(val) {

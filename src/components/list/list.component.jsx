@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-// import UserService from '../../user.service';
-import CubesService from '../../cubes.service';
+
 import SocketService from '../../socket.service';
 import GlobalService from '../../global.service';
 
@@ -32,7 +31,7 @@ class UserList extends React.Component {
     //     });
     // });
 
-    CubesService.cubes.subscribe(cubes=>{
+    GlobalService.cubes.subscribe(cubes=>{
       self.setState({
         cubes: cubes
       });

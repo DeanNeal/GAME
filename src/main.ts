@@ -1,7 +1,6 @@
 import './polyfills';
 import Helpers from './helper';
 // import UserService from './user.service';
-import CubesService from './cubes.service';
 import SocketService from './socket.service';
 import GlobalService from './global.service';
 import createPlanet from './planet';
@@ -10,6 +9,8 @@ declare var document: any;
 declare var $: any;
 import * as THREE from 'three'
 import FlyControls from './FlyControls';
+import {loadStarship} from './utils';
+
 // import PersonControl from './3dPersonControl';
 // import ShipControls from './shipControls';
 
@@ -54,7 +55,7 @@ export class Game {
     public isMove: boolean = false;
     public earthMesh:any;
     public cloudMesh: any;
-    public startPosition:any = { x: 0, y: 100, z: 100 };
+    public startPosition:any = { x: 0, y: 8, z: 45 };
     // public playerPosition:any = { x: 0, y: 0, z: 0 };
     public Earth: any;
 
@@ -85,11 +86,13 @@ export class Game {
 
         this.scene = new THREE.Scene();
         this.addInvisiblePlayer();
-        this.addPlanet();
+
+
         this.addSky();
         this.addCubes();
         this.addAsteroids();
         this.cubeWasRemoved();
+
 
         SocketService.socket.on('userIsReady', (user: any)=> {
             // UserService.user.next(user);
@@ -259,86 +262,112 @@ export class Game {
     }
 
     createNewPlayer(user:any) {
-        let newPlayer = this.createUserMesh();
-        newPlayer.userData = {
-            id: user.id 
-        };
-        newPlayer.position.set(0, 0, 0);
 
-        let spritey = Helpers.makeTextSprite(user.playerName, { fontsize: 32, fontface: "Georgia" });
-        spritey.position.set(50, 100, 0);
-        newPlayer.add(spritey);
+        loadStarship((object:any)=>{
+            let newPlayer = object;
+            newPlayer.userData = {
+                id: user.id 
+            };
+            newPlayer.position.set(0, 0, 0);
 
-        this.players.push({ mesh: newPlayer, user: user });
+            newPlayer.material.color.set(0xffffff);
 
-        this.scene.add(newPlayer);
+            let spritey = Helpers.makeTextSprite(user.playerName, { fontsize: 32, fontface: "Georgia" });
+            spritey.position.set(50, 100, 0);
+            newPlayer.add(spritey);
+
+            this.players.push({ mesh: newPlayer, user: user });
+
+            this.scene.add(newPlayer);
+        });
+        // let newPlayer = this.createUserMesh();
+        // newPlayer.userData = {
+        //     id: user.id 
+        // };
+        // newPlayer.position.set(0, 0, 0);
+
+        // let spritey = Helpers.makeTextSprite(user.playerName, { fontsize: 32, fontface: "Georgia" });
+        // spritey.position.set(50, 100, 0);
+        // newPlayer.add(spritey);
+
+        // this.players.push({ mesh: newPlayer, user: user });
+
+        // this.scene.add(newPlayer);
     }
 
-    createUserMesh() {
-        let loader = new THREE.TextureLoader();
-        let texture = loader.load('img/sphere.png', function(texture) {
-            texture.repeat.set(10, 10);
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.anisotropy = 16;
-            // texture.needsUpdate = true;
-            // texture.minFilter = THREE.LinearFilter;
-        });
-        let textureBump = loader.load('img/bump.png', function(texture) {
-            textureBump.repeat.set(10, 10);
-            textureBump.wrapS = textureBump.wrapT = THREE.RepeatWrapping;
-            textureBump.anisotropy = 16;
-            // textureBump.needsUpdate = true;
-            // texture.minFilter = THREE.LinearFilter;
-        });
+    // createUserMesh() {
+    //     let loader = new THREE.TextureLoader();
+    //     let texture = loader.load('img/sphere.png', function(texture) {
+    //         texture.repeat.set(10, 10);
+    //         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    //         texture.anisotropy = 16;
+    //         // texture.needsUpdate = true;
+    //         // texture.minFilter = THREE.LinearFilter;
+    //     });
+    //     let textureBump = loader.load('img/bump.png', function(texture) {
+    //         textureBump.repeat.set(10, 10);
+    //         textureBump.wrapS = textureBump.wrapT = THREE.RepeatWrapping;
+    //         textureBump.anisotropy = 16;
+    //         // textureBump.needsUpdate = true;
+    //         // texture.minFilter = THREE.LinearFilter;
+    //     });
 
 
-        let userMesh = new THREE.Mesh(
-            new THREE.SphereGeometry(70, 15, 15),
-            new THREE.MeshPhongMaterial({
-                // map: texture,
-                // bumpMap: textureBump,
-                color: 0xffff00,
-                // specular: 0x0022ff,
-                shininess: 1,
-                // side: THREE.BackSide,
-                // opacity: 1,
-                // transparent: true
-            })
-        );
+    //     let userMesh = new THREE.Mesh(
+    //         new THREE.SphereGeometry(70, 15, 15),
+    //         new THREE.MeshPhongMaterial({
+    //             // map: texture,
+    //             // bumpMap: textureBump,
+    //             color: 0xffff00,
+    //             // specular: 0x0022ff,
+    //             shininess: 1,
+    //             // side: THREE.BackSide,
+    //             // opacity: 1,
+    //             // transparent: true
+    //         })
+    //     );
 
-        userMesh.add(this.createGun());
+    //     userMesh.add(this.createGun());
 
-        return userMesh;
-    }
+    //     return userMesh;
+    // }
 
     addInvisiblePlayer() {
-        this.InvisiblePlayer = this.createUserMesh();
+       // this.InvisiblePlayer = this.createUserMesh();
 
-        this.controls = new FlyControls(this.InvisiblePlayer, this.camera);
-        // this.controls.enablePan = false;
-
-
-        // this.controls.movementSpeed = 1000;
-        this.controls.domElement = this.container;
-        this.controls.rollSpeed = Math.PI / 3.5;
-        this.controls.autoForward = false;
-        this.controls.dragToLook = true;
+        loadStarship((object:any)=>{
+            // this.scene.add(object);
+            this.InvisiblePlayer = object;
+            this.controls = new FlyControls(this.InvisiblePlayer, this.camera);
+            // this.controls.enablePan = false;
 
 
-        this.InvisiblePlayer.add(this.camera);
-        this.InvisiblePlayer.position.set(0, 0, 0);
-        this.InvisiblePlayer.rotation.set(0, 0, 0);
+            // this.controls.movementSpeed = 1000;
+            this.controls.domElement = this.container;
+            this.controls.rollSpeed = Math.PI / 3.5;
+            this.controls.autoForward = false;
+            this.controls.dragToLook = true;
 
 
-        var spriteMap = new THREE.TextureLoader().load( "img/aim.png" );
-        var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
-        var sprite = new THREE.Sprite( spriteMaterial );
-        sprite.position.set(0, 0, -300);
-        sprite.scale.set(15, 15, 15);
+            this.InvisiblePlayer.material.color.set(0xffffff);
+            this.InvisiblePlayer.add(this.camera);
+            this.InvisiblePlayer.position.set(0, 0, 0);
+            this.InvisiblePlayer.rotation.set(0, 0, 0);
 
-        this.camera.add(sprite);
-        // this.camera.position.set(0, 100, 200);        
-        this.scene.add(this.InvisiblePlayer);
+
+            var spriteMap = new THREE.TextureLoader().load( "img/aim.png" );
+            var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
+            var sprite = new THREE.Sprite( spriteMaterial );
+            sprite.position.set(0, -0.15, -10);
+            sprite.scale.set(0.05, 0.05, 0.05);
+
+            this.camera.add(sprite);
+  
+            this.scene.add(this.InvisiblePlayer);
+
+            this.addPlanet();
+        });
+
     }
 
     createGun() {
@@ -439,12 +468,11 @@ export class Game {
                 this.allCubes.push(mesh);
             });
 
-            CubesService.cubes.next(this.allCubes);
+            GlobalService.cubes.next(this.allCubes);
         });
     }
 
     addAsteroids() {
-    
        let s = 1000;
        let cube = new THREE.BoxGeometry(s, s, s);
 
@@ -468,7 +496,6 @@ export class Game {
                this.allAsteroids.push(mesh);
            });
 
-           // CubesService.cubes.next(this.allCubes);
        });
     }
 
@@ -478,7 +505,7 @@ export class Game {
                 if (this.allCubes[i].userData.id === cube.id) {
                     this.scene.remove(this.allCubes[i]);
                     this.allCubes.splice(i, 1);
-                    CubesService.cubes.next(this.allCubes);
+                    GlobalService.cubes.next(this.allCubes);
                     if (this.allCubes.length === 0) {
                         SocketService.socket.emit('startAgain');
                         this.startTimer();
@@ -563,12 +590,13 @@ export class Game {
         // this.camera.position.y = this.InvisiblePlayer.position.y + 0.5 + 20*4;
         // this.camera.position.z = this.InvisiblePlayer.position.z + 0.5 + 20*4;
 
-        if (GlobalService.user.value && this.documentIsActive) {
+        if (GlobalService.user.value && this.documentIsActive && this.InvisiblePlayer) {
             SocketService.socket.emit("move", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
+
+            $('#position').html('Position: ' + this.InvisiblePlayer.position.x.toFixed(0) + ' ' + this.InvisiblePlayer.position.y.toFixed(0) + ' ' + this.InvisiblePlayer.position.z.toFixed(0));
+            $('#rotation').html('Rotation: ' + this.InvisiblePlayer.rotation.x.toFixed(2) + ' ' + this.InvisiblePlayer.rotation.y.toFixed(2) + ' ' + this.InvisiblePlayer.rotation.z.toFixed(2));
         }
 
-        $('#position').html('Position: ' + this.InvisiblePlayer.position.x.toFixed(0) + ' ' + this.InvisiblePlayer.position.y.toFixed(0) + ' ' + this.InvisiblePlayer.position.z.toFixed(0));
-        $('#rotation').html('Rotation: ' + this.InvisiblePlayer.rotation.x.toFixed(2) + ' ' + this.InvisiblePlayer.rotation.y.toFixed(2) + ' ' + this.InvisiblePlayer.rotation.z.toFixed(2));
 
         if (this.allCubes.length) {
             this.cubesCollisionDetection();
@@ -654,8 +682,10 @@ export class Game {
     render() {
 
         let delta = this.clock.getDelta();
-
-        this.controls.update(delta);
+        if(this.controls) {
+             this.controls.update(delta);
+        }
+       
         // this.controls.updateShip(delta);
         this.renderer.render(this.scene, this.camera);
 
