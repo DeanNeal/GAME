@@ -9,7 +9,7 @@ declare var document: any;
 declare var $: any;
 import * as THREE from 'three'
 import FlyControls from './FlyControls';
-import {loadStarship} from './utils';
+import { loadStarship } from './utils';
 
 // import PersonControl from './3dPersonControl';
 // import ShipControls from './shipControls';
@@ -35,15 +35,15 @@ export class Game {
     public raycaster: any;
     public controls: any;
 
-    public mouse:any = new THREE.Vector2();
+    public mouse: any = new THREE.Vector2();
     // public INTERSECTED:any;
 
-    public clock:any = new THREE.Clock();
+    public clock: any = new THREE.Clock();
 
-    public allSpheres:any = [];
-    public allCubes:any = [];
-    public allAsteroids:any = [];
-    public bullets:any = [];
+    public allSpheres: any = [];
+    public allCubes: any = [];
+    public allAsteroids: any = [];
+    public bullets: any = [];
     public othersBullets: any = [];
 
     // public COLLIDERS:any = [];
@@ -51,11 +51,11 @@ export class Game {
     public lastBulletCollisionId: any;
     public InvisiblePlayer: any;
     // public currentPlayer: any;
-    public players:any = [];
+    public players: any = [];
     public isMove: boolean = false;
-    public earthMesh:any;
+    public earthMesh: any;
     public cloudMesh: any;
-    public startPosition:any = { x: 0, y: 8, z: 45 };
+    public startPosition: any = { x: 0, y: 8, z: 45 };
     // public playerPosition:any = { x: 0, y: 0, z: 0 };
     public Earth: any;
 
@@ -94,16 +94,16 @@ export class Game {
         this.cubeWasRemoved();
 
 
-        SocketService.socket.on('userIsReady', (user: any)=> {
+        SocketService.socket.on('userIsReady', (user: any) => {
             // UserService.user.next(user);
             this.players.push({ mesh: null, user: user });
         });
 
-        SocketService.socket.on('updateUsersCoords', (users: any[])=>{
-            users.forEach((user:any, i:any)=> {
-                this.players.forEach((p:any) => {
+        SocketService.socket.on('updateUsersCoords', (users: any[]) => {
+            users.forEach((user: any, i: any) => {
+                this.players.forEach((p: any) => {
                     if (p.mesh && p.user.id === user.id) {        //console.log(user.position);
-                        p.mesh.position.set(user.position.x, user.position.y , user.position.z );
+                        p.mesh.position.set(user.position.x, user.position.y, user.position.z);
                         p.mesh.rotation.set(user.rotation._x, user.rotation._y, user.rotation._z);
                     }
                 })
@@ -111,19 +111,19 @@ export class Game {
         });
 
 
-        SocketService.socket.on('otherNewPlayer', (users:any)=> {
-            users.forEach(( user:any, i:any)=>  {
-                let exists = this.players.map((x: any)=> { return x.user.id; }).indexOf(user.id);
-                
+        SocketService.socket.on('otherNewPlayer', (users: any) => {
+            users.forEach((user: any, i: any) => {
+                let exists = this.players.map((x: any) => { return x.user.id; }).indexOf(user.id);
+
                 if (exists === -1) {
                     this.createNewPlayer(user);
                 }
             });
         });
 
-        SocketService.socket.on('otherFire', (params:any)=> {
+        SocketService.socket.on('otherFire', (params: any) => {
             // console.log(this.players);
-            let userMesh = this.players.filter((r:any)=> r.user.id == params.userId)[0].mesh;
+            let userMesh = this.players.filter((r: any) => r.user.id == params.userId)[0].mesh;
             let pos = userMesh.position.clone();
             let bulletMesh = this.createBullet();
 
@@ -132,17 +132,17 @@ export class Game {
 
             this.othersBullets.push({
                 mesh: bulletMesh,
-                matrixWorld:  params.matrixWorld,
+                matrixWorld: params.matrixWorld,
                 camPos: params.camPos
             });
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.scene.remove(bulletMesh);
                 this.othersBullets.splice(0, 1);
             }, 3000);
         });
 
-        SocketService.socket.on('deletePlayer', (userId:any)=> {
+        SocketService.socket.on('deletePlayer', (userId: any) => {
             console.log('deletePlayer');
 
             for (let i = 0; i < this.players.length; i++) {
@@ -157,8 +157,8 @@ export class Game {
 
         Observable
             .fromEvent(document, 'keydown')
-            .subscribe((e:KeyboardEvent)=>{
-                if(!this.isShooting) {
+            .subscribe((e: KeyboardEvent) => {
+                if (!this.isShooting) {
                     this.start = new Date().getTime() - this.duration;
                     this.isShooting = e;
                 }
@@ -166,12 +166,12 @@ export class Game {
 
         Observable
             .fromEvent(document, 'keyup')
-            .subscribe((e:KeyboardEvent)=>{
+            .subscribe((e: KeyboardEvent) => {
                 this.isShooting = null;
             })
 
         // lights
-        let dLight:any = new THREE.DirectionalLight(0xffffff);
+        let dLight: any = new THREE.DirectionalLight(0xffffff);
         dLight.position.set(2000, 2000, -6000);
         dLight.castShadow = true;
         dLight.shadowCameraVisible = true;
@@ -198,22 +198,22 @@ export class Game {
 
         //
         worker.postMessage(1);
-        worker.onmessage = (evt)=> {
+        worker.onmessage = (evt) => {
 
             // var interval = setInterval(()=> {
-                // evt.data is the values from the Web Worker
+            // evt.data is the values from the Web Worker
             // console.log(123);
-         
-               //  if(!this.documentIsActive) {
-               //      this.InvisiblePlayer.position.set(this.InvisiblePlayer.position.x+10, this.InvisiblePlayer.position.y+10, this.InvisiblePlayer.position.z+10);
-               //      // this.controls.update(this.clock.getDelta());
-               //     SocketService.socket.emit("user-position", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
-               //     worker.postMessage(2);
-               // }
+
+            //  if(!this.documentIsActive) {
+            //      this.InvisiblePlayer.position.set(this.InvisiblePlayer.position.x+10, this.InvisiblePlayer.position.y+10, this.InvisiblePlayer.position.z+10);
+            //      // this.controls.update(this.clock.getDelta());
+            //     SocketService.socket.emit("user-position", { position: this.InvisiblePlayer.position, rotation: this.InvisiblePlayer.rotation });
+            //     worker.postMessage(2);
+            // }
             // }, 50);
         };
-        window.addEventListener('visibilitychange', ()=> {
-              this.documentIsActive = !document.hidden;
+        window.addEventListener('visibilitychange', () => {
+            this.documentIsActive = !document.hidden;
         }, false);
 
         // stats
@@ -224,9 +224,13 @@ export class Game {
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
     }
 
-    shot(e:KeyboardEvent) {
-        if(e.keyCode === 32 && GlobalService.user.value) {
+    shot(e: KeyboardEvent) {
+        if (e.keyCode === 32 && GlobalService.user.value) {
             let bullet = this.createBullet();
+
+            var audio = new Audio('blaster-1.mp3');
+            audio.volume = 0.01;
+            audio.play();
 
             let pos = this.InvisiblePlayer.position.clone();
             let rot = this.InvisiblePlayer.rotation.clone();
@@ -235,18 +239,18 @@ export class Game {
 
             this.bullets.push({
                 mesh: bullet,
-                matrixWorld:  this.InvisiblePlayer.matrixWorld.clone(),
+                matrixWorld: this.InvisiblePlayer.matrixWorld.clone(),
                 camPos: this.InvisiblePlayer.position.clone()
             });
 
             SocketService.socket.emit('fire', {
                 userId: GlobalService.user.value.id,
-                matrixWorld:  this.InvisiblePlayer.matrixWorld.clone(),
-                camPos: this.InvisiblePlayer.position.clone(), 
+                matrixWorld: this.InvisiblePlayer.matrixWorld.clone(),
+                camPos: this.InvisiblePlayer.position.clone(),
                 rotation: rot
             });
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.scene.remove(bullet);
                 this.bullets.splice(0, 1);
             }, 3000);
@@ -255,18 +259,19 @@ export class Game {
 
     createBullet() {
         let bullet = new THREE.Mesh(
-        new THREE.CubeGeometry(5, 5, 2000),
-        new THREE.MeshBasicMaterial({ color:0xffffff }));
+            new THREE.CubeGeometry(5, 5, 2000),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
         this.scene.add(bullet);
         return bullet;
     }
 
-    createNewPlayer(user:any) {
+    createNewPlayer(user: any) {
 
-        loadStarship((object:any)=>{
+        loadStarship((object: any) => {
             let newPlayer = object;
             newPlayer.userData = {
-                id: user.id 
+                id: user.id
             };
             newPlayer.position.set(0, 0, 0);
 
@@ -333,9 +338,9 @@ export class Game {
     // }
 
     addInvisiblePlayer() {
-       // this.InvisiblePlayer = this.createUserMesh();
+        // this.InvisiblePlayer = this.createUserMesh();
 
-        loadStarship((object:any)=>{
+        loadStarship((object: any) => {
             // this.scene.add(object);
             this.InvisiblePlayer = object;
             this.controls = new FlyControls(this.InvisiblePlayer, this.camera);
@@ -355,14 +360,14 @@ export class Game {
             this.InvisiblePlayer.rotation.set(0, 0, 0);
 
 
-            var spriteMap = new THREE.TextureLoader().load( "img/aim.png" );
-            var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
-            var sprite = new THREE.Sprite( spriteMaterial );
+            var spriteMap = new THREE.TextureLoader().load("img/aim.png");
+            var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
+            var sprite = new THREE.Sprite(spriteMaterial);
             sprite.position.set(0, -0.15, -10);
             sprite.scale.set(0.05, 0.05, 0.05);
 
             this.camera.add(sprite);
-  
+
             this.scene.add(this.InvisiblePlayer);
 
             this.addPlanet();
@@ -372,7 +377,7 @@ export class Game {
 
     createGun() {
         let cube = new THREE.BoxGeometry(25, 25, 100);
-        let material = new THREE.MeshPhongMaterial({ color: 0x333333 , wireframe: false,specular: 0xffffff, shininess: 50 });
+        let material = new THREE.MeshPhongMaterial({ color: 0x333333, wireframe: false, specular: 0xffffff, shininess: 50 });
         let gun = new THREE.Mesh(cube, material);
 
         gun.position.set(0, 0, -50);
@@ -381,14 +386,14 @@ export class Game {
 
     addPlanet() {
         var loader = new THREE.TextureLoader();
-        var earthTexture = loader.load('img/mars.jpg', function(texture) {
+        var earthTexture = loader.load('img/mars.jpg', function (texture) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
             texture.offset.set(0, 0);
             texture.repeat.set(1, 1);
         });
 
         var earthMaterial = new THREE.MeshLambertMaterial({ map: earthTexture });
-        var earthPlane:any = new THREE.Mesh(new THREE.PlaneGeometry(30000, 30000), earthMaterial);
+        var earthPlane: any = new THREE.Mesh(new THREE.PlaneGeometry(30000, 30000), earthMaterial);
         earthPlane.material.side = THREE.DoubleSide;
         earthPlane.position.x = 70000;
         earthPlane.position.z = 70000;
@@ -403,20 +408,20 @@ export class Game {
 
         this.scene.add(earthPlane);
 
-        earthPlane.lookAt( earthPlane.worldToLocal( this.InvisiblePlayer.matrixWorld.getPosition() ) );
+        earthPlane.lookAt(earthPlane.worldToLocal(this.InvisiblePlayer.matrixWorld.getPosition()));
 
-       // this.Earth = createPlanet({size: 10000});
-       // this.Earth.position.x = 20000;
-       // this.Earth.position.z = 20000;
-       // this.Earth.position.y = 20000;
-       // this.scene.add(this.Earth);
+        // this.Earth = createPlanet({size: 10000});
+        // this.Earth.position.x = 20000;
+        // this.Earth.position.z = 20000;
+        // this.Earth.position.y = 20000;
+        // this.scene.add(this.Earth);
     }
 
     addSky() {
         let loader = new THREE.TextureLoader();
         // create the geometry sphere
         let geometry = new THREE.SphereGeometry(250000, 100, 100)
-        let skyTexture = loader.load('img/galaxy_starfield.png', function(texture) {
+        let skyTexture = loader.load('img/galaxy_starfield.png', function (texture) {
             texture.repeat.set(10, 10);
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         });
@@ -434,7 +439,7 @@ export class Game {
         let s = 150;
         let cube = new THREE.BoxGeometry(s, s, s);
 
-        SocketService.socket.on('updateCubes', (cubes: any[])=> {
+        SocketService.socket.on('updateCubes', (cubes: any[]) => {
             // let loader = new THREE.TextureLoader();
             // let texture = loader.load('img/cyber2.jpg', function(texture) {
             //     texture.repeat.set(1, 1);
@@ -473,34 +478,34 @@ export class Game {
     }
 
     addAsteroids() {
-       let s = 1000;
-       let cube = new THREE.BoxGeometry(s, s, s);
+        let s = 1000;
+        let cube = new THREE.BoxGeometry(s, s, s);
 
-       SocketService.socket.on('updateAsteroids', (asteroids: any[])=> {
+        SocketService.socket.on('updateAsteroids', (asteroids: any[]) => {
 
-           asteroids.forEach(c => {
-               let material = new THREE.MeshPhongMaterial({ color: c.color, wireframe: false,/*opacity: 0.5, transparent: true ,*/ specular: 0xffffff, shininess: 50 });
-               let mesh = new THREE.Mesh(cube, material);
+            asteroids.forEach(c => {
+                let material = new THREE.MeshPhongMaterial({ color: c.color, wireframe: false,/*opacity: 0.5, transparent: true ,*/ specular: 0xffffff, shininess: 50 });
+                let mesh = new THREE.Mesh(cube, material);
 
-               mesh.userData = c;
-               mesh.position.x = c.position.x;
-               mesh.position.y = c.position.y;
-               mesh.position.z = c.position.z;
+                mesh.userData = c;
+                mesh.position.x = c.position.x;
+                mesh.position.y = c.position.y;
+                mesh.position.z = c.position.z;
 
-               mesh.rotation.x = c.position.x;
-               mesh.rotation.y = c.position.y;
-               mesh.rotation.z = c.position.z;
+                mesh.rotation.x = c.position.x;
+                mesh.rotation.y = c.position.y;
+                mesh.rotation.z = c.position.z;
 
 
-               this.scene.add(mesh);
-               this.allAsteroids.push(mesh);
-           });
+                this.scene.add(mesh);
+                this.allAsteroids.push(mesh);
+            });
 
-       });
+        });
     }
 
     cubeWasRemoved() {
-        SocketService.socket.on('cubeWasRemoved', (cube: any)=> {
+        SocketService.socket.on('cubeWasRemoved', (cube: any) => {
             for (let i = 0; i < this.allCubes.length; i++) {
                 if (this.allCubes[i].userData.id === cube.id) {
                     this.scene.remove(this.allCubes[i]);
@@ -518,8 +523,8 @@ export class Game {
 
     startTimer() {
         let fiveMinutes = 5,
-             display = document.querySelector('#timer');
-         Helpers.startTimer(fiveMinutes, display);
+            display = document.querySelector('#timer');
+        Helpers.startTimer(fiveMinutes, display);
     }
 
     onWindowResize(event: Event) {
@@ -533,7 +538,7 @@ export class Game {
     animate() {
         requestAnimationFrame(this.animate.bind(this));
 
-      
+
         for (let i = 0; i < this.allCubes.length; i++) {
             // allCubes[i].position.x += 1;
             this.allCubes[i].rotation.y += 0.01;
@@ -543,7 +548,7 @@ export class Game {
 
         for (let i = 0; i < this.bullets.length; i++) {
             //Pick a point in front of the camera in camera space:
-            var pLocal = new THREE.Vector3( 0, 0, -1 );
+            var pLocal = new THREE.Vector3(0, 0, -1);
             // //Now transform that point into world space:
             var pWorld = pLocal.applyMatrix4(this.bullets[i].matrixWorld);
             // //You can now construct the desired direction vector:
@@ -552,7 +557,7 @@ export class Game {
         };
 
         for (let i = 0; i < this.othersBullets.length; i++) {
-            var pLocal = new THREE.Vector3( 0, 0, -1 );
+            var pLocal = new THREE.Vector3(0, 0, -1);
             var pWorld = pLocal.applyMatrix4(this.othersBullets[i].matrixWorld);
             var dir = pWorld.sub(this.othersBullets[i].camPos).normalize();
             this.othersBullets[i].mesh.position.add(dir.multiplyScalar(1000));
@@ -605,7 +610,7 @@ export class Game {
         if (this.bullets.length) {
             this.damageCollisionDetection();
         }
-        
+
 
         this.render();
 
@@ -613,16 +618,16 @@ export class Game {
     }
 
     shotAnimate() {
-        let cl =  this.clock.getElapsedTime();
+        let cl = this.clock.getElapsedTime();
 
         var elapsed = new Date().getTime() - this.start;
-// console.log(elapsed);
-       if (elapsed > this.duration) {
-            if(this.isShooting) {
+        // console.log(elapsed);
+        if (elapsed > this.duration) {
+            if (this.isShooting) {
                 this.shot(this.isShooting);
             }
             this.start = new Date().getTime();
-       }
+        }
     }
 
     cubesCollisionDetection() {
@@ -651,8 +656,8 @@ export class Game {
         }
     }
 
-    damageCollisionDetection () {
-        this.players.filter((r:any)=> r.mesh).forEach((player:any)=>{
+    damageCollisionDetection() {
+        this.players.filter((r: any) => r.mesh).forEach((player: any) => {
             let plMesh = player.mesh;
             let originPoint = plMesh.position.clone();
 
@@ -662,9 +667,9 @@ export class Game {
                 let directionVector = globalVertex.sub(plMesh.position);
                 let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
 
-                let collisionResults = ray.intersectObjects(this.bullets.map((r: any)=> r.mesh));
+                let collisionResults = ray.intersectObjects(this.bullets.map((r: any) => r.mesh));
                 if (collisionResults.length > 0 && collisionResults[0].distance <= directionVector.length()) {
-                    let obj:any = collisionResults[0].object;
+                    let obj: any = collisionResults[0].object;
 
                     if (obj.id !== this.lastBulletCollisionId) {
                         this.lastBulletCollisionId = obj.id;
@@ -682,10 +687,10 @@ export class Game {
     render() {
 
         let delta = this.clock.getDelta();
-        if(this.controls) {
-             this.controls.update(delta);
+        if (this.controls) {
+            this.controls.update(delta);
         }
-       
+
         // this.controls.updateShip(delta);
         this.renderer.render(this.scene, this.camera);
 

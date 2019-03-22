@@ -7,10 +7,10 @@ io.set('heartbeat interval', 2000);
 // let THREE = require('three');
 
 app.use(express.static(__dirname + '/public'));
-app.set('view engine', 'jade');
+app.set('view engine', 'html');
 app.get('/', function(req, res) {
-    // res.sendFile(__dirname + '/lansflare.html');
-    res.render('main');
+    res.sendFile(__dirname + '/index.html');
+    // res.render('index.html');
 });
 
 

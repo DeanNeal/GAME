@@ -1,12 +1,14 @@
 const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 // import webpackRxjsExternals from 'webpack-rxjs-externals';
 // const webpackRxjsExternals = require('webpack-rxjs-externals');
 
 module.exports = {
-    context: path.resolve(__dirname, './src'),
-    entry: './app.jsx',
+    mode: 'development',
+    // context: path.resolve(__dirname, './src'),
+    entry: './src/main-vue.js',
     output: {
         path: path.resolve(__dirname, './public'),
         filename: 'js/bundle.js',
@@ -16,11 +18,16 @@ module.exports = {
     //     contentBase: path.resolve(__dirname, './src')
     // },
     module: {
-        rules: [{
-                test: /\.tsx?$/,
+        rules: [
+            {
+                test: /\.ts$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
             },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+              },
 
             {
                 test: /\.js$/,
@@ -29,16 +36,7 @@ module.exports = {
                     loader: 'babel-loader'
                 }]
             },
-            {
-                test: /\.jsx$/,
-                exclude: [/node_modules/],
-                use: [{
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['react']
-                    }
-                }]
-            },
+
             {
                 test: /\.scss$/,
                 use: ExtractTextPlugin.extract({
@@ -61,19 +59,21 @@ module.exports = {
                 }]
             },
             {
-                test: /\.worker\.js$/,
-                use: { loader: 'worker-loader' ,  options: { inline: true, fallback: false, publicPath: '/workers/'}}
-            }
+                test: /\.mp3$/,
+                // include: SRC,
+                loader: 'file-loader'
+            },
+            // {
+            //     test: /\.worker\.js$/,
+            //     use: { loader: 'worker-loader' ,  options: { inline: true, fallback: false, publicPath: '/workers/'}}
+            // }
         ]
     },
-    // externals: [
-    //   webpackRxjsExternals(),
-    //   // other externals here
-    // ],
     resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.jsx']
+        extensions: ['.ts', '.js']
     },
     plugins: [
+        new VueLoaderPlugin(),
         new ExtractTextPlugin('css/main.css')
     ]
 };
