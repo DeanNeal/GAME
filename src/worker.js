@@ -2,9 +2,9 @@ import insideWorker from './vendor/inside-worker'
 
 import FlyControls from './FlyControls'
 // import ShipControls from './shipControls';
-import { loadStarship } from './utils'
+// import { loadStarship } from './utils'
 import SocketService from './socket.service'
-import Helpers from './helper'
+// import Helpers from './helper'
 import * as THREE from 'three'
 
 let container
@@ -29,10 +29,19 @@ let start = new Date().getTime()
 const duration = 120
 let isShooting = false
 
-SocketService.socket.on('userIsReady', user => {
+SocketService.socket.on('userUpdated', user => {
   players.push({ mesh: null, user: user })
   currentUser = user
+  worker.post({type: 'userUpdated', user});
 })
+
+SocketService.socket.on('userList', users => {
+  worker.post({type: 'userList', users});
+});
+
+SocketService.socket.on('gotDamage', (user)=> {
+    worker.post({type: 'userUpdated', user, damage: true});
+});
 
 SocketService.socket.on('updateCubes', cubes => {
   addCubes(cubes)
@@ -450,7 +459,7 @@ function damageCollisionDetection () {
 
           if (obj.id !== lastBulletCollisionId) {
             lastBulletCollisionId = obj.id
-            SocketService.socket.emit('demage', player.user)
+            SocketService.socket.emit('damage', player.user)
             // this.scene.remove(obj);
             obj.material.opacity = 0
             obj.material.transparent = true
@@ -462,7 +471,7 @@ function damageCollisionDetection () {
 
 function createBullet () {
   let bullet = new THREE.Mesh(
-    new THREE.CubeGeometry(5, 5, 2000),
+    new THREE.CubeGeometry(5, 5, 1000),
     new THREE.MeshBasicMaterial({ color: 0x00ff00 })
   )
   scene.add(bullet)
@@ -540,14 +549,14 @@ function animate () {
     var pWorld = pLocal.applyMatrix4(bullets[i].matrixWorld)
     // //You can now construct the desired direction vector:
     var dir = pWorld.sub(bullets[i].camPos).normalize()
-    bullets[i].mesh.position.add(dir.multiplyScalar(1000))
+    bullets[i].mesh.position.add(dir.multiplyScalar(300))
   }
 
   for (let i = 0; i < othersBullets.length; i++) {
     var pLocal = new THREE.Vector3(0, 0, -1)
     var pWorld = pLocal.applyMatrix4(othersBullets[i].matrixWorld)
     var dir = pWorld.sub(othersBullets[i].camPos).normalize()
-    othersBullets[i].mesh.position.add(dir.multiplyScalar(1000))
+    othersBullets[i].mesh.position.add(dir.multiplyScalar(300))
   }
 
   if (InvisiblePlayer) {

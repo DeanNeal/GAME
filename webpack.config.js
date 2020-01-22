@@ -8,10 +8,10 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 module.exports = {
     mode: 'development',
     // context: path.resolve(__dirname, './src'),
-    entry: './src/main-vue.js',
+    entry: {app: './src/main-vue.js', worker: './src/worker.js'},
     output: {
-        path: path.resolve(__dirname, './public'),
-        filename: 'js/bundle.js',
+        path: path.resolve(__dirname, './src/public')
+        // filename: 'js/bundle.js',
         // publicPath: '/'
     },
     // devServer: {

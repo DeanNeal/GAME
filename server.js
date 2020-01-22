@@ -6,7 +6,7 @@ io.set('heartbeat timeout', 5000);
 io.set('heartbeat interval', 2000);
 // let THREE = require('three');
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/src'));
 app.set('view engine', 'html');
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -28,7 +28,7 @@ io.sockets.on('connection', function(socket) {
 
     socket.on('add new player', function(playerOptions) {
         addUser(user, playerOptions);
-        socket.emit("userIsReady", user );
+        socket.emit("userUpdated", user );
 
         io.sockets.emit("otherNewPlayer", users);
         io.sockets.emit('userList', users);
@@ -45,9 +45,7 @@ io.sockets.on('connection', function(socket) {
         removeUser(user);
     });
     socket.on("move", function(data, log) {
-        // if(log ){
-        //     console.log(data, user.id)
-        // }
+
         updateUsersCoords(user.id, data);
     });
 
@@ -70,8 +68,8 @@ io.sockets.on('connection', function(socket) {
        socket.broadcast.emit("otherFire", bullet);
     });
 
-    socket.on("demage", function(user) {
-       decreaseHealth(user);
+    socket.on("damage", function(user) {
+       decreaseHealth(user._id);
     });
 
     socket.on('chat message', function(data) {
@@ -133,16 +131,19 @@ let increaseScores = function(curUser) {
     io.sockets.emit("userList", users);
 }
 
-let decreaseHealth = function(user) {
+let decreaseHealth = function(userId) {
     for (let i = 0; i < users.length; i++) {
-        if (users[i].id == user.id) {
+        if (users[i]._id == userId) {
+          
             users[i].health -= 10;
             // console.log(user);
-            io.sockets.to(user._id).emit("gotDemage", users);
+      
             if(users[i].health <= 0) {
                 users[i].health = 100;
                 users[i].death++;
             }
+
+            io.sockets.to( userId).emit("gotDamage", users[i]);
         }
     }
     io.sockets.emit("userList", users);
@@ -175,8 +176,8 @@ function getRandColor() {
 
 function createCubes() {
     let cubes = [];
-    for (let i = 0; i < 5; i++) {
-        let cube = {};
+    for (let i = 0; i < 3; i++) {
+
         cubes.push({
           id: i,
           color: getRandColor(),
@@ -197,10 +198,10 @@ function createCubes() {
 }
 
 function createAsteroids() {
-    let cubes = [];
+    let asteroids = [];
     for (let i = 0; i < 50; i++) {
-        let cube = {};
-        cubes.push({
+      
+        asteroids.push({
           id: i,
           color: 0xcccccc,//getRandColor(),
           position: {
@@ -216,7 +217,7 @@ function createAsteroids() {
         });
     }
 
-    return cubes;
+    return asteroids;
 }
 
 function removeCube(cube) {

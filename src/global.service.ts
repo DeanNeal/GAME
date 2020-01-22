@@ -6,19 +6,10 @@ class GlobalService {
     public user: any = new BehaviorSubject(null);
     public sceneControls: any = new ReplaySubject();
     public cubes = new BehaviorSubject([]);
+    public damage = new Subject();
 
     constructor() {
-        SocketService.socket.on('userIsReady', (user:any) =>{
-            this.user.next(user);
-        });
-
-        // SocketService.socket.on('userUpdated', (user:any) =>{
-        //     this.user.next(user);
-        // });
-
-    	SocketService.socket.on('userList', (users: any, user:any) =>{
-    		this.users.next(users);
-    	});
+ 
     }
 }
 

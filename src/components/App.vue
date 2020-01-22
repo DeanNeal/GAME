@@ -5,7 +5,12 @@
       <div class="popup">
         <form class="popup__content" @submit="submit($event)">
           <label>Username</label>
-          <input type="text" v-model="playerOptions.name" @keydown="keyPress($event)" required>
+          <input
+            type="text"
+            v-model="playerOptions.name"
+            @keydown="keyPress($event)"
+            required
+          />
           <button class="btn" :disabled="getReady" type="submit">START</button>
         </form>
       </div>
@@ -15,10 +20,8 @@
       <div id="info">Controls - > WASD/RF/QE + mouse</div>
       <div id="position"></div>
       <div id="rotation"></div>
-      <div id="gui">HP {{user.health}}</div>
-      <div id="gui-speed">
-        <span id="gui-speed-value"></span> KM/H
-      </div>
+      <div id="gui">HP {{ user.health }}</div>
+      <div id="gui-speed"><span id="gui-speed-value"></span> KM/H</div>
       <div id="timer"></div>
       <div class="damage"></div>
       <app-user-list></app-user-list>
@@ -28,15 +31,15 @@
 
 <script>
 // import HelloWorld from './components/HelloWorld'
-import {Game} from '../game';
-import SocketService from '../socket.service';
+import { Game } from '../game'
+import SocketService from '../socket.service'
 // import UserService from '../user.service';
-import GlobalService from '../global.service';
+import GlobalService from '../global.service'
 
-import UserList from './list/UserList.vue';
+import UserList from './list/UserList.vue'
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
     'app-user-list': UserList
   },
@@ -44,55 +47,45 @@ export default {
     return {
       getReady: false,
       playerOptions: {
-        name: ""
+        name: ''
       },
       user: {
         health: 100
       }
-    };
+    }
   },
   methods: {
-    submit(e) {
-      e.preventDefault();
-      this.start();
+    submit (e) {
+      e.preventDefault()
+      this.start()
     },
-    keyPress(event) {
-      if (event.key == "Enter" && this.playerOptions.name) {
-        this.start();
+    keyPress (event) {
+      if (event.key == 'Enter' && this.playerOptions.name) {
+        this.start()
       }
     },
-    start() {
-      this.getReady = true;
+    start () {
+      this.getReady = true
 
-      let game = new Game(this.playerOptions);
-
-      // SocketService.socket.emit("add new player", this.playerOptions);
-
-      SocketService.socket.on("userIsReady", user => {
-        GlobalService.user.next(user);
-      });
+      let game = new Game(this.playerOptions)
 
       GlobalService.user
         .filter(r => r)
         .subscribe(user => {
-          // this.setState({
-          //   user: user
-          // });
-          this.user = user;
-        });
+          this.user = user
+        })
 
-      SocketService.socket.on("gotDemage", () => {
-        clearTimeout(this.timeout);
-        var c = document.querySelector(".controls");
-        c.classList.add("damage");
+      GlobalService.damage.subscribe(() => {
+        clearTimeout(this.timeout)
+        var c = document.querySelector('.controls')
+        c.classList.add('damage')
         this.timeout = setTimeout(() => {
-          c.classList.remove("damage");
-        }, 300);
-      });
+          c.classList.remove('damage')
+        }, 300)
+      })
     }
   }
-};
+}
 </script>
 
-<style>
-</style>
+<style></style>

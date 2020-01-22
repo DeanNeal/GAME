@@ -48,6 +48,17 @@ export class Game {
             if(e.data.type==='speed'){
                 this.speedBlock.innerHTML = e.data.speed.moveMult;
             }
+
+            if(e.data.type === 'userUpdated') {
+                GlobalService.user.next(e.data.user);
+                if(e.data.damage) {
+                    GlobalService.damage.next();
+                }
+            }
+
+            if(e.data.type === 'userList') {
+                GlobalService.users.next(e.data.users);
+            }
         });
         
         this.worker.post({type: 'connection', playerOptions: opts})
