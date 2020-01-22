@@ -66,7 +66,7 @@ export default {
 
       let game = new Game(this.playerOptions);
 
-      SocketService.socket.emit("add new player", this.playerOptions);
+      // SocketService.socket.emit("add new player", this.playerOptions);
 
       SocketService.socket.on("userIsReady", user => {
         GlobalService.user.next(user);
@@ -81,13 +81,13 @@ export default {
           this.user = user;
         });
 
-      SocketService.socket.on("gotDemage", userId => {
+      SocketService.socket.on("gotDemage", () => {
         clearTimeout(this.timeout);
         var c = document.querySelector(".controls");
         c.classList.add("damage");
         this.timeout = setTimeout(() => {
           c.classList.remove("damage");
-        }, 100);
+        }, 300);
       });
     }
   }

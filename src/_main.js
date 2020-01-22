@@ -326,8 +326,8 @@ export default function socketIoInit() {
         dLight.position.set(2000, 2000, -6000);
         dLight.castShadow = true;
         dLight.shadowCameraVisible = true;
-        dLight.shadowDarkness = 0.2;
-        dLight.shadowMapWidth = dLight.shadowMapHeight = 1000;
+        // dLight.shadowDarkness = 0.2;
+        // dLight.shadowMapWidth = dLight.shadowMapHeight = 1000;
         dLight.intensity = 4;
         scene.add(dLight);
 

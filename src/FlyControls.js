@@ -1,14 +1,15 @@
 /**
  * @author James Baicoianu / http://www.baicoianu.com/
  */
+import  * as THREE from 'three';
 
-export default function ( object, camera ) {
+export default function ( object, camera, container) {
 
 	this.object = object;
 
 	this.cameraInitPosition = camera.position.clone();
 
-	this.domElement = /*( domElement !== undefined ) ? domElement : */document;
+	this.domElement = container || /*( domElement !== undefined ) ? domElement : */document;
 /*	if ( domElement ) this.domElement.setAttribute( 'tabindex', -1 );*/
 
 	// API
@@ -26,7 +27,7 @@ export default function ( object, camera ) {
 	// disable default target object behavior
 
 	// internals
-	this.maxSpeed = 45;
+	this.maxSpeed = 65;
 	this.acceleration = 0.45;
 	this.tmpQuaternion = new THREE.Quaternion();
 
@@ -66,8 +67,8 @@ export default function ( object, camera ) {
 			case 87: /*W*/ this.moveState.forward = 1; break;
 			case 83: /*S*/ this.moveState.back = 1; break;
 
-			case 65: /*A*/ this.moveState.left = 1; break;
-			case 68: /*D*/ this.moveState.right = 1; break;
+			// case 65: /*A*/ this.moveState.left = 1; break;
+			// case 68: /*D*/ this.moveState.right = 1; break;
 
 			case 82: /*R*/ this.moveState.up = 1; break;
 			case 70: /*F*/ this.moveState.down = 1; break;
@@ -104,8 +105,8 @@ export default function ( object, camera ) {
 			case 87: /*W*/ this.moveState.forward = 0; break;
 			case 83: /*S*/ this.moveState.back = 0; break;
 
-			case 65: /*A*/ this.moveState.left = 0; break;
-			case 68: /*D*/ this.moveState.right = 0; break;
+			// case 65: /*A*/ this.moveState.left = 0; break;
+			// case 68: /*D*/ this.moveState.right = 0; break;
 
 			case 82: /*R*/ this.moveState.up = 0; break;
 			case 70: /*F*/ this.moveState.down = 0; break;
@@ -132,14 +133,14 @@ export default function ( object, camera ) {
 		//if (!document.querySelector('.chatRoom').contains(event.target)) {
 	
 
-			if ( this.domElement !== document ) {
+			// if ( this.domElement !== document ) {
 
-				this.domElement.focus();
+			// 	this.domElement.focus();
 
-			}
+			// }
 
-			event.preventDefault();
-			event.stopPropagation();
+			// event.preventDefault();
+			// event.stopPropagation();
 
 			if ( this.dragToLook ) {
 
@@ -179,8 +180,8 @@ export default function ( object, camera ) {
 
 	this.mouseup = function( event ) {
 		//if (!document.querySelector('.chatRoom').contains(event.target)) {
-			event.preventDefault();
-			event.stopPropagation();
+			// event.preventDefault();
+			// event.stopPropagation();
 
 			if ( this.dragToLook ) {
 
@@ -220,9 +221,9 @@ export default function ( object, camera ) {
 
 		if(!this.moveState.forward  && !this.moveState.back) {
 			if(this.movementSpeedMultiplier > 0) {
-				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? (this.acceleration / 10) : 0;
+				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? (this.acceleration / 3) : 0;
 			} else {
-				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? (this.acceleration / 10) : 0;
+				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? (this.acceleration / 3) : 0;
 			}
 		}
 
@@ -231,7 +232,7 @@ export default function ( object, camera ) {
 
 		var moveMult = Math.round(delta /** this.movementSpeed*/ + Math.abs(this.movementSpeedMultiplier));
 		var rotMult = delta * this.rollSpeed;
-		this.updateSpeedValue(moveMult);
+
 
 
 		// console.log(moveMult, this.moveVector.z);	
@@ -247,18 +248,17 @@ export default function ( object, camera ) {
 
 		this.cameraUpdate();
 		
+		return {
+			moveMult,
+			rotMult
+		}
 	};
 
 	this.cameraUpdate = function () {
 		camera.position.z = this.cameraInitPosition.z+ (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier / 2 : 0);
 	}
 
-	this.updateSpeedValue = function(val) {
 
-		if(document.querySelector('#gui-speed-value')) {
-			document.querySelector('#gui-speed-value').innerHTML = val.toFixed(0);
-		}
-	}
 
 	this.updateMovementVector = function() {
 
@@ -293,21 +293,22 @@ export default function ( object, camera ) {
 
 	this.getContainerDimensions = function() {
 
-		if ( this.domElement != document ) {
+		// if ( this.domElement != document ) {
+
+		// 	return {
+		// 		size	: [ this.domElement.offsetWidth, this.domElement.offsetHeight ],
+		// 		offset	: [ this.domElement.offsetLeft,  this.domElement.offsetTop ]
+		// 	};
+
+		// } else {
 
 			return {
-				size	: [ this.domElement.offsetWidth, this.domElement.offsetHeight ],
-				offset	: [ this.domElement.offsetLeft,  this.domElement.offsetTop ]
-			};
-
-		} else {
-
-			return {
-				size	: [ window.innerWidth, window.innerHeight ],
+				// size	: [ container.innerWidth, container.innerHeight ],
+				size: [container.width, container.height],
 				offset	: [ 0, 0 ]
 			};
 
-		}
+		// }
 
 	};
 
@@ -323,13 +324,13 @@ export default function ( object, camera ) {
 
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-	this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
-	this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
-	this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
+	// this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
+	// this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
+	// this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
 
-	window.addEventListener( 'keydown', bind( this, this.keydown ), false );
-	window.addEventListener( 'keyup',   bind( this, this.keyup ), false );
-	window.addEventListener( 'keypress',   bind( this, this.keypress ), false );
+	// container.addEventListener( 'keydown', bind( this, this.keydown ), false );
+	// container.addEventListener( 'keyup',   bind( this, this.keyup ), false );
+	// container.addEventListener( 'keypress',   bind( this, this.keypress ), false );
 
 	this.updateMovementVector();
 	this.updateRotationVector();
@@ -340,7 +341,7 @@ export default function ( object, camera ) {
 	}
 
 
-	// window.addEventListener('visibilitychange', ()=> {
+	// container.addEventListener('visibilitychange', ()=> {
 	// 	this.reset();
 	// }, false);
 };

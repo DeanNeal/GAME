@@ -1,10 +1,10 @@
-declare var io: any;
+
+import * as io from 'socket.io-client';
 
 class SocketService {
     public socket: any;
     constructor() {
-        this.socket = io();
-
+        this.socket =  io();
     }
 }
 

@@ -6,9 +6,9 @@ export default function(options: any) {
 
   let earthGeometry = new THREE.SphereGeometry(options.size, 100, 100);
   let loader = new THREE.TextureLoader();
-  let t1 = loader.load('img/earthmap1k.jpg', function(texture) {});
-  let t2 = loader.load('img/earthbump1k.jpg', function(texture) {});
-  let t3 = loader.load('img/earthspec1k.jpg', function(texture) {});
+  let t1 = loader.load('public/img/earthmap1k.jpg', function(texture) {});
+  let t2 = loader.load('public/img/earthbump1k.jpg', function(texture) {});
+  let t3 = loader.load('public/img/earthspec1k.jpg', function(texture) {});
 
   let earthMaterial = new THREE.MeshPhongMaterial({
     map: t1,

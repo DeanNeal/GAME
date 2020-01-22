@@ -35,14 +35,6 @@ export default {
         this.users = users;
     })
 
-    // SocketService.socket.on('deletePlayer', function(userId) {
-    //     let a = self.state.users.slice();
-    //     a = a.filter(r=> r.id !== userId);
-    //     self.setState({
-    //       users: a
-    //     });
-    // });
-
     GlobalService.cubes.subscribe(cubes=>{
         this.cubes = cubes;
     })
