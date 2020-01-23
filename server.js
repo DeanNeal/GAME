@@ -34,7 +34,7 @@ io.sockets.on('connection', function(socket) {
 
     socket.on('addNewPlayer', function(playerOptions) {
         addUser(user, playerOptions);
-        socket.emit("userInit", user );
+        // socket.emit("userInit", user );
         socket.emit("userUpdated", user );
 
         io.sockets.emit("otherNewPlayer", users);
@@ -51,9 +51,9 @@ io.sockets.on('connection', function(socket) {
         updateUsersCoords(user.id, data);
     });
 
-    socket.on("increaseScores", function() {
-        increaseScores(user);
-    });
+    // socket.on("increaseScores", function() {
+    //     increaseScores(user);
+    // });
 
     socket.on("removeCube", function(cube) {
         removeCube(cube);
@@ -70,13 +70,13 @@ io.sockets.on('connection', function(socket) {
        socket.broadcast.emit("otherFire", bullet);
     });
 
-    socket.on("damage", function(user) {
-       decreaseHealth(user._id);
+    socket.on("damage", function(userDemaged, userDamaging) {
+       decreaseHealth(userDemaged._id, userDamaging._id);
     });
 
-    socket.on('chat message', function(data) {
-        io.emit('chat message', data);
-    });
+    // socket.on('chat message', function(data) {
+    //     io.emit('chat message', data);
+    // });
 
 });
 
@@ -92,7 +92,8 @@ let addUser = function(user, playerOptions) {
             z: 0
         },
         rotation: {},
-        scores: 0,
+        // scores: 0,
+        kills: 0,
         health: 100,
         death: 0
 
@@ -124,31 +125,32 @@ let updateUsersCoords = function(id, data, socket) {
     // io.sockets.emit("updateUsersCoords", users);
 }
 
-let increaseScores = function(curUser) {
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].id == curUser.id) {
-            users[i].scores += 1;
-            // users[i].health = 100;
-        }
-    }
-    io.sockets.emit("userList", users);
-}
+// let increaseScores = function(curUser) {
+//     for (let i = 0; i < users.length; i++) {
+//         if (users[i].id == curUser.id) {
+//             // users[i].scores += 1;
+//             // users[i].health = 100;
+//         }
+//     }
+//     io.sockets.emit("userList", users);
+// }
 
-let decreaseHealth = function(userId) {
+let decreaseHealth = function(userDemagedId, userDemagingId) {
     for (let i = 0; i < users.length; i++) {
-        if (users[i]._id == userId) {
+        if (users[i]._id == userDemagedId) {
           
             users[i].health -= 10;
-            // console.log(user);
+
       
             if(users[i].health <= 0) {
                 users[i].health = 100;
                 users[i].death++;
                
-                io.sockets.to(userId).emit("gameOver", {position: randomPosition(), rotation: randomRotation()});
+                io.sockets.to(userDemagedId).emit("killed", {position: randomPosition(), rotation: randomRotation()});
+                users.find(r=> r._id === userDemagingId).kills += 1;
             }
 
-            io.sockets.to(userId).emit("gotDamage", users[i]);
+            io.sockets.to(userDemagedId).emit("gotDamage", users[i]);
         }
     }
     io.sockets.emit("userList", users);
@@ -181,7 +183,7 @@ function getRandColor() {
 
 function createCubes() {
     let cubes = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 10; i++) {
 
         cubes.push({
           id: i,

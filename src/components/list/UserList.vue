@@ -6,7 +6,7 @@
           <ul>
               <li v-for="user of users" :key="user.id" :class="{'current-player' : isCurrent(user)}">
                   <div><i :style="{background: user.color}"></i>{{user.playerName}}</div>
-                  <span>HP: {{user.health}} Kills: {{user.scores}} Deaths: {{user.death}}</span>
+                  <span>HP: {{user.health}} Kills: {{user.kills}} Deaths: {{user.death}}</span>
               </li>
           </ul>
         </div>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import SocketService from '../../socket.service';
+
 import GlobalService from '../../global.service';
 
 export default {

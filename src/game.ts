@@ -5,7 +5,6 @@ import GlobalService from './global.service';
 
 declare var window: any;
 declare var document: any;
-declare var $: any;
 
 import createWorker from './vendor/create-worker';
 
@@ -39,7 +38,7 @@ export class Game {
             }
             if(e.data.type === 'playShot') {
                 var audio = new Audio('sounds/blaster-1.mp3')
-                audio.volume = 0.01
+                audio.volume = 0.1
                 audio.play()
             }
             if(e.data.type === 'readyForListeners') {

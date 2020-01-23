@@ -42,7 +42,7 @@
 <script>
 
 import { Game } from '../game'
-import SocketService from '../socket.service'
+// import SocketService from '../socket.service'
 import GlobalService from '../global.service'
 
 import UserList from './list/UserList.vue'

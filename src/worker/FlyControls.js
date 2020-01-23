@@ -260,7 +260,7 @@ export default function ( object, camera, container) {
 	};
 
 	this.cameraUpdate = function () {
-		camera.position.z = this.cameraInitPosition.z+ (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier / 2 : 0);
+		camera.position.z = this.cameraInitPosition.z+ (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier / 3 : 0);
 	}
 
 

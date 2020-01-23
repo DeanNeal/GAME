@@ -1,15 +1,15 @@
-import insideWorker from './vendor/inside-worker'
+import insideWorker from '../vendor/inside-worker'
 
 import FlyControls from './FlyControls'
 // import ShipControls from './shipControls';
 // import { loadStarship } from './utils'
 import SocketService from './socket.service'
-import Helpers from './helper'
+import Helpers from '../helper'
 import * as THREE from 'three'
 
 let container
 let renderer
-const startPosition = { x: 0, y: 40, z: 40 }
+const startPosition = { x: 0, y: 50, z: 50 }
 const clock = new THREE.Clock()
 const scene = new THREE.Scene()
 
@@ -30,15 +30,12 @@ const duration = 120
 let isShooting = false
 
 
-SocketService.socket.on('userInit', user=> {
-  addMainPlayer(user)
-  addSky()
-});
-
 SocketService.socket.on('userUpdated', user => {
   players.push({ mesh: null, user: user })
   currentUser = user
   worker.post({ type: 'userUpdated', user })
+  addMainPlayer(user)
+  addSky()
 })
 
 SocketService.socket.on('userList', users => {
@@ -89,7 +86,7 @@ SocketService.socket.on('otherNewPlayer', users => {
 SocketService.socket.on('otherFire', params => {
   let userMesh = players.filter(r => r.user.id == params.userId)[0].mesh
   let pos = userMesh.position.clone()
-  let bulletMesh = createBullet()
+  let bulletMesh = createBullet(params.color)
 
   bulletMesh.position.set(pos.x, pos.y, pos.z)
   bulletMesh.rotation.set(
@@ -110,7 +107,7 @@ SocketService.socket.on('otherFire', params => {
   }, 5000)
 })
 
-SocketService.socket.on('gameOver', function ({position, rotation}) {
+SocketService.socket.on('killed', function ({position, rotation}) {
   MainPlayer.position.set(position.x, position.y, position.z)
   MainPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
 })
@@ -302,16 +299,25 @@ function createUserMesh (color, main) {
 }
 
 function createGun () {
-  let cube = new THREE.BoxGeometry(12, 12, 100)
+  let cube = new THREE.CylinderGeometry(10,10,70,30);//BoxGeometry(12, 12, 100)
   let material = new THREE.MeshPhongMaterial({
-    color: 0xaaaaaa,
+    color: '#cccccc',
     wireframe: false,
     specular: 0xffffff,
     shininess: 20
   })
   let gun = new THREE.Mesh(cube, material)
 
+  
+
   gun.position.set(0, 0, -50)
+  gun.rotation.set(Math.PI / 2,0,0);
+
+  let gunDetails = new THREE.Mesh(new THREE.CylinderGeometry(7,7,70,30), material)
+  gunDetails.position.set(0, -10, 0)
+  // gunDetails.rotation.set(1.5,0,0);
+
+  gun.add(gunDetails);
   return gun
 }
 
@@ -414,7 +420,7 @@ function cubesCollisionDetection () {
         // scene.remove(obj);
 
         SocketService.socket.emit('removeCube', obj.userData)
-        SocketService.socket.emit('increaseScores')
+        // SocketService.socket.emit('increaseScores')
       }
     }
   }
@@ -446,10 +452,10 @@ function damageCollisionDetection () {
           collisionResults[0].distance <= directionVector.length()
         ) {
           let obj = collisionResults[0].object
-
+          
           if (obj.id !== lastBulletCollisionId) {
             lastBulletCollisionId = obj.id
-            SocketService.socket.emit('damage', player.user)
+            SocketService.socket.emit('damage', player.user, currentUser)
             // this.scene.remove(obj);
             obj.remove()
             // obj.material.opacity = 0
@@ -460,10 +466,10 @@ function damageCollisionDetection () {
     })
 }
 
-function createBullet () {
+function createBullet (color) {
   let bullet = new THREE.Mesh(
-    new THREE.CubeGeometry(5, 5, 500),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    new THREE.CubeGeometry(5, 5, 300),
+    new THREE.MeshBasicMaterial({ color: color })
   )
   scene.add(bullet)
   return bullet
@@ -471,7 +477,7 @@ function createBullet () {
 
 function shot () {
   if (currentUser) {
-    let bullet = createBullet()
+    let bullet = createBullet(currentUser.color)
 
     worker.post({ type: 'playShot' })
 
@@ -490,7 +496,8 @@ function shot () {
       userId: currentUser.id,
       matrixWorld: MainPlayer.matrixWorld.clone(),
       camPos: MainPlayer.position.clone(),
-      rotation: rot
+      rotation: rot,
+      color: currentUser.color
     })
 
     setTimeout(() => {
@@ -544,14 +551,14 @@ function animate () {
     var pWorld = pLocal.applyMatrix4(bullets[i].matrixWorld)
     // //You can now construct the desired direction vector:
     var dir = pWorld.sub(bullets[i].camPos).normalize()
-    bullets[i].mesh.position.add(dir.multiplyScalar(300))
+    bullets[i].mesh.position.add(dir.multiplyScalar(250))
   }
 
   for (let i = 0; i < othersBullets.length; i++) {
     var pLocal = new THREE.Vector3(0, 0, -1)
     var pWorld = pLocal.applyMatrix4(othersBullets[i].matrixWorld)
     var dir = pWorld.sub(othersBullets[i].camPos).normalize()
-    othersBullets[i].mesh.position.add(dir.multiplyScalar(300))
+    othersBullets[i].mesh.position.add(dir.multiplyScalar(250))
   }
 
   if (MainPlayer) {

@@ -1,4 +1,3 @@
-import SocketService from './socket.service';
 import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
 
 class GlobalService {
