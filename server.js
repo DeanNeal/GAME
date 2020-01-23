@@ -20,25 +20,27 @@ let users = [];
 let cubes = createCubes();
 let asteroids = createAsteroids();
 
+setInterval(function(){
+    io.sockets.emit("updateUsersCoords", users);
+}, 20);
+
 io.sockets.on('connection', function(socket) {
     let user = {
         id: socket.id.slice(0, 4),
-        _id: socket.id
+        _id: socket.id,
+        initPosition: randomPosition(),
+        initRotation: randomRotation()
     };
 
-    socket.on('add new player', function(playerOptions) {
+    socket.on('addNewPlayer', function(playerOptions) {
         addUser(user, playerOptions);
+        socket.emit("userInit", user );
         socket.emit("userUpdated", user );
 
         io.sockets.emit("otherNewPlayer", users);
         io.sockets.emit('userList', users);
         socket.emit("updateCubes", cubes);
         socket.emit("updateAsteroids", asteroids);
-
-
-        setInterval(function(){
-            io.sockets.emit("updateUsersCoords", users);
-        }, 20);
     });
 
     socket.on('disconnect', function() {
@@ -58,9 +60,9 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on("startAgain", function(cube) {
-        cubes = createCubes();
         setTimeout(function(){
-          socket.emit("updateCubes", cubes);
+            cubes = createCubes();
+            socket.emit("updateCubes", cubes);
         }, 5000);
     });
 
@@ -82,6 +84,7 @@ io.sockets.on('connection', function(socket) {
 let addUser = function(user, playerOptions) {
     user = Object.assign(user, {
         playerName: playerOptions.name,
+        color: playerOptions.color,
         size: 80,
         position: {
             x: 0,
@@ -124,8 +127,8 @@ let updateUsersCoords = function(id, data, socket) {
 let increaseScores = function(curUser) {
     for (let i = 0; i < users.length; i++) {
         if (users[i].id == curUser.id) {
-            // users[i].scores += 1;
-            users[i].health = 100;
+            users[i].scores += 1;
+            // users[i].health = 100;
         }
     }
     io.sockets.emit("userList", users);
@@ -141,9 +144,11 @@ let decreaseHealth = function(userId) {
             if(users[i].health <= 0) {
                 users[i].health = 100;
                 users[i].death++;
+               
+                io.sockets.to(userId).emit("gameOver", {position: randomPosition(), rotation: randomRotation()});
             }
 
-            io.sockets.to( userId).emit("gotDamage", users[i]);
+            io.sockets.to(userId).emit("gotDamage", users[i]);
         }
     }
     io.sockets.emit("userList", users);
@@ -203,7 +208,7 @@ function createAsteroids() {
       
         asteroids.push({
           id: i,
-          color: 0xcccccc,//getRandColor(),
+          color: 0xcccccc,
           position: {
             x: 20000 * (2.0 * Math.random() - 1.0),
             y: 20000 * (2.0 * Math.random() - 1.0),
@@ -228,6 +233,23 @@ function removeCube(cube) {
           return;
       }
   }
+}
+
+
+function randomPosition() {
+    return {
+        x: 2500 * (5.0 * Math.random() - 1.0),
+        y: 2500 * (5.0 * Math.random() - 1.0),
+        z: 2500 * (5.0 * Math.random() - 1.0)
+    }
+}
+
+function randomRotation() {
+    return {
+        x: Math.random(),
+        y: Math.random(),
+        z: Math.random()
+    }
 }
 
 http.listen(8081, process.env.IP);

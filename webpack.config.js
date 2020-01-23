@@ -1,16 +1,16 @@
 const path = require('path');
-const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+// const webpack = require('webpack');
+// const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // import webpackRxjsExternals from 'webpack-rxjs-externals';
 // const webpackRxjsExternals = require('webpack-rxjs-externals');
 
 module.exports = {
     mode: 'development',
-    // context: path.resolve(__dirname, './src'),
     entry: {app: './src/main-vue.js', worker: './src/worker.js'},
     output: {
-        path: path.resolve(__dirname, './src/public')
+        path: path.join(__dirname, './src/public')
         // filename: 'js/bundle.js',
         // publicPath: '/'
     },
@@ -37,12 +37,30 @@ module.exports = {
                 }]
             },
 
+            // {
+            //     test: /\.scss$/,
+            //     use: ExtractTextPlugin.extract({
+            //         fallback: "style-loader",
+            //         use: ['css-loader', 'sass-loader']
+            //     })
+            // },
+            // {
+            //     test: /\.(sass|scss)$/,
+            //     use: [{
+            //         loader: MiniCssExtractPlugin.loader,
+            //     }, {
+            //         loader: "css-loader",
+            //     }, {
+            //         loader: "sass-loader"
+            //     }]
+            // },
             {
-                test: /\.scss$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
-                    use: ['css-loader', 'sass-loader']
-                })
+                test: /\.(less)$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    "css-loader",
+                    "less-loader"
+                ]
             },
             {
                 test: /\.(png|jpg|gif)$/,
@@ -74,6 +92,9 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new ExtractTextPlugin('css/main.css')
+        new MiniCssExtractPlugin({
+			filename: "css/[name].css",
+			// chunkFilename: "[id].css"
+		})
     ]
 };

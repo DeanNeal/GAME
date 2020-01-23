@@ -148,7 +148,7 @@ function addSky () {
   let loader = new THREE.ImageBitmapLoader()
   // create the geometry sphere
   let geometry = new THREE.SphereGeometry(250000, 20, 20)
-  loader.load('./img/galaxy_starfield.png', function (imageBitmap) {
+  loader.load('../images/galaxy_starfield.png', function (imageBitmap) {
     var texture = new THREE.CanvasTexture(imageBitmap)
     texture.repeat.set(10, 10)
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping
