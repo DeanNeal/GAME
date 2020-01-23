@@ -38,7 +38,7 @@ export class Game {
                 GlobalService.cubes.next(e.data.cubes)
             }
             if(e.data.type === 'playShot') {
-                var audio = new Audio('public/blaster-1.mp3')
+                var audio = new Audio('sounds/blaster-1.mp3')
                 audio.volume = 0.01
                 audio.play()
             }
@@ -59,6 +59,10 @@ export class Game {
             if(e.data.type === 'userList') {
                 GlobalService.users.next(e.data.users);
             }
+
+            // if(e.data.type === 'gameOver') {
+            //     GlobalService.gameOver.next();
+            // }
         });
         
         this.worker.post({type: 'connection', playerOptions: opts})

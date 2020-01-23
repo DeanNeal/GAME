@@ -1,12 +1,12 @@
 <template>
       <div class="sidebar">
         <div class="sidebar__users">
-          <span class="title">Players:</span>
-          <span class="sidebar__left-count">Left: {{cubes.length}}</span>  
+          <span class="title">Players: <b>{{users.length}}</b></span>
+          <span class="sidebar__left-count">Left: {{cubes}}</span>  
           <ul>
               <li v-for="user of users" :key="user.id" :class="{'current-player' : isCurrent(user)}">
-                  {{user.playerName}} - {{user.id}}
-                  <span>Health: {{user.health}} Scores: {{user.scores}} Death: {{user.death}}</span>
+                  <div><i :style="{background: user.color}"></i>{{user.playerName}}</div>
+                  <span>HP: {{user.health}} Kills: {{user.scores}} Deaths: {{user.death}}</span>
               </li>
           </ul>
         </div>

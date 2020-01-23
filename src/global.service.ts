@@ -7,6 +7,7 @@ class GlobalService {
     public sceneControls: any = new ReplaySubject();
     public cubes = new BehaviorSubject([]);
     public damage = new Subject();
+    // public gameOver = new Subject();
 
     constructor() {
  

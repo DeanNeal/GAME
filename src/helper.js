@@ -1,4 +1,4 @@
-var colors = [
+export let colors = [
     '#FF62B0',
     '#9A03FE',
     '#62D0FF',

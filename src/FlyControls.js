@@ -33,7 +33,7 @@ export default function ( object, camera, container) {
 
 	this.mouseStatus = 0;
 
-	this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0 };
+	this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0, freeze: 0};
 	this.moveVector = new THREE.Vector3( 0, 0, 0 );
 	this.rotationVector = new THREE.Vector3( 0, 0, 0 );
 
@@ -53,16 +53,17 @@ export default function ( object, camera, container) {
 	this.keydown = function( event ) {
 
 		if ( event.altKey ) {
-
-			return;
-
+			return
 		}
+
  // console.log( event.keyCode);
 		// event.preventDefault();
 
 		switch ( event.keyCode ) {
 			
 			// case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
+
+			case 16: this.moveState.freeze = 1; break;
 
 			case 87: /*W*/ this.moveState.forward = 1; break;
 			case 83: /*S*/ this.moveState.back = 1; break;
@@ -101,6 +102,8 @@ export default function ( object, camera, container) {
 		switch ( event.keyCode ) {
 			
 			// case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
+
+			case 16: this.moveState.freeze = 0; break;
 
 			case 87: /*W*/ this.moveState.forward = 0; break;
 			case 83: /*S*/ this.moveState.back = 0; break;
@@ -220,10 +223,12 @@ export default function ( object, camera, container) {
 		}
 
 		if(!this.moveState.forward  && !this.moveState.back) {
-			if(this.movementSpeedMultiplier > 0) {
-				this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? (this.acceleration / 3) : 0;
-			} else {
-				this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? (this.acceleration / 3) : 0;
+			if(!this.moveState.freeze) {
+				if(this.movementSpeedMultiplier > 0) {
+					this.movementSpeedMultiplier -= this.movementSpeedMultiplier > 0 ? (this.acceleration / 3) : 0;
+				} else {
+					this.movementSpeedMultiplier += this.movementSpeedMultiplier < 0 ? (this.acceleration / 3) : 0;
+				}
 			}
 		}
 

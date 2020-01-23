@@ -1,4 +1,4 @@
-@import 'mixins.scss';
+// @import 'mixins.scss';
 
 * {
     margin: 0;
@@ -217,6 +217,8 @@ canvas {
             margin-top: 10px;
             width: 100%;
             float: left;
+            display: flex;
+            justify-content: center;
             label {
                 float: left;
                 margin-right: 4px;
@@ -227,12 +229,11 @@ canvas {
                 width: 20px;
                 height: 20px;
                 display: inline-block;
-                border: 1px solid #999;
-                margin-right: 3px;
+                border: 1px solid #ccc;
+                margin-right: 5px;
             }
             .color.active {
-                background: #F00;
-                box-shadow: 0 0 4px 1px #000;
+                box-shadow: 0 0 0px 1px #000;
                 border-color: #494949;
             }
         }
@@ -296,11 +297,14 @@ canvas {
                     padding: 3px 10px 3px 20px;
                     border: 1px solid #999;
                     border-bottom: none;
-                    font-size: 12px;
+                    font-size: 13px;
                     position: relative;
                     height: 21px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
                     &.current-player {
-                        color: green;
+                        background: rgba(75, 255, 114, 0.3);
                         font-weight: 700;
                     }
                     i {
@@ -308,8 +312,8 @@ canvas {
                         left: 7px;
                         top: 0;
                         border-radius: 100%;
-                        width: 10px;
-                        height: 10px;
+                        width: 8px;
+                        height: 8px;
                         display: block;
                         bottom: 0;
                         margin: auto;
@@ -324,95 +328,7 @@ canvas {
             }
         }
     }
-    .chatRoom {
-        padding: 10px 30px 10px 15px;
-        height: 300px;
-        margin: auto;
-        width: 400px;
-        position: relative;
-        border: 1px solid #999;
-        position: fixed;
-        z-index: 10;
-        right: 0;
-        bottom: 0;
-        background: rgba(245, 245, 245, 0.8);
-        cursor: auto;
-        &.closed {
-            height: 60px;
-            textarea {
-                display: none;
-            }
-            .close-chat:after {
-                transform: rotate(45deg);
-                -webkit-transform: rotate(45deg);
-            }
-            .chat-menu {
-                overflow: hidden;
-            }
-        }
-        .chat-menu {
-            height: 85%;
-            overflow: auto;
-        }
-        .close-chat {
-            cursor: pointer;
-            font-size: 12px;
-            color: #999;
-            width: 12px;
-            height: 12px;
-            display: inline-block;
-            right: 10px;
-            position: absolute;
-            &:after {
-                content: '';
-                position: absolute;
-                border: solid #777;
-                border-width: 0 2px 2px 0;
-                display: inline-block;
-                padding: 1px;
-                left: 0;
-                @include absolute-center;
-                transform: rotate(-135deg);
-                -webkit-transform: rotate(-135deg);
-            }
-        }
-        .messages {
-            padding-right: 20px;
-            li {
-                color: #fff;
-                margin-bottom: 10px;
-                padding: 2px 8px;
-                word-break: break-word;
-                p {
-                    font-size: 13px;
-                    color: #2B587A;
-                    height: 12px;
-                }
-                span {
-                    font-size: 11px;
-                    display: inline-block;
-                    color: #111;
-                }
-                .date {
-                    color: #999;
-                    font-size: 10px;
-                    float: right;
-                }
-            }
-            .new-message {
-                background: rgba(202, 194, 194, 0.5);
-            }
-        }
-        textarea {
-            margin-top: 10px;
-            resize: none;
-            width: 100%;
-        }
-    } // .chatRoom.dark {
-    //     border: 1px solid #101010;
-    //     background: #0b0c0f;
-    //     box-shadow: 0px 0px 42px 1px #25252A;
-    // }
+
     .player {
         border-radius: 100%;
         background: blue;
