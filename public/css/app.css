@@ -80,6 +80,14 @@ ul {
   height: 50px;
   white-space: nowrap;
 }
+#backToMain {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+}
 #position {
   color: #fff;
   position: absolute;
@@ -102,27 +110,6 @@ ul {
   text-align: center;
   z-index: 1;
 }
-.btn {
-  display: inline-block;
-  margin-bottom: 0;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  background-image: none;
-  white-space: nowrap;
-  margin-right: 10px;
-  border-radius: 4px;
-  -webkit-user-select: none;
-  background-color: #399aa2;
-  color: #fff;
-  font-size: 12px;
-  width: 150px;
-  border: none;
-  outline: none;
-}
-.btn:hover {
-  background: #2c767c;
-}
 canvas {
   width: 100vw;
   height: 100vh;
@@ -130,6 +117,7 @@ canvas {
 .container {
   height: 100%;
   width: 100%;
+  user-select: none;
 }
 .container .overlay {
   background: rgba(0, 0, 0, 0.6);
@@ -150,71 +138,121 @@ canvas {
   justify-content: center;
   z-index: 999;
 }
-.container .popup {
+.container .back {
+  color: #fff;
+  cursor: pointer;
+}
+.container .page {
+  width: 400px;
+  height: 500px;
+}
+.container .main-menu {
+  color: #fff;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 200px;
+}
+.container .main-menu h1 {
+  font-size: 48px;
+}
+.container .main-menu h1 sup {
+  font-size: 0.5em;
+  line-height: 0;
+  color: #666;
+}
+.container .main-menu ul {
+  margin-top: 100px;
+}
+.container .main-menu ul li {
+  font-size: 30px;
+  margin: 10px 0;
+  transition: 0.15s;
+  cursor: pointer;
+}
+.container .main-menu ul li:last-child {
+  margin-top: 30px;
+}
+.container .main-menu ul li:hover {
+  margin-left: -10px;
+}
+.container .authors {
+  color: #fff;
+}
+.container .authors ul {
+  margin: 50px 0 0 50px;
+}
+.container .authors ul li {
+  font-size: 24px;
+}
+.container .new-game {
   z-index: 1000;
   position: fixed;
-  width: 350px;
-  background: #fff;
   border-radius: 5px;
-  box-shadow: 0 0 8px 2px #000;
   min-height: 115px;
-  cursor: auto;
-  box-shadow: 0 0 30px 0px #555;
+  color: #fff;
 }
-.container .popup__content {
+.container .new-game__content {
   padding: 20px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
 }
-.container .popup .btn {
+.container .new-game .btn {
+  cursor: pointer;
   width: 100%;
   margin: 0px 50px;
-  padding: 8px 20px;
-  height: 30px;
-  margin-top: 20px;
+  padding: 15px 20px;
+  margin-top: 70px;
   margin-bottom: 10px;
-}
-.container .popup label {
-  width: 100%;
-  text-align: center;
-  font-size: 14px;
-}
-.container .popup input {
-  margin-top: 10px;
+  background: none;
+  color: #fff;
   border-radius: 4px;
-  height: 30px;
-  border: 1px solid #ccc;
-  padding: 7px 20px;
   outline: none;
 }
-.container .popup select {
+.container .new-game label {
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  margin-top: 40px;
+  margin-bottom: 15px;
+}
+.container .new-game input {
+  width: 100%;
+  height: 30px;
+  margin-top: 40px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  padding: 7px 20px;
+  outline: none;
+  background: none;
+  color: #fff;
+}
+.container .new-game select {
   margin-right: 22px;
   padding: 4px 9px 6px 9px;
 }
-.container .popup .colors {
-  margin-top: 10px;
+.container .new-game .colors {
   width: 100%;
   float: left;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
 }
-.container .popup .colors label {
+.container .new-game .colors label {
   float: left;
   margin-right: 4px;
   margin-bottom: 10px;
 }
-.container .popup .colors .color {
+.container .new-game .colors .color {
+  transition: 0.2s;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   display: inline-block;
-  border: 1px solid #ccc;
   margin-right: 5px;
 }
-.container .popup .colors .color.active {
-  box-shadow: 0 0 0px 1px #000;
+.container .new-game .colors .color.active {
+  box-shadow: 0 0 0px 2px #fff;
   border-color: #494949;
 }
 .container .version {
@@ -225,18 +263,6 @@ canvas {
 }
 .container .version.dark {
   color: white;
-}
-.container .cooming-soon {
-  font-size: 13px;
-  position: absolute;
-  left: 10px;
-  top: 5px;
-  line-height: 40px;
-}
-.container .cooming-soon img {
-  width: 40px;
-  float: left;
-  margin-right: 6px;
 }
 .container .sidebar {
   float: right;
@@ -323,9 +349,6 @@ canvas {
   display: inline;
   text-align: center;
   font-size: 12px;
-}
-.container .box {
-  position: relative;
 }
 .container.absolute {
   position: absolute;
