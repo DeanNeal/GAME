@@ -466,8 +466,8 @@ function damageCollisionDetection () {
             lastBulletCollisionId = obj.id
             
             SocketService.socket.emit('damage', player.user, currentUser)
-            worker.post({type: 'damageDone', volume: 0.05})
-            // this.scene.remove(obj);
+            worker.post({type: 'damageDone', volume: 0.1})
+ 
             obj.remove()
             // obj.material.opacity = 0
             // obj.material.transparent = true
