@@ -8,9 +8,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
     mode: 'development',
-    entry: {app: './src/main-vue.js', worker: './src/worker/worker.js'},
+    entry: {app: './src/main-vue.js', worker: './src/worker/worker.ts'},
     output: {
-        path: path.join(__dirname, './src/public')
+        path: path.join(__dirname, './public')
         // filename: 'js/bundle.js',
         // publicPath: '/'
     },

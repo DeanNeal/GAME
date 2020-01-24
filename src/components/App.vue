@@ -55,7 +55,7 @@ export default {
   data: () => {
     return {
       getReady: false,
-      colors: ['red', 'yellow', 'green', 'blue'],
+      colors: ['red', 'yellow', 'lime', 'blue'],
       playerOptions: {
         name: '',
         color: 'red'

@@ -1,7 +1,6 @@
 import insideWorker from '../vendor/inside-worker'
 
 import FlyControls from './FlyControls'
-// import ShipControls from './shipControls';
 // import { loadStarship } from './utils'
 import SocketService from './socket.service'
 import Helpers from '../helper'
@@ -95,6 +94,9 @@ SocketService.socket.on('otherFire', params => {
     params.rotation._z
   )
 
+  //offset
+  bulletMesh.translateZ(-50);
+
   othersBullets.push({
     mesh: bulletMesh,
     matrixWorld: params.matrixWorld,
@@ -145,7 +147,7 @@ function addSky () {
   let loader = new THREE.ImageBitmapLoader()
   // create the geometry sphere
   let geometry = new THREE.SphereGeometry(250000, 20, 20)
-  loader.load('../images/galaxy_starfield.png', function (imageBitmap) {
+  loader.load('./images/galaxy_starfield.png', function (imageBitmap: any) {
     var texture = new THREE.CanvasTexture(imageBitmap)
     texture.repeat.set(10, 10)
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping
@@ -186,6 +188,7 @@ function addCubes (cubes) {
       /*opacity: 0.5, transparent: true ,*/ specular: 0xffffff,
       shininess: 50
     })
+
     let mesh = new THREE.Mesh(cube, material)
 
     mesh.userData = c
@@ -277,10 +280,10 @@ function addMainPlayer ({color, initPosition, initRotation}) {
 
 }
 
-function createUserMesh (color, main) {
+function createUserMesh (color, main?) {
 
   let userMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(70, 15, 15),
+    new THREE.SphereGeometry(70, 20, 20),
     new THREE.MeshPhongMaterial({
       // map: texture,
       // bumpMap: textureBump,
@@ -360,31 +363,35 @@ function createNewPlayer (user) {
   newPlayer.userData = {
     id: user.id
   }
-  // newPlayer.position.set(0, 0, 0)
-  // newPlayer.material.color.set(0xff0000)
 
   var loader = new THREE.FontLoader()
-  loader.load('../vendor/helvetiker_bold.typeface.json', function (font) {
-    // var textGeo = new THREE.TextGeometry(user.playerName, {
-    //   font: font,
-    //   size: 32,
-    //   height: 3,
-    //   curveSegments: 10
-    // })
+  loader.load('./helvetiker_regular.typeface.json', function (font) {
+    var textGeo = new THREE.TextGeometry(user.playerName, {
+      font: font,
+      size: 16,
+      height: 1,
+      bevelEnabled : false,
+      bevelThickness : 1,
+      bevelSize : 0.01,
+      bevelSegments: 10,
+    })
 
-    // let material = new THREE.MeshPhongMaterial({
-    //   color: 0xffffff,
-    //   wireframe: false,
-    //   specular: 0xffffff
-    //   // shininess: 50
-    // })
+    let material = new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      // wireframe: false,
+      // specular: 0xffffff,
+      // shininess: 5,
+      emissive: 0xffffff,
+      // emissiveIntensity: 0.5
+    })
 
-    // const userTextMesh = new THREE.Mesh(textGeo, material)
-    // userTextMesh.position.set(50, 100, 0)
+    const userTextMesh = new THREE.Mesh(textGeo, material)
+    userTextMesh.receiveShadow = false;
+    userTextMesh.position.set(100, 100, 100)
 
-    // newPlayer.add(userTextMesh)
+    newPlayer.attach(userTextMesh)
 
-    players.push({ mesh: newPlayer, user: user});//, userTextMesh: userTextMesh })
+    players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh })
 
     scene.add(newPlayer)
   })
@@ -468,9 +475,10 @@ function damageCollisionDetection () {
 
 function createBullet (color) {
   let bullet = new THREE.Mesh(
-    new THREE.CubeGeometry(5, 5, 300),
+    new THREE['CubeGeometry'](5, 5, 200),
     new THREE.MeshBasicMaterial({ color: color })
   )
+  
   scene.add(bullet)
   return bullet
 }
@@ -479,26 +487,30 @@ function shot () {
   if (currentUser) {
     let bullet = createBullet(currentUser.color)
 
-    worker.post({ type: 'playShot' })
-
     let pos = MainPlayer.position.clone()
     let rot = MainPlayer.rotation.clone()
+
     bullet.position.set(pos.x, pos.y, pos.z)
     bullet.rotation.set(rot.x, rot.y, rot.z)
 
+    const camPos = MainPlayer.position.clone();
+    const matrixWorld = MainPlayer.matrixWorld.clone();
+    
     bullets.push({
       mesh: bullet,
-      matrixWorld: MainPlayer.matrixWorld.clone(),
-      camPos: MainPlayer.position.clone()
+      matrixWorld: matrixWorld,
+      camPos: camPos
     })
 
     SocketService.socket.emit('fire', {
       userId: currentUser.id,
-      matrixWorld: MainPlayer.matrixWorld.clone(),
-      camPos: MainPlayer.position.clone(),
+      matrixWorld: matrixWorld,
+      camPos: camPos,
       rotation: rot,
       color: currentUser.color
     })
+
+    worker.post({ type: 'playShot' })
 
     setTimeout(() => {
       scene.remove(bullet)
@@ -509,12 +521,11 @@ function shot () {
 
 function shotAnimate () {
   // let cl = clock.getElapsedTime();
-
   var elapsed = new Date().getTime() - start
-  // console.log(elapsed);
+
   if (elapsed > duration) {
     if (isShooting) {
-      shot(isShooting)
+      shot()
     }
     start = new Date().getTime()
   }
@@ -539,9 +550,7 @@ function animate () {
 
 
   for (let i = 0; i < allCubes.length; i++) {
-    // allCubes[i].position.x += 1;
     allCubes[i].rotation.y += 0.01
-    // allCubes[i].rotation.z += 0.2;
   }
 
   for (let i = 0; i < bullets.length; i++) {
@@ -551,6 +560,7 @@ function animate () {
     var pWorld = pLocal.applyMatrix4(bullets[i].matrixWorld)
     // //You can now construct the desired direction vector:
     var dir = pWorld.sub(bullets[i].camPos).normalize()
+
     bullets[i].mesh.position.add(dir.multiplyScalar(250))
   }
 
@@ -577,15 +587,41 @@ function animate () {
   }
 
 
-  // players.forEach(user => {
-  //   if (camera && user.userTextMesh) {
-  //     // const factor = user.mesh.position.distanceTo(camera.position) / 300;
-  //     // console.log(factor);
-  //     // user.userTextMesh.scale.set( factor, factor, factor );
-  //     // user.userTextMesh.lookAt(camera.position)
-  //   }
-  // })
+  players.forEach(user => {
+    if (camera && user.userTextMesh) {
+      // const factor = user.mesh.position.distanceTo(MainPlayer.position) / 300;
+      var scaleVector = new THREE.Vector3();
+      var scaleFactor = 2000;
+      var sprite = user.userTextMesh;
+      var scale = scaleVector.subVectors(user.mesh.position, MainPlayer.position).length() / scaleFactor;
+      sprite.scale.set(scale, scale, scale); 
+      sprite.position.set(70 + scale*6,70 + scale*6, 70 + scale*6);
+
+  
+      // user.userTextMesh.lookAt(MainPlayer.position.clone());
+
+      var worldCamPos = new THREE.Vector3();
+      camera.getWorldPosition(worldCamPos);
+      // this.worldToLocal(worldCamPos);
+      // this.lookAt(worldCamPos);
+      user.userTextMesh.lookAt(worldCamPos)
+      // console.log(worldCamPos);
+
+
+      // user.userTextMesh.quaternion.copy(MainPlayer.quaternion.clone().inverse());
+
+    }
+  })
 }
+
+// function lookAtVector( sourcePoint, destPoint ) {
+
+//   return new THREE.Quaternion().setFromRotationMatrix(
+//       new THREE.Matrix4()
+//           .lookAt( sourcePoint, destPoint, new THREE.Vector3( 0, 0, -1 ) )
+//   );
+
+// }
 
 const worker = insideWorker(e => {
   const canvas = e.data.canvas
@@ -599,8 +635,8 @@ const worker = insideWorker(e => {
     let dLight = new THREE.DirectionalLight(0xffffff)
     dLight.position.set(2000, 2000, -6000)
     dLight.castShadow = true
-    dLight.shadowCameraVisible = true
-    dLight.shadowDarkness = 0.7
+    // dLight.shadowCameraVisible = true
+    // dLight.shadowDarkness = 0.7
     dLight.shadowMapWidth = dLight.shadowMapHeight = 1000
     dLight.intensity = 1
     scene.add(dLight)

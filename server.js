@@ -6,7 +6,7 @@ io.set('heartbeat timeout', 5000);
 io.set('heartbeat interval', 2000);
 // let THREE = require('three');
 
-app.use(express.static(__dirname + '/src'));
+app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'html');
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -22,7 +22,7 @@ let asteroids = createAsteroids();
 
 setInterval(function(){
     io.sockets.emit("updateUsersCoords", users);
-}, 20);
+}, 10);
 
 io.sockets.on('connection', function(socket) {
     let user = {
@@ -240,18 +240,22 @@ function removeCube(cube) {
 
 function randomPosition() {
     return {
-        x: 2500 * (5.0 * Math.random() - 1.0),
-        y: 2500 * (5.0 * Math.random() - 1.0),
-        z: 2500 * (5.0 * Math.random() - 1.0)
+        x: 0,//2500 * (5.0 * Math.random() - 1.0),
+        y: 0,//2500 * (5.0 * Math.random() - 1.0),
+        z: 0//2500 * (5.0 * Math.random() - 1.0)
     }
 }
 
 function randomRotation() {
     return {
-        x: Math.random(),
-        y: Math.random(),
-        z: Math.random()
+        x: randomDecemal(0, Math.PI),
+        y: randomDecemal(0, Math.PI),
+        z: randomDecemal(0, Math.PI)
     }
+}
+
+function randomDecemal(from, to) {
+    return (Math.random() * (to - from) + from).toFixed(4)
 }
 
 http.listen(8081, process.env.IP);

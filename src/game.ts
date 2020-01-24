@@ -26,7 +26,7 @@ export class Game {
         // this.container.className = 'canvas';
         document.body.appendChild(this.container);
 
-        this.worker = createWorker(this.container, './public/worker.js', (e: any)=> {
+        this.worker = createWorker(this.container, './worker.js', (e: any)=> {
 
             this.speedBlock = document.querySelector('#gui-speed-value');
             
