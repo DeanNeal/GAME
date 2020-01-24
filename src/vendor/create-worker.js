@@ -11,7 +11,8 @@ export default function (canvas, workerUrl, listener) {
     return {
       post: function (a, b) {
         worker.postMessage(a, b)
-      }
+      },
+      worker: worker
     }
   } else {
     var randomId = 'Offscreen' + Math.round(Math.random() * 1000)

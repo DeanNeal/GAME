@@ -8,22 +8,29 @@ declare var document: any;
 
 import createWorker from './vendor/create-worker';
 
-
-import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
-
 export class Game {
     public container: any;
     public worker: any;
     public speedBlock:any;
-
-
+ 
     constructor(opts: any) {
         this.init(opts);
+
+        this.onWindowResize = this.onWindowResize.bind(this);
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyPress = this.onKeyPress.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
+
+        this.onContextmenu =  this.onContextmenu.bind(this);
     }
 
     init(opts: any) {
         this.container = document.createElement('canvas');
-        // this.container.className = 'canvas';
         document.body.appendChild(this.container);
 
         this.worker = createWorker(this.container, './worker.js', (e: any)=> {
@@ -57,7 +64,7 @@ export class Game {
 
             if(e.data.type === 'damageDone') {
                 var audio = new Audio('sounds/damage.mp3')
-                audio.volume = e.data.volume || 0.1
+                audio.volume = e.data.volume || 0.3
                 audio.play()
             }
 
@@ -72,29 +79,7 @@ export class Game {
         
         this.worker.post({type: 'connection', playerOptions: opts})
 
-        Observable
-        .fromEvent(document, 'keydown')
-        .subscribe((e: KeyboardEvent) => {
-            if(e.keyCode === 32) {
-                this.worker.post({
-                    type: 'startFire'
-                });
-            }
-        })
-
-        Observable
-            .fromEvent(document, 'keyup')
-            .subscribe((e: KeyboardEvent) => {
-                this.worker.post({
-                    type: 'stopFire'
-                });
-            })
-
         this.onWindowResize();
-
-        window.addEventListener('resize', this.onWindowResize.bind(this), false);
-
-
     }
 
     startTimer() {
@@ -109,77 +94,118 @@ export class Game {
         });
     }
 
-
     addListeners() {
+        window.addEventListener('mousedown', this.onMouseDown, false);
+        window.addEventListener('mousemove', this.onMouseMove, false);
+        window.addEventListener('mouseup', this.onMouseUp, false);
+        
+        window.addEventListener('keydown', this.onKeyDown, false);
+        window.addEventListener('keyup', this.onKeyUp, false);
+        window.addEventListener('keypress', this.onKeyPress, false);
 
-        window.addEventListener('mousedown',(e)=> {
-            e.preventDefault();
-			e.stopPropagation();
-            this.worker.post({
-                type: 'mousedown',
-                mouse: {
-                    button: e.button
-                }
-            })
-        }, false);
-        window.addEventListener('mousemove',(e)=> {
-            e.preventDefault();
-			e.stopPropagation();
-            this.worker.post({
-                type: 'mousemove',
-                mouse: {
-                    pageX: e.pageX,
-                    pageY: e.pageY
-                }
-            })
-        }, false);
-
-        window.addEventListener('mouseup',(e)=> {
-            e.preventDefault();
-			e.stopPropagation();
-            this.worker.post({
-                type: 'mouseup',
-                mouse: {
-                    pageX: e.pageX,
-                    pageY: e.pageY
-                }
-            })
-        }, false);
-
-        window.addEventListener('keydown',(e)=> {
-            this.worker.post({
-                type: 'keydown',
-                mouse: {
-                    altKey: e.altKey,
-                    keyCode: e.keyCode,
-                }
-            })
-        }, false);
-
-        window.addEventListener('keyup',(e)=> {
-            this.worker.post({
-                type: 'keyup',
-                mouse: {
-                    altKey: e.altKey,
-                    keyCode: e.keyCode,
-                }
-            })
-        }, false);
-
-        window.addEventListener('keypress',(e)=> {
-            this.worker.post({
-                type: 'keypress',
-                mouse: {
-                    altKey: e.altKey,
-                    keyCode: e.keyCode,
-                }
-            })
-        }, false);
-
-        window.addEventListener('contextmenu',(e)=> {
-            e.preventDefault();
-        }, false);
+        window.addEventListener('contextmenu', this.onContextmenu, false);
+        window.addEventListener('resize', this.onWindowResize, false);
     }
 
+    onMouseDown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.worker.post({
+            type: 'mousedown',
+            mouse: {
+                button: e.button
+            }
+        })
+    }
+
+    onMouseMove(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.worker.post({
+            type: 'mousemove',
+            mouse: {
+                pageX: e.pageX,
+                pageY: e.pageY
+            }
+        })
+    }
+
+    onMouseUp(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.worker.post({
+            type: 'mouseup',
+            mouse: {
+                pageX: e.pageX,
+                pageY: e.pageY
+            }
+        })
+    }
+
+    onKeyDown(e) {
+        if(e.keyCode === 32) {
+            this.worker.post({
+                type: 'startFire'
+            });
+        }
+
+        this.worker.post({
+            type: 'keydown',
+            mouse: {
+                altKey: e.altKey,
+                keyCode: e.keyCode,
+            }
+        })
+    }
+
+    onKeyPress(e) {
+        this.worker.post({
+            type: 'keypress',
+            mouse: {
+                altKey: e.altKey,
+                keyCode: e.keyCode,
+            }
+        })
+    }
+
+    onKeyUp(e) {
+
+        this.worker.post({
+            type: 'stopFire'
+        });
+        
+        this.worker.post({
+            type: 'keyup',
+            mouse: {
+                altKey: e.altKey,
+                keyCode: e.keyCode,
+            }
+        })
+    }
+
+    onContextmenu(e) {
+        e.preventDefault();
+    }
+
+    removeListeners() {
+        window.removeEventListener('resize', this.onWindowResize, false);
+
+        window.removeEventListener('mousedown', this.onMouseDown, false);
+        window.removeEventListener('mousemove', this.onMouseMove, false);
+        window.removeEventListener('mouseup', this.onMouseUp, false);
+        
+        window.removeEventListener('keydown', this.onKeyDown, false);
+        window.removeEventListener('keyup', this.onKeyUp, false);
+        window.removeEventListener('keypress', this.onKeyPress, false);
+
+        window.removeEventListener('contextmenu', this.onContextmenu, false);
+    }
+
+    disconnect() {
+        this.removeListeners();
+        this.worker.worker.terminate();
+        this.worker = undefined;
+        this.container.remove();
+    }
  
 }

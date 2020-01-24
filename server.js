@@ -32,6 +32,8 @@ io.sockets.on('connection', function(socket) {
         initRotation: randomRotation()
     };
 
+    io.sockets.emit('online', users.length);
+
     socket.on('addNewPlayer', function(playerOptions) {
         addUser(user, playerOptions);
         // socket.emit("userInit", user );
@@ -41,10 +43,13 @@ io.sockets.on('connection', function(socket) {
         io.sockets.emit('userList', users);
         socket.emit("updateCubes", cubes);
         socket.emit("updateAsteroids", asteroids);
+
+        io.sockets.emit('online', users.length);
     });
 
     socket.on('disconnect', function() {
         removeUser(user);
+        io.sockets.emit('online', users.length);
     });
     socket.on("move", function(data, log) {
 
@@ -240,9 +245,12 @@ function removeCube(cube) {
 
 function randomPosition() {
     return {
-        x: 0,//2500 * (5.0 * Math.random() - 1.0),
-        y: 0,//2500 * (5.0 * Math.random() - 1.0),
-        z: 0//2500 * (5.0 * Math.random() - 1.0)
+        // x: 0,//2500 * (5.0 * Math.random() - 1.0),
+        // y: 0,//2500 * (5.0 * Math.random() - 1.0),
+        // z: 0//2500 * (5.0 * Math.random() - 1.0)
+        x: 2500 * (5.0 * Math.random() - 1.0),
+        y: 2500 * (5.0 * Math.random() - 1.0),
+        z: 2500 * (5.0 * Math.random() - 1.0)
     }
 }
 

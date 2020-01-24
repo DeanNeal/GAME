@@ -103,7 +103,8 @@ SocketService.socket.on('otherFire', params => {
     camPos: params.camPos
   })
 
-  worker.post({ type: 'playShot', volume: 0.05 })
+
+  worker.post({ type: 'playShot', volume: getVolumeFromDistance(MainPlayer, userMesh) })
 
   setTimeout(() => {
     scene.remove(bulletMesh)
@@ -144,6 +145,14 @@ SocketService.socket.on('cubeWasRemoved', cube => {
     }
   }
 })
+
+
+function getVolumeFromDistance(fromMesh, toMesh) {
+  const factor = 0.9998;
+  const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
+  return  (1/(1 + (distanceToPlayer - distanceToPlayer * factor)) ) * 0.5;
+}
+
 
 function addSky () {
   let loader = new THREE.ImageBitmapLoader()
@@ -466,11 +475,10 @@ function damageCollisionDetection () {
             lastBulletCollisionId = obj.id
             
             SocketService.socket.emit('damage', player.user, currentUser)
-            worker.post({type: 'damageDone', volume: 0.1})
+            const volume = getVolumeFromDistance(MainPlayer, plMesh);
+            worker.post({type: 'damageDone', volume: volume})
  
             obj.remove()
-            // obj.material.opacity = 0
-            // obj.material.transparent = true
           }
         }
       }
