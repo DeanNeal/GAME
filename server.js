@@ -258,4 +258,4 @@ function randomDecemal(from, to) {
     return (Math.random() * (to - from) + from).toFixed(4)
 }
 
-http.listen(8081, process.env.IP);
+http.listen(process.env.PORT || 8081, '0.0.0.0' || process.env.IP);

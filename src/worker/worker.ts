@@ -103,6 +103,8 @@ SocketService.socket.on('otherFire', params => {
     camPos: params.camPos
   })
 
+  worker.post({ type: 'playShot', volume: 0.05 })
+
   setTimeout(() => {
     scene.remove(bulletMesh)
     othersBullets.splice(0, 1)
@@ -462,7 +464,9 @@ function damageCollisionDetection () {
           
           if (obj.id !== lastBulletCollisionId) {
             lastBulletCollisionId = obj.id
+            
             SocketService.socket.emit('damage', player.user, currentUser)
+            worker.post({type: 'damageDone', volume: 0.05})
             // this.scene.remove(obj);
             obj.remove()
             // obj.material.opacity = 0
@@ -510,7 +514,7 @@ function shot () {
       color: currentUser.color
     })
 
-    worker.post({ type: 'playShot' })
+    worker.post({ type: 'playShot', volume: 0.1 })
 
     setTimeout(() => {
       scene.remove(bullet)

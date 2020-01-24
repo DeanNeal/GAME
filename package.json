@@ -12,7 +12,8 @@
     "watch": "webpack --watch",
     "dev": "webpack --watch  --progress --profile",
     "prod": "cross-env NODE_ENV=prod webpack --config webpack.config.js --progress",
-    "server": "node server.js"
+    "server": "node server.js",
+    "start": "node server.js"
   },
   "devDependencies": {
     "@types/offscreencanvas": "^2019.6.1",
@@ -69,7 +70,9 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "webpack-command": "^0.2.1"
+    "webpack-command": "^0.2.1",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
   },
   "author": "Bogdan Zinkevych",
   "license": "MIT"
