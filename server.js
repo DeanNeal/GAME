@@ -77,6 +77,10 @@ io.sockets.on('connection', function (socket) {
     decreaseHealth(userDemaged._id, userDamaging._id)
   })
 
+  socket.on('damageToAsteroid', function(asteroid) {
+    removeAsteroid(asteroid.id);
+  });
+
   // socket.on('chat message', function(data) {
   //     io.emit('chat message', data);
   // });
@@ -231,6 +235,19 @@ function removeRune (rune) {
     if (rune.id === runes[i].id) {
       io.sockets.emit('runeWasRemoved', runes[i])
       runes.splice(i, 1)
+      return
+    }
+  }
+}
+
+function removeAsteroid(id) {
+  for (let i = 0; i < asteroids.length; i++) {
+    if (id === asteroids[i].id) {
+      asteroids[i].health -= 20;
+      if(asteroids[i].health <= 0) {
+        io.sockets.emit('asteroidWasRemoved', asteroids[i])
+        asteroids.splice(i, 1)
+      }
       return
     }
   }

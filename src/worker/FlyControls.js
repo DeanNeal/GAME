@@ -25,6 +25,8 @@ export default function ( object, camera, container) {
 
 	this.movementSpeedMultiplier = 0;
 	// disable default target object behavior
+	
+	this.disabled = false;
 
 	// internals
 	this.maxSpeed = 65;
@@ -165,6 +167,7 @@ export default function ( object, camera, container) {
 	};
 
 	this.mousemove = function( event ) {
+		if(this.disabled) return;
 
 		if ( !this.dragToLook || this.mouseStatus > 0 ) {
 
@@ -210,14 +213,16 @@ export default function ( object, camera, container) {
 
 	};
 
-	// this.stopRotation = function() {
-	// 	this.mouseStatus --;
-	// 	this.moveState.yawLeft = this.moveState.pitchDown = 0;
-	// 	console.log(this.mouseStatus, this.moveState);
+	this.stopRotation = function() {
+		// this.mouseStatus --;
+		this.moveState.yawLeft = this.moveState.pitchDown = 0;
+		console.log(this.mouseStatus, this.moveState);
 
-	// 	// this.updateMovementVector();
-	// 	this.updateRotationVector();
-	// };
+		// this.updateMovementVector();
+		this.updateRotationVector();
+
+		this.disabled = !this.disabled;
+	};
 
 	this.update = function( delta ) {
 		if (this.isMoving){

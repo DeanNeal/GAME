@@ -79,3 +79,12 @@ export function createUserMesh (color, main?) {
   torus.position.set(x,y -0.2,z);
   return torus;
  }
+
+ export function createBullet (color) {
+  let bullet = new THREE.Mesh(
+    new THREE['CubeGeometry'](5, 5, 200),
+    new THREE.MeshBasicMaterial({ color: color })
+  )
+  
+  return bullet
+}

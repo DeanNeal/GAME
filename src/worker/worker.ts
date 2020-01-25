@@ -5,9 +5,10 @@ import FlyControls from './FlyControls'
 import SocketService from './socket.service'
 import Helpers from '../helper'
 import * as THREE from 'three'
-import { createUserMesh, createAim} from './objects'
+import { createUserMesh, createAim, createBullet} from './objects'
 import { addAsteroids, addRunes, addSky} from './environment'
-import { asteroidCollision, runesCollisionDetection } from './collision'
+import { asteroidCollision, runesCollisionDetection, damageCollisionDetection } from './collision'
+import { getVolumeFromDistance } from './utils'
 
 let container
 let renderer
@@ -26,7 +27,7 @@ let currentUser
 let players = []
 let controls
 // let lastCollisionId
-let lastBulletCollisionId
+// let lastBulletCollisionId
 let start = new Date().getTime()
 const duration = 120
 let isShooting = false
@@ -118,6 +119,7 @@ SocketService.socket.on('otherFire', params => {
     camPos: params.camPos
   })
 
+  scene.add(bulletMesh);
 
   worker.post({ type: 'playShot', volume: getVolumeFromDistance(MainPlayer, userMesh) })
 
@@ -146,7 +148,7 @@ SocketService.socket.on('deletePlayer', userId => {
 })
 
 SocketService.socket.on('runeWasRemoved', rune => {
-  for (let i = 0; i < allRunes.length; i++) {
+  for (let i = 0; i < allRunes.length; i++) {debugger
     if (allRunes[i].userData.id === rune.id) {
       scene.remove(allRunes[i])
       allRunes.splice(i, 1)
@@ -162,11 +164,21 @@ SocketService.socket.on('runeWasRemoved', rune => {
   }
 })
 
-function getVolumeFromDistance(fromMesh, toMesh) {
-  const factor = 0.9998;
-  const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
-  return  (1/(1 + (distanceToPlayer - distanceToPlayer * factor)) ) * 0.5;
-}
+SocketService.socket.on('asteroidWasRemoved', asteroid => {
+  for (let i = 0; i < allAsteroids.length; i++) {
+    if (allAsteroids[i].userData.id === asteroid.id) {
+      scene.remove(allAsteroids[i])
+      allAsteroids.splice(i, 1)
+      return
+    }
+  }
+})
+
+// function getVolumeFromDistance(fromMesh, toMesh) {
+//   const factor = 0.9998;
+//   const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
+//   return  (1/(1 + (distanceToPlayer - distanceToPlayer * factor)) ) * 0.5;
+// }
 
 
 function addMainPlayer ({color, initPosition, initRotation}) {
@@ -226,93 +238,6 @@ function createNewPlayer (user) {
   })
 }
 
-// function runesCollisionDetection () {
-//   let originPoint = MainPlayer.position.clone()
-
-//   for (
-//     let vertexIndex = 0;
-//     vertexIndex < MainPlayer.geometry.vertices.length;
-//     vertexIndex++
-//   ) {
-//     let localVertex = MainPlayer.geometry.vertices[vertexIndex].clone()
-//     let globalVertex = localVertex.applyMatrix4(MainPlayer.matrix)
-//     let directionVector = globalVertex.sub(MainPlayer.position)
-//     let ray = new THREE.Raycaster(
-//       originPoint,
-//       directionVector.clone().normalize()
-//     )
-//     let collisionResults = ray.intersectObjects(allRunes)
-//     if (
-//       collisionResults.length > 0 &&
-//       collisionResults[0].distance <= directionVector.length()
-//     ) {
-//       let obj = collisionResults[0].object
-//       if (obj.id !== lastCollisionId) {
-//         // console.log(obj.id);
-//         lastCollisionId = obj.id
-
-//         // obj.material.opacity = 0.4;
-//         // obj.material.transparent = true;
-//         // scene.remove(obj);
-
-//         SocketService.socket.emit('removeCube', obj.userData)
-//         // SocketService.socket.emit('increaseScores')
-//       }
-//     }
-//   }
-// }
-
-function damageCollisionDetection () {
-  players
-    .filter(r => r.mesh)
-    .forEach(player => {
-      let plMesh = player.mesh
-      let originPoint = plMesh.position.clone()
-
-      for (
-        let vertexIndex = 0;
-        vertexIndex < plMesh.geometry.vertices.length;
-        vertexIndex++
-      ) {
-        let localVertex = plMesh.geometry.vertices[vertexIndex].clone()
-        let globalVertex = localVertex.applyMatrix4(plMesh.matrix)
-        let directionVector = globalVertex.sub(plMesh.position)
-        let ray = new THREE.Raycaster(
-          originPoint,
-          directionVector.clone().normalize()
-        )
-
-        let collisionResults = ray.intersectObjects(bullets.map(r => r.mesh))
-        if (
-          collisionResults.length > 0 &&
-          collisionResults[0].distance <= directionVector.length()
-        ) {
-          let obj = collisionResults[0].object
-          
-          if (obj.id !== lastBulletCollisionId) {
-            lastBulletCollisionId = obj.id
-            
-            SocketService.socket.emit('damage', player.user, currentUser)
-            const volume = getVolumeFromDistance(MainPlayer, plMesh);
-            worker.post({type: 'damageDone', volume: volume})
- 
-            obj.remove()
-          }
-        }
-      }
-    })
-}
-
-function createBullet (color) {
-  let bullet = new THREE.Mesh(
-    new THREE['CubeGeometry'](5, 5, 200),
-    new THREE.MeshBasicMaterial({ color: color })
-  )
-  
-  scene.add(bullet)
-  return bullet
-}
-
 function shot () {
   if (currentUser) {
     let bullet = createBullet(currentUser.color)
@@ -332,6 +257,8 @@ function shot () {
       camPos: camPos
     })
 
+    scene.add(bullet);
+
     SocketService.socket.emit('fire', {
       userId: currentUser.id,
       matrixWorld: matrixWorld,
@@ -344,7 +271,7 @@ function shot () {
 
     setTimeout(() => {
       scene.remove(bullet)
-      bullets.splice(0, 1)
+      bullets.splice(0, 1);
     }, 5000)
   }
 }
@@ -413,11 +340,8 @@ function animate () {
       sprite.scale.set(scale, scale, scale); 
       sprite.position.set(70 + scale*6,70 + scale*6, 70 + scale*6);
 
-
       user.userTextMesh.lookAt(MainPlayer.position)
       user.userTextMesh.quaternion.copy( MainPlayer.quaternion );
-
-
     }
   })
 
@@ -433,22 +357,16 @@ function animate () {
   }
 
   if (bullets.length) {
-    damageCollisionDetection()
+    damageCollisionDetection(players, bullets, currentUser, MainPlayer, worker)
   }
 
-  asteroidCollision();
-
-
-
-  // if(spotLight) {
-  //   // spotLight.intensity += 0.001;
-  //   spotLight.angle += 0.001;
-  // }
-
-
+  if(allAsteroids.length && MainPlayer) {
+    asteroidCollision(allAsteroids, bullets, MainPlayer, worker);
+  }
+  
 }
 
-let spotLight;
+
 const worker = insideWorker(e => {
   const canvas = e.data.canvas
   if (canvas) {
@@ -533,9 +451,9 @@ const worker = insideWorker(e => {
     controls.keypress(e.data.mouse)
   }
 
-  // if(e.data.type === 'stopRotation') {
-  //   controls.stopRotation();
-  // }
+  if(e.data.type === 'stopRotation') {
+    controls.stopRotation();
+  }
 })
 
 
