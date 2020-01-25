@@ -141,9 +141,11 @@ canvas {
     height: 100%;
     width: 100%;
     user-select: none;
-    cursor: url(../../public/images/cursor1.png), pointer;
-    &.in-game {
-        // cursor: none;
+    &.mode-0 {
+        cursor: url(../../public/images/cursor1.png), pointer;
+    }
+    &.mode-1 {
+        cursor: none;
     }
     .overlay {
         background: rgba(0, 0, 0, 0.6);

@@ -167,7 +167,9 @@ export default function ( object, camera, container) {
 	};
 
 	this.mousemove = function( event ) {
-		if(this.disabled) return;
+		if(this.disabled) {
+			return;
+		}
 
 		if ( !this.dragToLook || this.mouseStatus > 0 ) {
 
@@ -179,7 +181,6 @@ export default function ( object, camera, container) {
 			this.moveState.pitchDown =   ( ( event.pageY - container.offset[ 1 ] ) - halfHeight ) / halfHeight;
 
 			this.updateRotationVector();
-
 		}
 
 	};
@@ -214,13 +215,6 @@ export default function ( object, camera, container) {
 	};
 
 	this.stopRotation = function() {
-		// this.mouseStatus --;
-		this.moveState.yawLeft = this.moveState.pitchDown = 0;
-		console.log(this.mouseStatus, this.moveState);
-
-		// this.updateMovementVector();
-		this.updateRotationVector();
-
 		this.disabled = !this.disabled;
 	};
 
@@ -266,6 +260,16 @@ export default function ( object, camera, container) {
 		this.object.rotation.setFromQuaternion( this.object.quaternion, this.object.rotation.order );
 
 		this.cameraUpdate();
+
+
+		//smooth stop
+		if(this.disabled) {
+			this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005  ? this.moveState.yawLeft/1.07 : 0
+			this.moveState.pitchDown  = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown /1.07 : 0
+
+			// console.log(this.moveState.yawLeft );
+			this.updateRotationVector();
+		}
 		
 		return {
 			moveMult,

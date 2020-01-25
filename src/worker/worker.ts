@@ -199,7 +199,8 @@ function addMainPlayer ({color, initPosition, initRotation}) {
   MainPlayer.add(camera)
 
  
-  camera.add(createAim(0, 0, -50))
+  // camera.add(createAim(0, 0, -50))
+  
   scene.add(MainPlayer)
 
   worker.post({ type: 'readyForListeners' })

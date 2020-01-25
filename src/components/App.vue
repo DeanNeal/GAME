@@ -1,5 +1,5 @@
 <template>
-  <div class="container absolute" :class="{'in-game': getReady}">
+  <div class="container absolute" :class="[getReady ? (viewMode === 1 ? 'mode-0' : 'mode-1') : '']">
     <div class="start-page" v-if="!getReady">
       <!--<div class="overlay"></div>-->
 
@@ -53,7 +53,11 @@
 
     <div class="controls" v-if="getReady">
       <div id="backToMain" @click="back()">Main menu</div>
-      <div id="info">Controls - > WA/QE + mouse & shift(freeze), Tab -  close user list</div>
+      <div id="info">
+        <div>Controls - > WA/QE + mouse </div>
+        <div>Shift - constant speed</div>
+        <div>Tab - change view mode</div>
+      </div>
       <div id="position"></div>
       <div id="rotation"></div>
       <div id="gui">HP {{ user.health }}</div>
@@ -91,6 +95,7 @@ export default {
   data: () => {
     return {
       showTab: true,
+      viewMode: 0,
       gameInstance: null,
       introMusic: null,
       currentPage: 'mainMenu',
@@ -135,8 +140,9 @@ export default {
       }, 300)
     })
 
-    GlobalService.toggleTab.subscribe(()=> {
-      this.showTab = !this.showTab;
+    GlobalService.viewMode.subscribe((mode)=> {
+      // this.showTab = !this.showTab;
+      this.viewMode = mode;
     });
   },
   methods: {

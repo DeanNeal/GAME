@@ -31,11 +31,11 @@ export function addAsteroids (asteroids, cb) {
     let cube = new THREE.BoxGeometry(s, s, s)
   
     runes.forEach(c => {
-      let material = new THREE.MeshPhongMaterial({
-        color: c.color,
-        wireframe: true,
-        /*opacity: 0.5, transparent: true ,*/ specular: 0xffffff,
-        shininess: 50
+      let material = new THREE.MeshNormalMaterial({
+        // color: c.color,
+        // wireframe: true,
+        // /*opacity: 0.5, transparent: true ,*/ specular: 0xffffff,
+        // shininess: 20
       })
   
       let mesh = new THREE.Mesh(cube, material)

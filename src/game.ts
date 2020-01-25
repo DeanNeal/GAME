@@ -169,7 +169,7 @@ export class Game {
             this.worker.post({
                 type: 'stopRotation'
             });
-            // GlobalService.toggleTab.next();
+            GlobalService.viewMode.next(GlobalService.viewMode.getValue() ? 0 : 1);
         }
 
         this.worker.post({
