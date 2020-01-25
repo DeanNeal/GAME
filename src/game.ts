@@ -164,6 +164,11 @@ export class Game {
         //     });
         // }
 
+        if(e.keyCode === 9) {
+            e.preventDefault();
+            GlobalService.toggleTab.next();
+        }
+
         this.worker.post({
             type: 'keydown',
             mouse: {

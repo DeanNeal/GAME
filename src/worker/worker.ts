@@ -153,8 +153,8 @@ SocketService.socket.on('cubeWasRemoved', cube => {
       worker.post({ type: 'updateCubes', cubes: allCubes.length })
 
       if (allCubes.length === 0) {
-        SocketService.socket.emit('startAgain')
         worker.post({ type: 'startTimer' })
+        SocketService.socket.emit('startAgain')
       }
       return
     }

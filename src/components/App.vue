@@ -52,15 +52,16 @@
     </div>
 
     <div class="controls" v-if="getReady">
-      <div id="backToMain" @click="back()">Back to main menu</div>
-      <div id="info">Controls - > WA/QE + mouse & shift(freeze)</div>
+      <div id="backToMain" @click="back()">Main menu</div>
+      <div id="info">Controls - > WA/QE + mouse & shift(freeze), Tab -  close user list</div>
       <div id="position"></div>
       <div id="rotation"></div>
       <div id="gui">HP {{ user.health }}</div>
       <div id="gui-speed"><span id="gui-speed-value"></span> KM/H</div>
       <div id="timer"></div>
       <div class="damage"></div>
-      <app-user-list></app-user-list>
+      <app-user-list :class="{'active': showTab}"></app-user-list>
+
     </div>
   </div>
 </template>
@@ -89,6 +90,7 @@ export default {
   },
   data: () => {
     return {
+      showTab: true,
       gameInstance: null,
       introMusic: null,
       currentPage: 'mainMenu',
@@ -132,6 +134,10 @@ export default {
         c.classList.remove('damage')
       }, 300)
     })
+
+    GlobalService.toggleTab.subscribe(()=> {
+      this.showTab = !this.showTab;
+    });
   },
   methods: {
     playIntro() {

@@ -66,7 +66,7 @@ io.sockets.on('connection', function (socket) {
     setTimeout(function () {
       cubes = createCubes()
       socket.emit('updateCubes', cubes)
-    }, 5000)
+    }, 6000);
   })
 
   socket.on('fire', function (bullet) {
@@ -204,15 +204,15 @@ function createCubes () {
 
 function createAsteroids () {
   let asteroids = []
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 100; i++) {
     asteroids.push({
       size: randomInteger(200, 2000),
       id: i,
       color: 0xcccccc,
       position: {
-        x: 20000 * (2.0 * Math.random() - 1.0),
-        y: 20000 * (2.0 * Math.random() - 1.0),
-        z: 20000 * (2.0 * Math.random() - 1.0)
+        x: 60000 * (2.0 * Math.random() - 1.0),
+        y: 60000 * (2.0 * Math.random() - 1.0),
+        z: 60000 * (2.0 * Math.random() - 1.0)
       },
       rotation: {
         x: Math.random() * Math.PI,

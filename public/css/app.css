@@ -223,7 +223,7 @@ canvas {
   margin-top: 40px;
   border: none;
   border-bottom: 1px solid #ccc;
-  padding: 7px 20px;
+  padding: 7px 0px;
   outline: none;
   background: none;
   color: #fff;
@@ -270,10 +270,14 @@ canvas {
   padding: 5px;
   z-index: 10;
   position: fixed;
-  right: 0;
+  right: -400px;
   border: 1px solid #999;
   background: #fff;
+  transition: 0.2s;
   background: rgba(245, 245, 245, 0.8);
+}
+.container .sidebar.active {
+  right: 0px;
 }
 .container .sidebar #welcome {
   font-size: 12px;
@@ -304,7 +308,7 @@ canvas {
   padding: 3px 10px 3px 20px;
   border: 1px solid #999;
   border-bottom: none;
-  font-size: 13px;
+  font-size: 14px;
   position: relative;
   height: 21px;
   display: flex;
@@ -312,8 +316,9 @@ canvas {
   justify-content: space-between;
 }
 .container .sidebar__users ul li.current-player {
-  background: rgba(75, 255, 114, 0.3);
+  background: rgba(17, 17, 17, 0.575);
   font-weight: 700;
+  color: #fff;
 }
 .container .sidebar__users ul li i {
   position: absolute;
@@ -325,9 +330,6 @@ canvas {
   display: block;
   bottom: 0;
   margin: auto;
-}
-.container .sidebar__users ul li span {
-  float: right;
 }
 .container .sidebar__users ul li:last-child {
   border-bottom: 1px solid #999;

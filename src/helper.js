@@ -190,7 +190,7 @@ let Helpers = {
 
             if (--timer < 0) {
                 timer = duration;
-                 display.textContent = '';
+                display.textContent = '';
                 clearInterval(interval);
             }
         }, 1000);
