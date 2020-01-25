@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 export let colors = [
     '#FF62B0',
     '#9A03FE',

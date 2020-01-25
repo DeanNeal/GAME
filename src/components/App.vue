@@ -153,6 +153,11 @@ export default {
     },
     goTo(page){
       this.currentPage = page;
+      if(page === 'newGame') {
+        setTimeout(() => {
+          this.$refs.input.focus()
+        })
+      }
     },
     back () {
       this.goTo('mainMenu');
@@ -164,12 +169,6 @@ export default {
           this.playerOptions = new InitState();
           this.playIntro();
       }
-    },
-    newGame () {
-      this.currentPage = 'newGame'
-      setTimeout(() => {
-        this.$refs.input.focus()
-      })
     },
     submit (e) {
       e.preventDefault()

@@ -45,6 +45,7 @@ export class Game {
             }
             if(e.data.type === 'playShot') {
                 var audio = new Audio('sounds/blaster-1.mp3')
+                audio.currentTime = 0;
                 audio.volume = e.data.volume || 0.1
                 audio.play()
             }
@@ -63,9 +64,10 @@ export class Game {
             }
 
             if(e.data.type === 'damageDone') {
-                var audio = new Audio('sounds/damage.mp3')
-                audio.volume = e.data.volume || 0.3
-                audio.play()
+                var audio = new Audio('sounds/damage.mp3');
+                audio.currentTime = 0;
+                audio.volume = e.data.volume || 0.3;
+                audio.play();
             }
 
             if(e.data.type === 'userList') {

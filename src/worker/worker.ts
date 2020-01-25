@@ -63,6 +63,8 @@ SocketService.socket.on('updateUsersCoords', users => {
           user.rotation._y,
           user.rotation._z
         )
+          
+        p.userTextMesh.position.set(user.position.x + 100, user.position.y + 100, user.position.z + 100);
       }
     })
   })
@@ -123,6 +125,7 @@ SocketService.socket.on('deletePlayer', userId => {
   for (let i = 0; i < players.length; i++) {
     if (players[i].user.id === userId) {
       scene.remove(players[i].mesh)
+      scene.remove(players[i].userTextMesh)
       players.splice(i, 1)
       return
     }
@@ -202,6 +205,10 @@ function addCubes (cubes) {
 
     let mesh = new THREE.Mesh(cube, material)
 
+    
+    mesh.castShadow = true; //default is false
+    mesh.receiveShadow = true; //default
+
     mesh.userData = c
     mesh.position.x = c.position.x
     mesh.position.y = c.position.y
@@ -211,13 +218,6 @@ function addCubes (cubes) {
     mesh.rotation.y = c.position.y
     mesh.rotation.z = c.position.z
 
-    // var spritey = Helpers.makeTextSprite(c.id, { fontsize: 50, fontface: "Georgia" });
-    // spritey.position.set(50, 100, 0);
-
-    // mesh.add(spritey);
-
-    // mesh.matrixAutoUpdate = false;
-    // mesh.updateMatrix();
 
     scene.add(mesh)
     allCubes.push(mesh)
@@ -227,17 +227,19 @@ function addCubes (cubes) {
 }
 
 function addAsteroids (asteroids) {
-  let s = 1000
-  let cube = new THREE.BoxGeometry(s, s, s)
 
   asteroids.forEach(c => {
+    let cube = new THREE.BoxGeometry(c.size, c.size, c.size);
+
     let material = new THREE.MeshPhongMaterial({
       color: c.color,
       wireframe: false,
-      /*opacity: 0.5, transparent: true ,*/ specular: 0xffffff,
-      shininess: 50
+      specular: 0xffffff
     })
     let mesh = new THREE.Mesh(cube, material)
+    
+    mesh.castShadow = true; //default is false
+    mesh.receiveShadow = true; //default
 
     mesh.userData = c
     mesh.position.x = c.position.x
@@ -307,9 +309,24 @@ function createUserMesh (color, main?) {
     })
   )
 
-  userMesh.add(createGun())
+  userMesh.castShadow = true; //default is false
+  userMesh.receiveShadow = true; //default
 
+  userMesh.add(createGun());
+  if(!main) userMesh.add(createBoxGeometry(73,0,0, color));
+  if(!main) userMesh.add(createBoxGeometry(-73,0,0, color));
+  
   return userMesh
+}
+
+function createBoxGeometry(x,y,z, color) {
+    var geometry = new THREE.BoxGeometry( 140, 10, 10 );
+    var material = new THREE.MeshPhongMaterial( {color: color || 0xffffff} );
+    var cube = new THREE.Mesh( geometry, material );
+    cube.position.set(x,y,z);
+    cube.rotation.set(0, 0, Math.PI/2);
+
+    return cube;
 }
 
 function createGun () {
@@ -379,7 +396,7 @@ function createNewPlayer (user) {
   loader.load('./helvetiker_regular.typeface.json', function (font) {
     var textGeo = new THREE.TextGeometry(user.playerName, {
       font: font,
-      size: 16,
+      size: 20,
       height: 1,
       bevelEnabled : false,
       bevelThickness : 1,
@@ -397,14 +414,11 @@ function createNewPlayer (user) {
     })
 
     const userTextMesh = new THREE.Mesh(textGeo, material)
-    userTextMesh.receiveShadow = false;
-    userTextMesh.position.set(100, 100, 100)
-
-    newPlayer.attach(userTextMesh)
 
     players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh })
 
     scene.add(newPlayer)
+    scene.add(userTextMesh)
   })
 }
 
@@ -583,6 +597,26 @@ function animate () {
     othersBullets[i].mesh.position.add(dir.multiplyScalar(250))
   }
 
+
+  players.forEach(user => {
+    if (camera && user.userTextMesh) {
+      // const factor = user.mesh.position.distanceTo(MainPlayer.position) / 300;
+      var scaleVector = new THREE.Vector3();
+      var scaleFactor = 2000;
+      var sprite = user.userTextMesh;
+
+      var scale = scaleVector.subVectors(user.mesh.position, MainPlayer.position).length() / scaleFactor;
+      sprite.scale.set(scale, scale, scale); 
+      sprite.position.set(70 + scale*6,70 + scale*6, 70 + scale*6);
+
+
+      user.userTextMesh.lookAt(MainPlayer.position)
+      user.userTextMesh.quaternion.copy( MainPlayer.quaternion );
+
+
+    }
+  })
+
   if (MainPlayer) {
     SocketService.socket.emit('move', {
       position: MainPlayer.position,
@@ -599,41 +633,9 @@ function animate () {
   }
 
 
-  players.forEach(user => {
-    if (camera && user.userTextMesh) {
-      // const factor = user.mesh.position.distanceTo(MainPlayer.position) / 300;
-      var scaleVector = new THREE.Vector3();
-      var scaleFactor = 2000;
-      var sprite = user.userTextMesh;
-      var scale = scaleVector.subVectors(user.mesh.position, MainPlayer.position).length() / scaleFactor;
-      sprite.scale.set(scale, scale, scale); 
-      sprite.position.set(70 + scale*6,70 + scale*6, 70 + scale*6);
 
-  
-      // user.userTextMesh.lookAt(MainPlayer.position.clone());
-
-      var worldCamPos = new THREE.Vector3();
-      camera.getWorldPosition(worldCamPos);
-      // this.worldToLocal(worldCamPos);
-      // this.lookAt(worldCamPos);
-      user.userTextMesh.lookAt(worldCamPos)
-      // console.log(worldCamPos);
-
-
-      // user.userTextMesh.quaternion.copy(MainPlayer.quaternion.clone().inverse());
-
-    }
-  })
 }
 
-// function lookAtVector( sourcePoint, destPoint ) {
-
-//   return new THREE.Quaternion().setFromRotationMatrix(
-//       new THREE.Matrix4()
-//           .lookAt( sourcePoint, destPoint, new THREE.Vector3( 0, 0, -1 ) )
-//   );
-
-// }
 
 const worker = insideWorker(e => {
   const canvas = e.data.canvas
@@ -647,20 +649,29 @@ const worker = insideWorker(e => {
     let dLight = new THREE.DirectionalLight(0xffffff)
     dLight.position.set(2000, 2000, -6000)
     dLight.castShadow = true
-    // dLight.shadowCameraVisible = true
-    // dLight.shadowDarkness = 0.7
-    dLight.shadowMapWidth = dLight.shadowMapHeight = 1000
+    // dLight['shadowCameraVisible'] = true
+    // dLight['shadowDarkness'] = 1
+    dLight.shadow.mapSize.width = 512;  // default
+    dLight.shadow.mapSize.height = 512; // default
+    dLight.shadow.camera.near = 0.5;    // default
+    dLight.shadow.camera.far = 5000;     // default
+
+    // dLight.shadowMapWidth = dLight.shadowMapHeight = 1000
     dLight.intensity = 1
     scene.add(dLight)
 
+//     var helper = new THREE.CameraHelper( dLight.shadow.camera );
+// scene.add( helper );
     let ambient = new THREE.AmbientLight(0x000000)
-    ambient.color.setHSL(0.01, 0.01, 0.4)
+    ambient.color.setHSL(0.01, 0.01, 0.2)
     scene.add(ambient)
 
     // Helpers.addLight(scene, 0.55, 0.9, 0.5, 2000, 10000, -125000);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     renderer.setClearColor(0x000000, 1)
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.setPixelRatio(1)
 
   
