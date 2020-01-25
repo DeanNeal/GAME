@@ -4,10 +4,8 @@ export function addAsteroids (asteroids, cb) {
    asteroids.forEach(c => {
      let cube = new THREE.BoxGeometry(c.size, c.size, c.size);
  
-     let material = new THREE.MeshPhongMaterial({
-       color: c.color,
-       wireframe: false,
-       specular: 0xffffff
+     let material = new THREE.MeshStandardMaterial({
+      color: 0xffffff, roughness: 0.5, metalness: .5
      })
      let mesh = new THREE.Mesh(cube, material)
      
@@ -28,11 +26,11 @@ export function addAsteroids (asteroids, cb) {
    })
  }
 
- export function addCubes(cubes, cb) {
+ export function addRunes(runes, cb) {
     let s = 150
     let cube = new THREE.BoxGeometry(s, s, s)
   
-    cubes.forEach(c => {
+    runes.forEach(c => {
       let material = new THREE.MeshPhongMaterial({
         color: c.color,
         wireframe: true,

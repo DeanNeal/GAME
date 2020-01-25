@@ -1,16 +1,19 @@
 import * as THREE from 'three'
 
-export function createGun () {
+export function createGun (color) {
    let cube = new THREE.CylinderGeometry(10,10,70,30);//BoxGeometry(12, 12, 100)
    let material = new THREE.MeshPhongMaterial({
-     color: '#cccccc',
-     wireframe: false,
-     specular: 0xffffff,
-     shininess: 20
+     color: color,
+     emissive: color,
+     emissiveIntensity: 0.1,
+    //  specular: 0xffffff,
+     shininess: 1
    })
    let gun = new THREE.Mesh(cube, material)
  
    
+  //  gun.castShadow = true; //default is false
+  //  gun.receiveShadow = true; //default
  
    gun.position.set(0, 0, -50)
    gun.rotation.set(Math.PI / 2,0,0);
@@ -18,6 +21,10 @@ export function createGun () {
    let gunDetails = new THREE.Mesh(new THREE.CylinderGeometry(7,7,70,30), material)
    gunDetails.position.set(0, -10, 0)
    // gunDetails.rotation.set(1.5,0,0);
+   
+
+  //  gunDetails.castShadow = true; //default is false
+  //  gunDetails.receiveShadow = true; //default
  
    gun.add(gunDetails);
    return gun
@@ -30,6 +37,10 @@ export function createBoxGeometry(x,y,z, color) {
    cube.position.set(x,y,z);
    cube.rotation.set(0, 0, Math.PI/2);
 
+   cube.castShadow = true; //default is false
+   cube.receiveShadow = true; //default
+ 
+
    return cube;
 }
 
@@ -40,21 +51,23 @@ export function createUserMesh (color, main?) {
      new THREE.MeshPhongMaterial({
        // map: texture,
        // bumpMap: textureBump,
-       color: color ? color : 0xffff00,
+       color: color,
        // specular: 0x0022ff,
        shininess: 1,
+       emissive: color,
+       emissiveIntensity: 0.1,
        // side: THREE.BackSide,
        opacity: main ? 0: 1,
        transparent: main ? true : false
      })
    )
  
-   userMesh.castShadow = true; //default is false
-   userMesh.receiveShadow = true; //default
+  //  userMesh.castShadow = true; //default is false
+  //  userMesh.receiveShadow = true; //default
  
-   userMesh.add(createGun());
-   if(!main) userMesh.add(createBoxGeometry(73,0,0, color));
-   if(!main) userMesh.add(createBoxGeometry(-73,0,0, color));
+   userMesh.add(createGun(color));
+   userMesh.add(createBoxGeometry(73,0,0, color));
+   userMesh.add(createBoxGeometry(-73,0,0, color));
    
    return userMesh
  }

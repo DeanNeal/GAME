@@ -6,7 +6,7 @@ import SocketService from './socket.service'
 import Helpers from '../helper'
 import * as THREE from 'three'
 import { createUserMesh, createAim} from './objects'
-import { addAsteroids, addCubes, addSky} from './environment'
+import { addAsteroids, addRunes, addSky} from './environment'
 
 let container
 let renderer
@@ -16,7 +16,7 @@ const scene = new THREE.Scene()
 
 const camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
 
-let allCubes = []
+let allRunes = []
 let allAsteroids = []
 let bullets = []
 let othersBullets = []
@@ -49,13 +49,13 @@ SocketService.socket.on('gotDamage', user => {
   worker.post({ type: 'userUpdated', user, damage: true })
 })
 
-SocketService.socket.on('updateCubes', cubes => {
-  addCubes(cubes, (mesh)=> {
+SocketService.socket.on('updateRunes', runes => {
+  addRunes(runes, (mesh)=> {
     scene.add(mesh)
-    allCubes.push(mesh)
+    allRunes.push(mesh)
   });
 
-  worker.post({ type: 'updateCubes', cubes: allCubes.length })
+  worker.post({ type: 'updateRunes', runes: allRunes.length })
 })
 
 SocketService.socket.on('updateAsteroids', asteroids => {
@@ -144,15 +144,15 @@ SocketService.socket.on('deletePlayer', userId => {
   }
 })
 
-SocketService.socket.on('cubeWasRemoved', cube => {
-  for (let i = 0; i < allCubes.length; i++) {
-    if (allCubes[i].userData.id === cube.id) {
-      scene.remove(allCubes[i])
-      allCubes.splice(i, 1)
+SocketService.socket.on('runeWasRemoved', rune => {
+  for (let i = 0; i < allRunes.length; i++) {
+    if (allRunes[i].userData.id === rune.id) {
+      scene.remove(allRunes[i])
+      allRunes.splice(i, 1)
 
-      worker.post({ type: 'updateCubes', cubes: allCubes.length })
+      worker.post({ type: 'updateRunes', runes: allRunes.length })
 
-      if (allCubes.length === 0) {
+      if (allRunes.length === 0) {
         worker.post({ type: 'startTimer' })
         SocketService.socket.emit('startAgain')
       }
@@ -225,7 +225,7 @@ function createNewPlayer (user) {
   })
 }
 
-function cubesCollisionDetection () {
+function runesCollisionDetection () {
   let originPoint = MainPlayer.position.clone()
 
   for (
@@ -240,7 +240,7 @@ function cubesCollisionDetection () {
       originPoint,
       directionVector.clone().normalize()
     )
-    let collisionResults = ray.intersectObjects(allCubes)
+    let collisionResults = ray.intersectObjects(allRunes)
     if (
       collisionResults.length > 0 &&
       collisionResults[0].distance <= directionVector.length()
@@ -378,8 +378,8 @@ function animate () {
   shotAnimate()
 
 
-  for (let i = 0; i < allCubes.length; i++) {
-    allCubes[i].rotation.y += 0.01
+  for (let i = 0; i < allRunes.length; i++) {
+    allRunes[i].rotation.y += 0.01
   }
 
   for (let i = 0; i < bullets.length; i++) {
@@ -427,8 +427,8 @@ function animate () {
     })
   }
 
-  if (allCubes.length && MainPlayer) {
-    cubesCollisionDetection()
+  if (allRunes.length && MainPlayer) {
+    runesCollisionDetection()
   }
 
   if (bullets.length) {
@@ -437,9 +437,15 @@ function animate () {
 
 
 
+  // if(spotLight) {
+  //   // spotLight.intensity += 0.001;
+  //   spotLight.angle += 0.001;
+  // }
+
+
 }
 
-
+let spotLight;
 const worker = insideWorker(e => {
   const canvas = e.data.canvas
   if (canvas) {
@@ -448,36 +454,35 @@ const worker = insideWorker(e => {
     container = canvas
     camera.position.set(startPosition.x, startPosition.y, startPosition.z)
 
-    // lights
-    let dLight = new THREE.DirectionalLight(0xffffff)
-    dLight.position.set(2000, 2000, -6000)
-    dLight.castShadow = true
-    // dLight['shadowCameraVisible'] = true
-    // dLight['shadowDarkness'] = 1
-    dLight.shadow.mapSize.width = 512;  // default
-    dLight.shadow.mapSize.height = 512; // default
-    dLight.shadow.camera.near = 0.5;    // default
-    dLight.shadow.camera.far = 5000;     // default
+    // // lights
+    let dLight = new THREE.DirectionalLight(0xffffff, 1)
+    dLight.position.set( 0.5, 1, 0 ).normalize();
+    // dLight.castShadow = true
+
+    // dLight.shadow.mapSize.width = 8000;  // default
+    // dLight.shadow.mapSize.height = 8000; // default
+    // dLight.shadow.camera.near = 10;    // default
+    // dLight.shadow.camera.far = 5000;     // default
 
     // dLight.shadowMapWidth = dLight.shadowMapHeight = 1000
     dLight.intensity = 1
     scene.add(dLight)
 
-//     var helper = new THREE.CameraHelper( dLight.shadow.camera );
-// scene.add( helper );
-    let ambient = new THREE.AmbientLight(0x000000)
-    ambient.color.setHSL(0.01, 0.01, 0.2)
-    scene.add(ambient)
 
-    // Helpers.addLight(scene, 0.55, 0.9, 0.5, 2000, 10000, -125000);
+    var light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.3 );
+    scene.add( light );
+
+    // let ambient = new THREE.AmbientLight(0x000000)
+    // ambient.color.setHSL(0.01, 0.01, 0.5)
+    // scene.add(ambient)
+
+    // Helpers.addLight(scene, 0.55, 0.9, 0.5, 2000, 10000, 10000);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-    renderer.setClearColor(0x000000, 1)
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
-    renderer.setPixelRatio(1)
-
-  
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // renderer.setPixelRatio(1)
 
     animate()
   }

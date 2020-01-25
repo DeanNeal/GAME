@@ -2,6 +2,7 @@
  * @author Mugen87 / https://github.com/Mugen87
  * @author mrdoob / http://mrdoob.com/
  */
+import * as THREE from 'three';
 
 THREE.Lensflare = function () {
 

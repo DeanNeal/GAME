@@ -16,7 +16,7 @@ app.get('/', function (req, res) {
 /****LOGIC*****/
 
 let users = []
-let cubes = createCubes()
+let runes = createRunes()
 let asteroids = createAsteroids()
 
 setInterval(function () {
@@ -40,7 +40,7 @@ io.sockets.on('connection', function (socket) {
 
     io.sockets.emit('otherNewPlayer', users)
     io.sockets.emit('userList', users)
-    socket.emit('updateCubes', cubes)
+    socket.emit('updateRunes', runes)
     socket.emit('updateAsteroids', asteroids)
 
     io.sockets.emit('online', users.length)
@@ -58,14 +58,14 @@ io.sockets.on('connection', function (socket) {
   //     increaseScores(user);
   // });
 
-  socket.on('removeCube', function (cube) {
-    removeCube(cube)
+  socket.on('removeRune', function (rune) {
+    removeRune(rune)
   })
 
-  socket.on('startAgain', function (cube) {
+  socket.on('startAgain', function (rune) {
     setTimeout(function () {
-      cubes = createCubes()
-      socket.emit('updateCubes', cubes)
+      runes = createRunes()
+      socket.emit('updateRunes', runes)
     }, 6000);
   })
 
@@ -180,10 +180,10 @@ function getRandColor () {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
-function createCubes () {
-  let cubes = []
+function createRunes () {
+  let runes = []
   for (let i = 0; i < 10; i++) {
-    cubes.push({
+    runes.push({
       id: i,
       color: getRandColor(),
       position: {
@@ -199,7 +199,7 @@ function createCubes () {
     })
   }
 
-  return cubes
+  return runes
 }
 
 function createAsteroids () {
@@ -225,11 +225,11 @@ function createAsteroids () {
   return asteroids
 }
 
-function removeCube (cube) {
-  for (let i = 0; i < cubes.length; i++) {
-    if (cube.id === cubes[i].id) {
-      io.sockets.emit('cubeWasRemoved', cubes[i])
-      cubes.splice(i, 1)
+function removeRune (rune) {
+  for (let i = 0; i < runes.length; i++) {
+    if (rune.id === runes[i].id) {
+      io.sockets.emit('runeWasRemoved', runes[i])
+      runes.splice(i, 1)
       return
     }
   }

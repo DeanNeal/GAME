@@ -40,8 +40,8 @@ export class Game {
             if(e.data.type === 'startTimer') {
                 this.startTimer();
             }
-            if(e.data.type === 'updateCubes') {
-                GlobalService.cubes.next(e.data.cubes)
+            if(e.data.type === 'updateRunes') {
+                GlobalService.runes.next(e.data.runes)
             }
             if(e.data.type === 'playShot') {
                 var audio = new Audio('sounds/blaster-1.mp3')

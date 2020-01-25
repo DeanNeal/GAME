@@ -4,7 +4,7 @@ class GlobalService {
     public users: any = new ReplaySubject();
     public user: any = new BehaviorSubject(null);
     public sceneControls: any = new ReplaySubject();
-    public cubes = new BehaviorSubject([]);
+    public runes = new BehaviorSubject([]);
     public damage = new Subject();
     public toggleTab = new Subject();
     // public gameOver = new Subject();

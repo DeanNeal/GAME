@@ -1,8 +1,8 @@
 <template>
       <div class="sidebar">
         <div class="sidebar__users">
-          <span class="title">Players: <b>{{users.length}}</b></span>
-          <span class="sidebar__left-count">Left: {{cubes}}</span>  
+         <!-- <span class="title">Online: <b>{{users.length}}</b></span> -->
+          <span class="sidebar__left-count">Runes: {{runes}}</span>  
           <ul>
               <li v-for="user of users" :key="user.id" :class="{'current-player' : isCurrent(user)}">
                   <div><i :style="{background: user.color}"></i>{{user.playerName}}</div>
@@ -22,7 +22,7 @@ export default {
   data: () => {
     return {
         users: [],
-        cubes: []
+        runes: []
     };
   },
   computed: {
@@ -35,8 +35,8 @@ export default {
         this.users = users;
     })
 
-    GlobalService.cubes.subscribe(cubes=>{
-        this.cubes = cubes;
+    GlobalService.runes.subscribe(runes=>{
+        this.runes = runes;
     })
   },
   methods: {

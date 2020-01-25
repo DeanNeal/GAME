@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+// import './vendor/threejs/Lensflare.js'
+import { Vector2, Vector3 } from './vendor/threejs/three.js';
 
 export let colors = [
     '#FF62B0',
@@ -57,27 +59,28 @@ let Helpers = {
 
     },
     addLight: (scene, h, s, l, x, y, z) => {
-        var loader = new THREE.TextureLoader();
-        var textureFlare0 = loader.load("public/img/lensflare0.png");
-        var textureFlare1 = loader.load("public/img/lensflare2.png");
-        var textureFlare2 = loader.load("public/img/lensflare3.png");
-        var light = new THREE.PointLight(0xffffff, 1.5, 450);
-        light.color.setHSL(h, s, l);
-        light.position.set(x, y, z);
-        scene.add(light);
+        // var loader = new THREE.TextureLoader();
+        let loader = new THREE.ImageBitmapLoader()
+        var light = new THREE.PointLight( 0xffffff, 1.5, 200000 );
 
-        var flareColor = new THREE.Color(0xffffff);
-        flareColor.setHSL(h, s, l + 0.5);
+        loader.load('images/lensflare0.png', (imageBitmap)=> {
+            var texture1 = new THREE.CanvasTexture(imageBitmap);
+            loader.load('images/lensflare2.png', (imageBitmap)=> {
+                var texture2 = new THREE.CanvasTexture(imageBitmap);
 
-        var lensflare = new THREE.Lensflare();
-        lensflare.addElement(new THREE.LensflareElement(textureFlare0, 512, 0));
-        lensflare.addElement(new THREE.LensflareElement(textureFlare1, 512, 0));
-        lensflare.addElement(new THREE.LensflareElement(textureFlare2, 60, 0.6));
+                loader.load('images/lensflare3.png', (imageBitmap)=> {
+                    var texture3 = new THREE.CanvasTexture(imageBitmap);
 
-        lensflare.customUpdateCallback = Helpers.lensFlareUpdateCallback;
-        lensflare.position.copy(light.position);
+                    var lensflare = new THREE.Lensflare();
+                    lensflare.addElement(new THREE.LensflareElement(texture1, 512, 0));
+                    lensflare.addElement(new THREE.LensflareElement(texture2, 512, 0));
+                    lensflare.addElement(new THREE.LensflareElement(texture3, 60, 0.6));
 
-        scene.add(lensflare);
+                    light.add( lensflare );
+                    scene.add(light);
+                });
+            })
+        })
     },
 
     getRandColor: () => {
