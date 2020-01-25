@@ -1,5 +1,5 @@
 <template>
-  <div class="container absolute">
+  <div class="container absolute" :class="{'in-game': getReady}">
     <div class="start-page" v-if="!getReady">
       <!--<div class="overlay"></div>-->
 

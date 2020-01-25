@@ -237,20 +237,20 @@ function removeCube (cube) {
 
 function randomPosition () {
   return {
-    x: 0, //2500 * (5.0 * Math.random() - 1.0),
-    y: 0, //2500 * (5.0 * Math.random() - 1.0),
-    z: 0 //2500 * (5.0 * Math.random() - 1.0)
-    // x: 2500 * (5.0 * Math.random() - 1.0),
-    // y: 2500 * (5.0 * Math.random() - 1.0),
-    // z: 2500 * (5.0 * Math.random() - 1.0)
+    // x: 0, //2500 * (5.0 * Math.random() - 1.0),
+    // y: 0, //2500 * (5.0 * Math.random() - 1.0),
+    // z: 0 //2500 * (5.0 * Math.random() - 1.0)
+    x: 2500 * (5.0 * Math.random() - 1.0),
+    y: 2500 * (5.0 * Math.random() - 1.0),
+    z: 2500 * (5.0 * Math.random() - 1.0)
   }
 }
 
 function randomRotation () {
   return {
-    x: 0, //randomDecemal(0, Math.PI),
-    y: 0, //randomDecemal(0, Math.PI),
-    z: 0 //randomDecemal(0, Math.PI)
+    x: randomDecemal(0, Math.PI),
+    y: randomDecemal(0, Math.PI),
+    z: randomDecemal(0, Math.PI)
   }
 }
 

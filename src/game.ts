@@ -107,11 +107,19 @@ export class Game {
 
         window.addEventListener('contextmenu', this.onContextmenu, false);
         window.addEventListener('resize', this.onWindowResize, false);
+        
     }
 
     onMouseDown(e) {
         e.preventDefault();
         e.stopPropagation();
+
+        if(e.button === 0) {
+            this.worker.post({
+                type: 'startFire'
+            });
+        }
+
         this.worker.post({
             type: 'mousedown',
             mouse: {
@@ -135,6 +143,11 @@ export class Game {
     onMouseUp(e) {
         e.preventDefault();
         e.stopPropagation();
+
+        this.worker.post({
+            type: 'stopFire'
+        });
+
         this.worker.post({
             type: 'mouseup',
             mouse: {
@@ -145,11 +158,11 @@ export class Game {
     }
 
     onKeyDown(e) {
-        if(e.keyCode === 32) {
-            this.worker.post({
-                type: 'startFire'
-            });
-        }
+        // if(e.keyCode === 32) {
+        //     this.worker.post({
+        //         type: 'startFire'
+        //     });
+        // }
 
         this.worker.post({
             type: 'keydown',
@@ -172,9 +185,9 @@ export class Game {
 
     onKeyUp(e) {
 
-        this.worker.post({
-            type: 'stopFire'
-        });
+        // this.worker.post({
+        //     type: 'stopFire'
+        // });
         
         this.worker.post({
             type: 'keyup',

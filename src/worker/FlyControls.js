@@ -151,13 +151,13 @@ export default function ( object, camera, container) {
 
 			} else {
 
-				switch ( event.button ) {
+				// switch ( event.button ) {
 
-					case 0: this.moveState.forward = 1; break;
-					case 2: this.moveState.back = 1; break;
+				// 	case 0: this.moveState.forward = 1; break;
+				// 	case 2: this.moveState.back = 1; break;
 
-				}
-
+				// }
+			
 				this.updateMovementVector();
 
 			}
@@ -194,12 +194,12 @@ export default function ( object, camera, container) {
 
 			} else {
 
-				switch ( event.button ) {
+				// switch ( event.button ) {
 
-					case 0: this.moveState.forward = 0; break;
-					case 2: this.moveState.back = 0; break;
+				// 	case 0: this.moveState.forward = 0; break;
+				// 	case 2: this.moveState.back = 0; break;
 
-				}
+				// }
 
 				this.updateMovementVector();
 
@@ -209,6 +209,15 @@ export default function ( object, camera, container) {
 		//}
 
 	};
+
+	// this.stopRotation = function() {
+	// 	this.mouseStatus --;
+	// 	this.moveState.yawLeft = this.moveState.pitchDown = 0;
+	// 	console.log(this.mouseStatus, this.moveState);
+
+	// 	// this.updateMovementVector();
+	// 	this.updateRotationVector();
+	// };
 
 	this.update = function( delta ) {
 		if (this.isMoving){

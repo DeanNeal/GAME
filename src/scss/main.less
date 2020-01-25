@@ -20,7 +20,7 @@ body {
     height: 100%;
     background: #000;
     font-family: 'Source Sans Pro', sans-serif;
-    cursor: url(../../public/images/cursor1.png), pointer;
+    
     // cursor: none;
 }
 
@@ -141,6 +141,10 @@ canvas {
     height: 100%;
     width: 100%;
     user-select: none;
+    cursor: url(../../public/images/cursor1.png), pointer;
+    &.in-game {
+        // cursor: none;
+    }
     .overlay {
         background: rgba(0, 0, 0, 0.6);
         width: 100%;

@@ -5,6 +5,8 @@ import FlyControls from './FlyControls'
 import SocketService from './socket.service'
 import Helpers from '../helper'
 import * as THREE from 'three'
+import { createUserMesh, createAim} from './objects'
+import { addAsteroids, addCubes, addSky} from './environment'
 
 let container
 let renderer
@@ -34,7 +36,9 @@ SocketService.socket.on('userUpdated', user => {
   currentUser = user
   worker.post({ type: 'userUpdated', user })
   addMainPlayer(user)
-  addSky()
+  addSky((sky)=> {
+    scene.add(sky)
+  })
 })
 
 SocketService.socket.on('userList', users => {
@@ -46,11 +50,19 @@ SocketService.socket.on('gotDamage', user => {
 })
 
 SocketService.socket.on('updateCubes', cubes => {
-  addCubes(cubes)
+  addCubes(cubes, (mesh)=> {
+    scene.add(mesh)
+    allCubes.push(mesh)
+  });
+
+  worker.post({ type: 'updateCubes', cubes: allCubes.length })
 })
 
 SocketService.socket.on('updateAsteroids', asteroids => {
-  addAsteroids(asteroids)
+  addAsteroids(asteroids, (mesh)=> {
+     scene.add(mesh)
+     allAsteroids.push(mesh)
+  });
 })
 
 SocketService.socket.on('updateUsersCoords', users => {
@@ -149,111 +161,12 @@ SocketService.socket.on('cubeWasRemoved', cube => {
   }
 })
 
-
 function getVolumeFromDistance(fromMesh, toMesh) {
   const factor = 0.9998;
   const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
   return  (1/(1 + (distanceToPlayer - distanceToPlayer * factor)) ) * 0.5;
 }
 
-
-function addSky () {
-  let loader = new THREE.ImageBitmapLoader()
-  // create the geometry sphere
-  let geometry = new THREE.SphereGeometry(250000, 20, 20)
-  loader.load('./images/galaxy_starfield.png', function (imageBitmap: any) {
-    var texture = new THREE.CanvasTexture(imageBitmap)
-    texture.repeat.set(10, 10)
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-    var material = new THREE.MeshBasicMaterial({ map: texture })
-    material.side = THREE.BackSide
-
-    let galaxy = new THREE.Mesh(geometry, material)
-
-    scene.add(galaxy)
-  })
-
-  // // create the material, using a texture of startfield
-  // let material = new THREE.MeshBasicMaterial({ map: skyTexture })
-  // // material.map = THREE.ImageBitmapLoader('img/sky.jpg')
-
-  // material.side = THREE.BackSide
-  // // create the mesh based on geometry and material
-  // let galaxy = new THREE.Mesh(geometry, material)
-  // scene.add(galaxy)
-}
-
-function addCubes (cubes) {
-  let s = 150
-  let cube = new THREE.BoxGeometry(s, s, s)
-
-  // let loader = new THREE.ImageBitmapLoader();
-  // let texture = loader.load('img/cyber2.jpg', function(texture) {
-  //     texture.repeat.set(1, 1);
-  //     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  //     // texture.anisotropy = 16;
-  //     // texture.needsUpdate = true;
-  // });
-
-  cubes.forEach(c => {
-    let material = new THREE.MeshPhongMaterial({
-      color: c.color,
-      wireframe: true,
-      /*opacity: 0.5, transparent: true ,*/ specular: 0xffffff,
-      shininess: 50
-    })
-
-    let mesh = new THREE.Mesh(cube, material)
-
-    
-    mesh.castShadow = true; //default is false
-    mesh.receiveShadow = true; //default
-
-    mesh.userData = c
-    mesh.position.x = c.position.x
-    mesh.position.y = c.position.y
-    mesh.position.z = c.position.z
-
-    mesh.rotation.x = c.position.x
-    mesh.rotation.y = c.position.y
-    mesh.rotation.z = c.position.z
-
-
-    scene.add(mesh)
-    allCubes.push(mesh)
-  })
-
-  worker.post({ type: 'updateCubes', cubes: allCubes.length })
-}
-
-function addAsteroids (asteroids) {
-
-  asteroids.forEach(c => {
-    let cube = new THREE.BoxGeometry(c.size, c.size, c.size);
-
-    let material = new THREE.MeshPhongMaterial({
-      color: c.color,
-      wireframe: false,
-      specular: 0xffffff
-    })
-    let mesh = new THREE.Mesh(cube, material)
-    
-    mesh.castShadow = true; //default is false
-    mesh.receiveShadow = true; //default
-
-    mesh.userData = c
-    mesh.position.x = c.position.x
-    mesh.position.y = c.position.y
-    mesh.position.z = c.position.z
-
-    mesh.rotation.x = c.position.x
-    mesh.rotation.y = c.position.y
-    mesh.rotation.z = c.position.z
-
-    scene.add(mesh)
-    allAsteroids.push(mesh)
-  })
-}
 
 function addMainPlayer ({color, initPosition, initRotation}) {
   MainPlayer = createUserMesh(color, true)
@@ -265,126 +178,20 @@ function addMainPlayer ({color, initPosition, initRotation}) {
   controls.domElement = container
   controls.rollSpeed = Math.PI / 3.5
   controls.autoForward = false
-  controls.dragToLook = true
+  controls.dragToLook = false
 
  
   MainPlayer.position.set(initPosition.x, initPosition.y, initPosition.z)
   MainPlayer.rotation.set(initRotation.x, initRotation.y, initRotation.z)
   MainPlayer.add(camera)
 
-  // let loader = new THREE.ImageBitmapLoader()
-
-  // loader.load('./img/aim.png', function (imageBitmap) {
-  //   var texture = new THREE.CanvasTexture(imageBitmap)
-  //   var spriteMaterial = new THREE.SpriteMaterial({
-  //     map: texture,
-  //     color: 0xffffff
-  //   })
-  //   var sprite = new THREE.Sprite(spriteMaterial)
-  //   sprite.position.set(0, -0.11, -10)
-  //   sprite.scale.set(0.5, 0.5, 0.5)
-
-  //   camera.add(sprite)
-  // })
-
+ 
+  camera.add(createAim(0, 0, -50))
   scene.add(MainPlayer)
 
   worker.post({ type: 'readyForListeners' })
-
 }
 
-function createUserMesh (color, main?) {
-
-  let userMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(70, 20, 20),
-    new THREE.MeshPhongMaterial({
-      // map: texture,
-      // bumpMap: textureBump,
-      color: color ? color : 0xffff00,
-      // specular: 0x0022ff,
-      shininess: 1,
-      // side: THREE.BackSide,
-      opacity: main ? 0: 1,
-      transparent: main ? true : false
-    })
-  )
-
-  userMesh.castShadow = true; //default is false
-  userMesh.receiveShadow = true; //default
-
-  userMesh.add(createGun());
-  if(!main) userMesh.add(createBoxGeometry(73,0,0, color));
-  if(!main) userMesh.add(createBoxGeometry(-73,0,0, color));
-  
-  return userMesh
-}
-
-function createBoxGeometry(x,y,z, color) {
-    var geometry = new THREE.BoxGeometry( 140, 10, 10 );
-    var material = new THREE.MeshPhongMaterial( {color: color || 0xffffff} );
-    var cube = new THREE.Mesh( geometry, material );
-    cube.position.set(x,y,z);
-    cube.rotation.set(0, 0, Math.PI/2);
-
-    return cube;
-}
-
-function createGun () {
-  let cube = new THREE.CylinderGeometry(10,10,70,30);//BoxGeometry(12, 12, 100)
-  let material = new THREE.MeshPhongMaterial({
-    color: '#cccccc',
-    wireframe: false,
-    specular: 0xffffff,
-    shininess: 20
-  })
-  let gun = new THREE.Mesh(cube, material)
-
-  
-
-  gun.position.set(0, 0, -50)
-  gun.rotation.set(Math.PI / 2,0,0);
-
-  let gunDetails = new THREE.Mesh(new THREE.CylinderGeometry(7,7,70,30), material)
-  gunDetails.position.set(0, -10, 0)
-  // gunDetails.rotation.set(1.5,0,0);
-
-  gun.add(gunDetails);
-  return gun
-}
-
-// function addPlanet () {
-//   var loader = new THREE.ImageBitmapLoader()
-//   var earthTexture = loader.load('public/img/mars.jpg', function (texture) {
-//     texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-//     texture.offset.set(0, 0)
-//     texture.repeat.set(1, 1)
-//   })
-
-//   var earthMaterial = new THREE.MeshLambertMaterial({ map: earthTexture })
-//   var earthPlane = new THREE.Mesh(
-//     new THREE.PlaneGeometry(30000, 30000),
-//     earthMaterial
-//   )
-//   earthPlane.material.side = THREE.DoubleSide
-//   earthPlane.position.x = 70000
-//   earthPlane.position.z = 70000
-//   earthPlane.position.y = 70000
-
-//   // rotation.z is rotation around the z-axis, measured in radians (rather than degrees)
-//   // Math.PI = 180 degrees, Math.PI / 2 = 90 degrees, etc.
-//   earthPlane.rotation.z = (0.1 * Math.PI) / 2
-//   earthPlane.rotation.y = (0.5 * Math.PI) / 2
-
-//   scene.add(earthPlane)
-
-//   // earthPlane.lookAt(earthPlane.worldToLocal(MainPlayer.matrixWorld.getPosition()));
-
-//   // this.Earth = createPlanet({size: 10000});
-//   // this.Earth.position.x = 20000;
-//   // this.Earth.position.z = 20000;
-//   // this.Earth.position.y = 20000;
-//   // this.scene.add(this.Earth);
-// }
 
 function createNewPlayer (user) {
   let newPlayer = createUserMesh(user.color)
@@ -406,11 +213,7 @@ function createNewPlayer (user) {
 
     let material = new THREE.MeshPhongMaterial({
       color: 0xffffff,
-      // wireframe: false,
-      // specular: 0xffffff,
-      // shininess: 5,
       emissive: 0xffffff,
-      // emissiveIntensity: 0.5
     })
 
     const userTextMesh = new THREE.Mesh(textGeo, material)
@@ -721,4 +524,55 @@ const worker = insideWorker(e => {
   if (e.data.type === 'keypress') {
     controls.keypress(e.data.mouse)
   }
+
+  // if(e.data.type === 'stopRotation') {
+  //   controls.stopRotation();
+  // }
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function addPlanet () {
+//   var loader = new THREE.ImageBitmapLoader()
+//   var earthTexture = loader.load('public/img/mars.jpg', function (texture) {
+//     texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+//     texture.offset.set(0, 0)
+//     texture.repeat.set(1, 1)
+//   })
+
+//   var earthMaterial = new THREE.MeshLambertMaterial({ map: earthTexture })
+//   var earthPlane = new THREE.Mesh(
+//     new THREE.PlaneGeometry(30000, 30000),
+//     earthMaterial
+//   )
+//   earthPlane.material.side = THREE.DoubleSide
+//   earthPlane.position.x = 70000
+//   earthPlane.position.z = 70000
+//   earthPlane.position.y = 70000
+
+//   // rotation.z is rotation around the z-axis, measured in radians (rather than degrees)
+//   // Math.PI = 180 degrees, Math.PI / 2 = 90 degrees, etc.
+//   earthPlane.rotation.z = (0.1 * Math.PI) / 2
+//   earthPlane.rotation.y = (0.5 * Math.PI) / 2
+
+//   scene.add(earthPlane)
+
+//   // earthPlane.lookAt(earthPlane.worldToLocal(MainPlayer.matrixWorld.getPosition()));
+
+//   // this.Earth = createPlanet({size: 10000});
+//   // this.Earth.position.x = 20000;
+//   // this.Earth.position.z = 20000;
+//   // this.Earth.position.y = 20000;
+//   // this.scene.add(this.Earth);
+// }
