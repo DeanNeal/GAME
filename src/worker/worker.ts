@@ -7,6 +7,7 @@ import Helpers from '../helper'
 import * as THREE from 'three'
 import { createUserMesh, createAim} from './objects'
 import { addAsteroids, addRunes, addSky} from './environment'
+import { asteroidCollision, runesCollisionDetection } from './collision'
 
 let container
 let renderer
@@ -24,7 +25,7 @@ let MainPlayer
 let currentUser
 let players = []
 let controls
-let lastCollisionId
+// let lastCollisionId
 let lastBulletCollisionId
 let start = new Date().getTime()
 const duration = 120
@@ -225,41 +226,41 @@ function createNewPlayer (user) {
   })
 }
 
-function runesCollisionDetection () {
-  let originPoint = MainPlayer.position.clone()
+// function runesCollisionDetection () {
+//   let originPoint = MainPlayer.position.clone()
 
-  for (
-    let vertexIndex = 0;
-    vertexIndex < MainPlayer.geometry.vertices.length;
-    vertexIndex++
-  ) {
-    let localVertex = MainPlayer.geometry.vertices[vertexIndex].clone()
-    let globalVertex = localVertex.applyMatrix4(MainPlayer.matrix)
-    let directionVector = globalVertex.sub(MainPlayer.position)
-    let ray = new THREE.Raycaster(
-      originPoint,
-      directionVector.clone().normalize()
-    )
-    let collisionResults = ray.intersectObjects(allRunes)
-    if (
-      collisionResults.length > 0 &&
-      collisionResults[0].distance <= directionVector.length()
-    ) {
-      let obj = collisionResults[0].object
-      if (obj.id !== lastCollisionId) {
-        // console.log(obj.id);
-        lastCollisionId = obj.id
+//   for (
+//     let vertexIndex = 0;
+//     vertexIndex < MainPlayer.geometry.vertices.length;
+//     vertexIndex++
+//   ) {
+//     let localVertex = MainPlayer.geometry.vertices[vertexIndex].clone()
+//     let globalVertex = localVertex.applyMatrix4(MainPlayer.matrix)
+//     let directionVector = globalVertex.sub(MainPlayer.position)
+//     let ray = new THREE.Raycaster(
+//       originPoint,
+//       directionVector.clone().normalize()
+//     )
+//     let collisionResults = ray.intersectObjects(allRunes)
+//     if (
+//       collisionResults.length > 0 &&
+//       collisionResults[0].distance <= directionVector.length()
+//     ) {
+//       let obj = collisionResults[0].object
+//       if (obj.id !== lastCollisionId) {
+//         // console.log(obj.id);
+//         lastCollisionId = obj.id
 
-        // obj.material.opacity = 0.4;
-        // obj.material.transparent = true;
-        // scene.remove(obj);
+//         // obj.material.opacity = 0.4;
+//         // obj.material.transparent = true;
+//         // scene.remove(obj);
 
-        SocketService.socket.emit('removeCube', obj.userData)
-        // SocketService.socket.emit('increaseScores')
-      }
-    }
-  }
-}
+//         SocketService.socket.emit('removeCube', obj.userData)
+//         // SocketService.socket.emit('increaseScores')
+//       }
+//     }
+//   }
+// }
 
 function damageCollisionDetection () {
   players
@@ -428,12 +429,14 @@ function animate () {
   }
 
   if (allRunes.length && MainPlayer) {
-    runesCollisionDetection()
+    runesCollisionDetection(MainPlayer, allRunes)
   }
 
   if (bullets.length) {
     damageCollisionDetection()
   }
+
+  asteroidCollision();
 
 
 
