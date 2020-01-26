@@ -37,41 +37,20 @@ export function asteroidCollision(asteroids, bullets, MainPlayer, worker) {
       })
   })
 }
-let lastCollisionId;
-export function runesCollisionDetection(MainPlayer, allRunes) {
-   let originPoint = MainPlayer.position.clone()
+let lastRuneCollisionId;
+export function runesCollisionDetection(MainPlayer, allRunes, worker) {
+  
+  allRunes.forEach(rune=> {
+    const obj =  rune;
+    if(detectCollisionCubes(rune, MainPlayer)) {
+        if(obj.id !== lastRuneCollisionId) {
+          lastRuneCollisionId = obj.id
+          SocketService.socket.emit('removeRune', obj.userData)
+          worker.post({type: 'removeRune', volume: 0.5})
+        }
+    }
+  });
 
-   for (
-     let vertexIndex = 0;
-     vertexIndex < MainPlayer.geometry.vertices.length;
-     vertexIndex++
-   ) {
-     let localVertex = MainPlayer.geometry.vertices[vertexIndex].clone()
-     let globalVertex = localVertex.applyMatrix4(MainPlayer.matrix)
-     let directionVector = globalVertex.sub(MainPlayer.position)
-     let ray = new THREE.Raycaster(
-       originPoint,
-       directionVector.clone().normalize()
-     )
-     let collisionResults = ray.intersectObjects(allRunes)
-     if (
-       collisionResults.length > 0 &&
-       collisionResults[0].distance <= directionVector.length()
-     ) {
-       let obj = collisionResults[0].object
-       if (obj.id !== lastCollisionId) {
-         // console.log(obj.id);
-         lastCollisionId = obj.id
- 
-         // obj.material.opacity = 0.4;
-         // obj.material.transparent = true;
-         // scene.remove(obj);
-
-         SocketService.socket.emit('removeRune', obj.userData)
-         // SocketService.socket.emit('increaseScores')
-       }
-     }
-   }
 }
 
 let lastBulletWithEnemyCollisionId;

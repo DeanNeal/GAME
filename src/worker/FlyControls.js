@@ -25,8 +25,7 @@ export default function ( object, camera, container) {
 
 	this.movementSpeedMultiplier = 0;
 	// disable default target object behavior
-	
-	this.disabled = false;
+
 
 	// internals
 	this.maxSpeed = 65;
@@ -38,6 +37,7 @@ export default function ( object, camera, container) {
 	this.moveState = { up: 0, down: 0, left: 0, right: 0, forward: 0, back: 0, pitchUp: 0, pitchDown: 0, yawLeft: 0, yawRight: 0, rollLeft: 0, rollRight: 0, freeze: 0};
 	this.moveVector = new THREE.Vector3( 0, 0, 0 );
 	this.rotationVector = new THREE.Vector3( 0, 0, 0 );
+
 
 
 	var movementKeyCodes = [87,83,65,68,82,70,38,40]
@@ -167,9 +167,6 @@ export default function ( object, camera, container) {
 	};
 
 	this.mousemove = function( event ) {
-		if(this.disabled) {
-			return;
-		}
 
 		if ( !this.dragToLook || this.mouseStatus > 0 ) {
 
@@ -214,8 +211,8 @@ export default function ( object, camera, container) {
 
 	};
 
-	this.stopRotation = function() {
-		this.disabled = !this.disabled;
+	this.mousewheel = function() {
+
 	};
 
 	this.update = function( delta ) {
@@ -247,29 +244,28 @@ export default function ( object, camera, container) {
 		var rotMult = delta * this.rollSpeed;
 
 
-
 		// console.log(moveMult, this.moveVector.z);	
 		this.object.translateX( this.moveVector.x * moveMult );
 		this.object.translateY( this.moveVector.y * moveMult );
 		this.object.translateZ( this.moveVector.z * moveMult );
 
 		this.tmpQuaternion.set( this.rotationVector.x * rotMult, this.rotationVector.y * rotMult, this.rotationVector.z * rotMult, 1 ).normalize();
-		this.object.quaternion.multiply( this.tmpQuaternion );
+	
+		// if(!this.moveState.freeze) {
+		this.object.quaternion.multiply(this.tmpQuaternion );
 
 		// expose the rotation vector for convenience
 		this.object.rotation.setFromQuaternion( this.object.quaternion, this.object.rotation.order );
 
 		this.cameraUpdate();
 
-
 		//smooth stop
-		if(this.disabled) {
-			this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005  ? this.moveState.yawLeft/1.07 : 0
-			this.moveState.pitchDown  = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown /1.07 : 0
+		// if(this.viewMode === 1) {
+		// 	this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005  ? this.moveState.yawLeft/1.07 : 0
+		// 	this.moveState.pitchDown  = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown /1.07 : 0
 
-			// console.log(this.moveState.yawLeft );
-			this.updateRotationVector();
-		}
+		// 	this.updateRotationVector();
+		// }
 		
 		return {
 			moveMult,
@@ -280,8 +276,6 @@ export default function ( object, camera, container) {
 	this.cameraUpdate = function () {
 		camera.position.z = this.cameraInitPosition.z+ (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier / 3 : 0);
 	}
-
-
 
 	this.updateMovementVector = function() {
 

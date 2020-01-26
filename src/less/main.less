@@ -141,11 +141,13 @@ canvas {
     height: 100%;
     width: 100%;
     user-select: none;
+    cursor: url(../../public/images/cursor1.png), pointer;
     &.mode-0 {
         cursor: url(../../public/images/cursor1.png), pointer;
     }
     &.mode-1 {
-        cursor: none;
+        cursor: url(../../public/images/cursor1.png), pointer;
+        // cursor: none;
     }
     .overlay {
         background: rgba(0, 0, 0, 0.6);
@@ -195,7 +197,7 @@ canvas {
                 font-size: 30px;
                 margin: 10px 0;
                 transition: 0.15s;
-                cursor: pointer;
+                // cursor: pointer;
                 &:last-child {
                     margin-top: 30px;
                 }
@@ -233,7 +235,8 @@ canvas {
             justify-content: center;
         }
         .btn {
-            cursor: pointer;
+            cursor: url(../../public/images/cursor1.png), pointer;
+            // cursor: pointer;
             width: 100%;
             margin: 0px 50px;
             padding: 15px 20px;
@@ -251,6 +254,7 @@ canvas {
             font-size: 16px;
             margin-top: 40px;
             margin-bottom: 15px;
+            cursor: url(../../public/images/cursor1.png), pointer;
         }
         input {
             width: 100%;
@@ -280,7 +284,7 @@ canvas {
             }
             .color {
                 transition: 0.2s;
-                cursor: pointer;
+                // cursor: pointer;
                 width: 30px;
                 height: 30px;
                 display: inline-block;

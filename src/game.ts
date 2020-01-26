@@ -27,6 +27,7 @@ export class Game {
         this.onKeyUp = this.onKeyUp.bind(this);
 
         this.onContextmenu =  this.onContextmenu.bind(this);
+        this.onMouseWheel = this.onMouseWheel.bind(this);
     }
 
     init(opts: any) {
@@ -74,6 +75,13 @@ export class Game {
                 GlobalService.users.next(e.data.users);
             }
 
+            if(e.data.type === 'removeRune') {
+                var audio = new Audio('sounds/rune.mp3');
+                audio.currentTime = 0;
+                audio.volume = e.data.volume || 0.3;
+                audio.play();
+            }
+
             // if(e.data.type === 'gameOver') {
             //     GlobalService.gameOver.next();
             // }
@@ -107,14 +115,16 @@ export class Game {
 
         window.addEventListener('contextmenu', this.onContextmenu, false);
         window.addEventListener('resize', this.onWindowResize, false);
-        
+
+        window.addEventListener("mousewheel", this.onMouseWheel);
+		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
     }
 
     onMouseDown(e) {
         e.preventDefault();
         e.stopPropagation();
 
-        if(e.button === 0) {
+        if(e.button === 0){// && GlobalService.viewMode.getValue() === 0) {
             this.worker.post({
                 type: 'startFire'
             });
@@ -123,6 +133,8 @@ export class Game {
         this.worker.post({
             type: 'mousedown',
             mouse: {
+                clientX: e.clientX,
+                clientY: e.clientY,
                 button: e.button
             }
         })
@@ -135,7 +147,9 @@ export class Game {
             type: 'mousemove',
             mouse: {
                 pageX: e.pageX,
-                pageY: e.pageY
+                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY
             }
         })
     }
@@ -152,7 +166,9 @@ export class Game {
             type: 'mouseup',
             mouse: {
                 pageX: e.pageX,
-                pageY: e.pageY
+                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY
             }
         })
     }
@@ -167,7 +183,7 @@ export class Game {
         if(e.keyCode === 9) {
             e.preventDefault();
             this.worker.post({
-                type: 'stopRotation'
+                type: 'changeViewMode'
             });
             GlobalService.viewMode.next(GlobalService.viewMode.getValue() ? 0 : 1);
         }
@@ -210,6 +226,20 @@ export class Game {
         e.preventDefault();
     }
 
+    onMouseWheel(e) {
+        e = window.event || e;
+        const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+
+        this.worker.post({
+            type: 'mousewheel',
+            mouse: {
+                deltaY: e.deltaY
+            }
+        })
+
+        // e.preventDefault();
+    }
+
     removeListeners() {
         window.removeEventListener('resize', this.onWindowResize, false);
 
@@ -222,6 +252,9 @@ export class Game {
         window.removeEventListener('keypress', this.onKeyPress, false);
 
         window.removeEventListener('contextmenu', this.onContextmenu, false);
+
+        window.addEventListener("mousewheel", this.onMouseWheel);
+		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
     }
 
     disconnect() {

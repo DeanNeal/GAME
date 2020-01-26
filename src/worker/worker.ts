@@ -1,6 +1,9 @@
 import insideWorker from '../vendor/inside-worker'
 
 import FlyControls from './FlyControls'
+// import {ThirdPersonControl} from './3rdPersonControls'
+import OrbitControls from './OrbitControls';
+
 // import { loadStarship } from './utils'
 import SocketService from './socket.service'
 import Helpers from '../helper'
@@ -12,11 +15,16 @@ import { getVolumeFromDistance } from './utils'
 
 let container
 let renderer
-const startPosition = { x: 0, y: 50, z: 50 }
 const clock = new THREE.Clock()
 const scene = new THREE.Scene()
 
-const camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
+const camera1 = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
+camera1.position.set(0, 50, 50)
+
+const camera2 = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
+
+const fakeCamera = camera2.clone(); 
+
 
 let allRunes = []
 let allAsteroids = []
@@ -31,6 +39,8 @@ let controls
 let start = new Date().getTime()
 const duration = 120
 let isShooting = false
+
+let viewMode = 0;
 
 
 SocketService.socket.on('userUpdated', user => {
@@ -148,7 +158,7 @@ SocketService.socket.on('deletePlayer', userId => {
 })
 
 SocketService.socket.on('runeWasRemoved', rune => {
-  for (let i = 0; i < allRunes.length; i++) {debugger
+  for (let i = 0; i < allRunes.length; i++) {
     if (allRunes[i].userData.id === rune.id) {
       scene.remove(allRunes[i])
       allRunes.splice(i, 1)
@@ -174,17 +184,29 @@ SocketService.socket.on('asteroidWasRemoved', asteroid => {
   }
 })
 
-// function getVolumeFromDistance(fromMesh, toMesh) {
-//   const factor = 0.9998;
-//   const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
-//   return  (1/(1 + (distanceToPlayer - distanceToPlayer * factor)) ) * 0.5;
-// }
-
 
 function addMainPlayer ({color, initPosition, initRotation}) {
   MainPlayer = createUserMesh(color, true)
 
-  controls = new FlyControls(MainPlayer, camera, container)
+  MainPlayer.position.set(initPosition.x, initPosition.y, initPosition.z)
+  MainPlayer.rotation.set(initRotation.x, initRotation.y, initRotation.z)
+
+  MainPlayer.add(camera1)
+  MainPlayer.add(camera2);
+
+ 
+
+  initFirstPersonMode();
+  
+  // camera.add(createAim(0, 0, -50))
+
+  scene.add(MainPlayer)
+
+  worker.post({ type: 'readyForListeners' })
+}
+
+function initFirstPersonMode() {
+  controls = new FlyControls(MainPlayer, camera1, container)
   // controls.enablePan = false;
 
   controls.movementSpeed = 1000
@@ -192,18 +214,26 @@ function addMainPlayer ({color, initPosition, initRotation}) {
   controls.rollSpeed = Math.PI / 3.5
   controls.autoForward = false
   controls.dragToLook = false
+  camera1.up = new THREE.Vector3(0, 1, 0);
 
- 
-  MainPlayer.position.set(initPosition.x, initPosition.y, initPosition.z)
-  MainPlayer.rotation.set(initRotation.x, initRotation.y, initRotation.z)
-  MainPlayer.add(camera)
+}
 
- 
-  // camera.add(createAim(0, 0, -50))
-  
-  scene.add(MainPlayer)
+function initThirdPersonMode() {
 
-  worker.post({ type: 'readyForListeners' })
+  controls = new OrbitControls(MainPlayer, fakeCamera, container);
+  // controls.enablePan = true;
+  controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+  controls.dampingFactor = 0.25;
+
+  controls.screenSpacePanning = false;
+
+  controls.minDistance = 300;
+  controls.maxDistance = 1500;
+
+  controls.zoomSpeed = 2;
+  controls.rotateSpeed = 0.1;
+
+  controls.maxPolarAngle = Math.PI/2;
 }
 
 
@@ -296,8 +326,11 @@ function render () {
     worker.post({ type: 'speed', speed })
   }
 
+
+  camera2.copy(fakeCamera);
+
   // controls.updateShip(delta);
-  renderer.render(scene, camera)
+  renderer.render(scene, viewMode === 0 ? camera1 : camera2)
 }
 
 function animate () {
@@ -331,7 +364,7 @@ function animate () {
 
 
   players.forEach(user => {
-    if (camera && user.userTextMesh) {
+    if (user.userTextMesh) {
       // const factor = user.mesh.position.distanceTo(MainPlayer.position) / 300;
       var scaleVector = new THREE.Vector3();
       var scaleFactor = 2000;
@@ -354,7 +387,7 @@ function animate () {
   }
 
   if (allRunes.length && MainPlayer) {
-    runesCollisionDetection(MainPlayer, allRunes)
+    runesCollisionDetection(MainPlayer, allRunes, worker)
   }
 
   if (bullets.length) {
@@ -364,7 +397,6 @@ function animate () {
   if(allAsteroids.length && MainPlayer) {
     asteroidCollision(allAsteroids, bullets, MainPlayer, worker);
   }
-  
 }
 
 
@@ -374,7 +406,7 @@ const worker = insideWorker(e => {
     if (!canvas.style) canvas.style = { width: 0, height: 0 }
 
     container = canvas
-    camera.position.set(startPosition.x, startPosition.y, startPosition.z)
+    
 
     // // lights
     let dLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -412,8 +444,14 @@ const worker = insideWorker(e => {
   if (e.data.type === 'resize') {
     renderer.setSize(e.data.width, e.data.height)
 
-    camera.aspect = e.data.width / e.data.height
-    camera.updateProjectionMatrix()
+    camera1.aspect = e.data.width / e.data.height
+    camera1.updateProjectionMatrix()
+
+    camera2.aspect = e.data.width / e.data.height
+    camera2.updateProjectionMatrix()
+
+    fakeCamera.aspect = e.data.width / e.data.height
+    fakeCamera.updateProjectionMatrix()
   }
 
   if (e.data.type === 'connection') {
@@ -452,8 +490,26 @@ const worker = insideWorker(e => {
     controls.keypress(e.data.mouse)
   }
 
-  if(e.data.type === 'stopRotation') {
-    controls.stopRotation();
+  if(e.data.type === 'mousewheel') {
+    // if (e.data.delta < 0) {
+    //   controls.zoomOut();
+    // } else {
+    //   controls.zoomIn();
+    // }
+    controls.mousewheel(e.data.mouse);
+  }
+
+  if(e.data.type === 'changeViewMode') {
+
+    viewMode = viewMode === 0 ? 1 : 0;
+
+    if(viewMode === 0) {
+      initFirstPersonMode();
+    } else {
+      initThirdPersonMode();
+    }
+
+
   }
 })
 

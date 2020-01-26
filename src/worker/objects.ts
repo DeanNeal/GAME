@@ -30,8 +30,8 @@ export function createGun (color) {
    return gun
  }
 
-export function createBoxGeometry(x,y,z, color) {
-   var geometry = new THREE.BoxGeometry( 140, 10, 10 );
+export function createBoxGeometry({w,h,d}, x,y,z, color) {
+   var geometry = new THREE.BoxGeometry( w, h, d );
    var material = new THREE.MeshPhongMaterial( {color: color || 0xffffff} );
    var cube = new THREE.Mesh( geometry, material );
    cube.position.set(x,y,z);
@@ -65,9 +65,13 @@ export function createUserMesh (color, main?) {
   //  userMesh.castShadow = true; //default is false
   //  userMesh.receiveShadow = true; //default
  
-   userMesh.add(createGun(color));
-   userMesh.add(createBoxGeometry(73,0,0, color));
-   userMesh.add(createBoxGeometry(-73,0,0, color));
+  // if(!main){
+    userMesh.add(createGun(color));
+    userMesh.add(createBoxGeometry({w: 140, h: 10, d: 10}, 73,0,0, color));
+    userMesh.add(createBoxGeometry({w: 140, h: 10, d: 10}, -73,0,0, color));
+    userMesh.add(createBoxGeometry({w: 50, h: 10, d: 10}, 0,50, 100, color));
+  // }
+
    
    return userMesh
  }
@@ -82,8 +86,8 @@ export function createUserMesh (color, main?) {
 
  export function createBullet (color) {
   let bullet = new THREE.Mesh(
-    new THREE['CubeGeometry'](5, 5, 200),
-    new THREE.MeshBasicMaterial({ color: color })
+    new THREE['CubeGeometry'](5, 5, 100),
+    new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 1 })
   )
   
   return bullet
