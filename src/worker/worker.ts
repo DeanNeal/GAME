@@ -19,8 +19,6 @@ const clock = new THREE.Clock()
 const scene = new THREE.Scene()
 
 const camera1 = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
-// camera1.position.set(0, 50, 50)
-
 const camera2 = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
 
 const fakeCamera = camera2.clone(); 
@@ -34,8 +32,7 @@ let MainPlayer
 let currentUser
 let players = []
 let controls
-// let lastCollisionId
-// let lastBulletCollisionId
+
 let start = new Date().getTime()
 const duration = 220
 let isShooting = false
@@ -88,11 +85,12 @@ SocketService.socket.on('updateUsersCoords', users => {
           user.rotation._z
         )
 
-        // var distance = p.mesh.position.distanceTo(MainPlayer.position).toFixed(0);
-        
-        // p.userTextMesh.geometry.parameters.text =  distance;
+        let distance = p.mesh.position.distanceTo(MainPlayer.position) / 10;
+
+        distance = distance > 1000 ? 1000 : distance; 
+        distance = distance < 100 ? 100 : distance; 
   
-        p.userTextMesh.position.set(user.position.x + 100, user.position.y + 100, user.position.z + 100);
+        p.userTextMesh.position.set(user.position.x + distance, user.position.y + distance, user.position.z + distance);
       }
     })
   })
@@ -247,10 +245,10 @@ function createNewPlayer (user) {
     id: user.id
   }
 
-  var loader = new THREE.FontLoader()
+  const loader = new THREE.FontLoader()
   loader.load('./helvetiker_regular.typeface.json', function (font) {
 
-    var textGeo = new THREE.TextGeometry(user.playerName, {
+    const textGeo = new THREE.TextGeometry(user.playerName, {
       font: font,
       size: 20,
       height: 1,
@@ -314,7 +312,7 @@ function shot () {
 
 function shotAnimate () {
   // let cl = clock.getElapsedTime();
-  var elapsed = new Date().getTime() - start
+  const elapsed = new Date().getTime() - start
 
   if (elapsed > duration) {
     if (isShooting) {
@@ -351,30 +349,30 @@ function animate () {
 
   for (let i = 0; i < bullets.length; i++) {
     //Pick a point in front of the camera in camera space:
-    var pLocal = new THREE.Vector3(0, 0, -1)
+    const pLocal = new THREE.Vector3(0, 0, -1)
     // //Now transform that point into world space:
-    var pWorld = pLocal.applyMatrix4(bullets[i].matrixWorld)
+    const pWorld = pLocal.applyMatrix4(bullets[i].matrixWorld)
     // //You can now construct the desired direction vector:
-    var dir = pWorld.sub(bullets[i].camPos).normalize()
+    const dir = pWorld.sub(bullets[i].camPos).normalize()
 
     bullets[i].mesh.position.add(dir.multiplyScalar(250))
   }
 
   for (let i = 0; i < othersBullets.length; i++) {
-    var pLocal = new THREE.Vector3(0, 0, -1)
-    var pWorld = pLocal.applyMatrix4(othersBullets[i].matrixWorld)
-    var dir = pWorld.sub(othersBullets[i].camPos).normalize()
+    const pLocal = new THREE.Vector3(0, 0, -1)
+    const pWorld = pLocal.applyMatrix4(othersBullets[i].matrixWorld)
+    const dir = pWorld.sub(othersBullets[i].camPos).normalize()
     othersBullets[i].mesh.position.add(dir.multiplyScalar(250))
   }
 
 
   players.forEach(user => {
     if (user.userTextMesh) {
-      var scaleVector = new THREE.Vector3();
-      var scaleFactor = 2000;
-      var sprite = user.userTextMesh;
+      const scaleVector = new THREE.Vector3();
+      const scaleFactor = 2000;
+      const sprite = user.userTextMesh;
 
-      var scale = scaleVector.subVectors(user.mesh.position, MainPlayer.position).length() / scaleFactor;
+      const scale = scaleVector.subVectors(user.mesh.position, MainPlayer.position).length() / scaleFactor;
       sprite.scale.set(scale, scale, scale); 
       sprite.position.set(70 + scale*6,70 + scale*6, 70 + scale*6);
 
@@ -434,7 +432,7 @@ const worker = insideWorker(e => {
     scene.add(dLight)
 
 
-    var light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.4 );
+    const light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.4 );
     scene.add( light );
 
     // let ambient = new THREE.AmbientLight(0x000000)
