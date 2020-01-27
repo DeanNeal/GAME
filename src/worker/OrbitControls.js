@@ -60,7 +60,7 @@ export default THREE.OrbitControls = function ( player, object, domElement) {
 	this.zoomStart = 0;
 
 	this.zoomDampingFactor = 0.15; //0.3
-	this.smoothZoomSpeed = 10.0;
+	this.smoothZoomSpeed = 15.0;
 	this.smoothZoom = false;
 
 	// Set to false to disable rotating

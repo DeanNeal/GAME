@@ -232,7 +232,7 @@ function initThirdPersonMode() {
   controls.screenSpacePanning = false;
 
   controls.minDistance = 300;
-  controls.maxDistance = 1500;
+  controls.maxDistance = 2500;
 
   controls.zoomSpeed = 2;
   controls.rotateSpeed = 0.1;
@@ -434,7 +434,7 @@ const worker = insideWorker(e => {
     scene.add(dLight)
 
 
-    const light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.4 );
+    const light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.7 );
     scene.add( light );
 
     // let ambient = new THREE.AmbientLight(0x000000)
