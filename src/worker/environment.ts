@@ -27,8 +27,8 @@ export function addAsteroids (asteroids, cb) {
  }
 
  export function addRunes(runes, cb) {
-    let s = 150
-    let cube = new THREE.BoxGeometry(s, s, s)
+    let s = 250
+    let cube = new THREE.OctahedronGeometry(s)
   
     runes.forEach(c => {
       let material = new THREE.MeshNormalMaterial({
