@@ -1,4 +1,3 @@
-import './polyfills';
 import Helpers from './helper';
 
 import GlobalService from './services/global.service';
@@ -166,11 +165,6 @@ export class Game {
     }
 
     onKeyDown(e) {
-
-        if(e.keyCode === 27){
-            GlobalService.backToMain.next();
-        }
-
         if(e.keyCode === 9) {
             e.preventDefault();
             this.worker.post({

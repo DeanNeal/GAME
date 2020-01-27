@@ -12,7 +12,7 @@ class GlobalService {
     public runes = new BehaviorSubject([]);
     public damage = new Subject();
     public toggleTab = new Subject();
-    public backToMain= new Subject();
+    // public backToMain= new Subject();
 
     public viewMode = new BehaviorSubject<GameMode>(0);
 

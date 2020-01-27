@@ -22,7 +22,7 @@
 
         <ul v-if="inGame">
           <li @click="leavematch()">Leave match</li>
-          <li @click="backToGame()">Back to game</li>
+          <!--<li @click="backToGame()">Back to game</li>-->
         </ul>
 
         <label class="mute">
@@ -174,14 +174,12 @@ export default {
       this.viewMode = mode
     })
 
-    GlobalService.backToMain.subscribe(() => {
-      if (this.getReady) {
-        this.goTo('mainMenu')
-        this.getReady = false
-        this.gameInstance.removeListeners()
-        AudioService.playAudio('menuMusic', 0.2, true)
-      }
-    })
+	window.addEventListener('keydown', e => {
+        //esc
+        if (e.keyCode === 27) {
+            this.getReady ? this.goToMenu() : this.backToGame()
+        }
+      }, false)
   },
   methods: {
     onMuteSounds (e) {
@@ -217,6 +215,14 @@ export default {
         this.goTo('mainMenu')
       }
     },
+	goToMenu() {
+		this.gameInstance.worker.post({type: 'stopFire'})
+
+		this.goTo('mainMenu')
+		this.getReady = false
+		this.gameInstance.removeListeners()
+		AudioService.playAudio('menuMusic', 0.2, true)
+	},
     backToGame() {
         this.getReady = true;
         this.gameInstance.addListeners();
