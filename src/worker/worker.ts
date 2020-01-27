@@ -227,6 +227,8 @@ function initThirdPersonMode() {
   controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
   controls.dampingFactor = 0.25;
 
+  controls.smoothZoom = true;
+
   controls.screenSpacePanning = false;
 
   controls.minDistance = 300;

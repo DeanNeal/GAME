@@ -56,6 +56,13 @@ export default THREE.OrbitControls = function ( player, object, domElement) {
 	this.enableZoom = true;
 	this.zoomSpeed = 1.0;
 
+	var zoomEnd = 0;
+	this.zoomStart = 0;
+
+	this.zoomDampingFactor = 0.15; //0.3
+	this.smoothZoomSpeed = 10.0;
+	this.smoothZoom = false;
+
 	// Set to false to disable rotating
 	this.enableRotate = true;
 	this.rotateSpeed = 1.0;
@@ -123,6 +130,15 @@ export default THREE.OrbitControls = function ( player, object, domElement) {
 		state = STATE.NONE;
 
 	};
+
+	this.smoothZoomUpdate = function() {
+
+		var factor = 1.0 + (zoomEnd - this.zoomStart) * this.smoothZoomSpeed;
+		scale *= factor;
+
+		this.zoomStart += (zoomEnd - this.zoomStart) * this.zoomDampingFactor;
+
+	 };
 
 	// this method is exposed, but perhaps it would be better if we can make it private...
 	this.update = function () {
@@ -218,6 +234,8 @@ export default THREE.OrbitControls = function ( player, object, domElement) {
 				// return true;
 
 			}
+
+			this.smoothZoomUpdate();
 
 			return {
 				moveMult: 0
@@ -527,15 +545,58 @@ export default THREE.OrbitControls = function ( player, object, domElement) {
 
 		// console.log( 'handleMouseWheel' );
 
-		if ( event.deltaY < 0 ) {
+		var delta = 0;
 
-			dollyOut( getZoomScale() );
+		if (scope.smoothZoom !== false) {
 
-		} else if ( event.deltaY > 0 ) {
+			if (event.wheelDelta) { // WebKit / Opera / Explorer 9
 
-			dollyIn( getZoomScale() );
+			  delta = event.wheelDelta / 40;
 
-		}
+			} else if (event.detail) { // Firefox
+
+			  delta = -event.detail / 3;
+
+			}
+			scope.zoomStart += delta * 0.001;
+
+		 } else {
+
+			if (event.wheelDelta !== undefined) {
+
+			  // WebKit / Opera / Explorer 9
+
+			  delta = event.wheelDelta;
+
+			} else if (event.detail !== undefined) {
+
+			  // Firefox
+
+			  delta = -event.detail;
+
+			}
+
+			if (delta > 0) {
+
+			  dollyOut(getZoomScale());
+
+			} else if (delta < 0) {
+
+			  dollyIn(getZoomScale());
+
+			}
+
+		 }
+
+		// if ( event.deltaY < 0 ) {
+
+		// 	dollyOut( getZoomScale() );
+
+		// } else if ( event.deltaY > 0 ) {
+
+		// 	dollyIn( getZoomScale() );
+
+		// }
 
 		scope.update();
 

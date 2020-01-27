@@ -233,6 +233,7 @@ export class Game {
         this.worker.post({
             type: 'mousewheel',
             mouse: {
+                wheelDelta: e.wheelDelta,
                 deltaY: e.deltaY
             }
         })
