@@ -26,9 +26,7 @@ setInterval(function () {
 io.sockets.on('connection', function (socket) {
   let user = {
     id: socket.id.slice(0, 4),
-    _id: socket.id,
-    initPosition: randomPosition(),
-    initRotation: randomRotation()
+    _id: socket.id
   }
 
   io.sockets.emit('online', users.length)
@@ -91,12 +89,8 @@ let addUser = function (user, playerOptions) {
     playerName: playerOptions.name,
     color: playerOptions.color,
     size: 80,
-    position: {
-      x: 0,
-      y: 0,
-      z: 0
-    },
-    rotation: {},
+    position: randomPosition(),
+    rotation: randomRotation(),
     // scores: 0,
     kills: 0,
     health: 100,
