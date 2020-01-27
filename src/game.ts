@@ -8,6 +8,14 @@ declare var document: any;
 
 import createWorker from './vendor/create-worker';
 
+
+function playAudio (name, volume, start?) {
+    var audio = new Audio('sounds/' + name)
+    if(start) audio.currentTime = 0;
+    audio.volume = volume
+    audio.play()
+}
+
 export class Game {
     public container: any;
     public worker: any;
@@ -45,10 +53,7 @@ export class Game {
                 GlobalService.runes.next(e.data.runes)
             }
             if(e.data.type === 'playShot') {
-                var audio = new Audio('sounds/blaster-1.mp3')
-                // audio.currentTime = 0;
-                audio.volume = e.data.volume || 0.1
-                audio.play()
+                playAudio('blaster-1.mp3', e.data.volume || 0.1);
             }
             if(e.data.type === 'readyForListeners') {
                 this.addListeners();
@@ -64,22 +69,16 @@ export class Game {
                 }
             }
 
-            if(e.data.type === 'damageDone') {
-                var audio = new Audio('sounds/damage.mp3');
-                audio.currentTime = 0;
-                audio.volume = e.data.volume || 0.3;
-                audio.play();
-            }
-
             if(e.data.type === 'userList') {
                 GlobalService.users.next(e.data.users);
             }
 
+            if(e.data.type === 'damageDone') {
+                playAudio('damage.mp3', e.data.volume || 0.3, true);
+            }
+
             if(e.data.type === 'removeRune') {
-                var audio = new Audio('sounds/rune.mp3');
-                audio.currentTime = 0;
-                audio.volume = e.data.volume || 0.3;
-                audio.play();
+                playAudio('rune.mp3', e.data.volume || 0.3, true);
             }
 
             // if(e.data.type === 'gameOver') {

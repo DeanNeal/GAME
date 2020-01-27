@@ -187,11 +187,11 @@ SocketService.socket.on('asteroidWasRemoved', asteroid => {
 })
 
 
-function addMainPlayer ({color, initPosition, initRotation}) {
+function addMainPlayer ({color, position, rotation}) {
   MainPlayer = createUserMesh(color, true)
 
-  MainPlayer.position.set(initPosition.x, initPosition.y, initPosition.z)
-  MainPlayer.rotation.set(initRotation.x, initRotation.y, initRotation.z)
+  MainPlayer.position.set(position.x, position.y, position.z)
+  MainPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
 
   MainPlayer.add(camera1)
   MainPlayer.add(camera2);
@@ -242,11 +242,15 @@ function initThirdPersonMode() {
 
 
 function createNewPlayer (user) {
+  const {position, rotation} = user;
   let newPlayer = createUserMesh(user.color)
   newPlayer.userData = {
     id: user.id
   }
 
+  newPlayer.position.set(position.x, position.y, position.z)
+  newPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
+  
   const loader = new THREE.FontLoader()
   loader.load('./helvetiker_regular.typeface.json', function (font) {
 
@@ -267,10 +271,11 @@ function createNewPlayer (user) {
 
     const userTextMesh = new THREE.Mesh(textGeo, material)
 
-    players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
-
     scene.add(newPlayer)
     scene.add(userTextMesh)
+
+    //should be after
+    players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
   })
 }
 
