@@ -21,7 +21,7 @@
         </ul>
 
         <ul v-if="inGame">
-          <li @click="leavematch()">Leave match</li>
+          <li @click="leavematch()" @mouseenter="menuItemMouse()">Leave match</li>
           <!--<li @click="backToGame()">Back to game</li>-->
         </ul>
 
