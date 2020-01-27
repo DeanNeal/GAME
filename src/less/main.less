@@ -176,12 +176,13 @@ canvas {
     .page {
         width: 400px;
         height: 500px;
+        position: relative;
+        z-index: 100;
         // transform: rotate3d(1,1,1, 10deg);
     }
     .main-menu {
         color: #fff;
         position: relative;
-        z-index: 1;
         padding-bottom: 200px;
         h1 {
             font-size: 48px;
@@ -193,6 +194,7 @@ canvas {
         }
         ul {
             margin-top: 100px;
+            margin-bottom: 40px;
             li {
                 font-size: 30px;
                 margin: 10px 0;
@@ -205,6 +207,14 @@ canvas {
                     margin-left: -10px;
                 }
     
+            }
+        }
+        .mute {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            input {
+                margin-left: 10px
             }
         }
     }

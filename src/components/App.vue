@@ -1,32 +1,60 @@
 <template>
-  <div class="container absolute" :class="[getReady ? (viewMode === 1 ? 'mode-0' : 'mode-1') : '']">
+  <div
+    class="container absolute"
+    :class="[getReady ? (viewMode === 1 ? 'mode-0' : 'mode-1') : '']"
+  >
     <div class="start-page" v-if="!getReady">
-      <!--<div class="overlay"></div>-->
+      <div class="overlay"></div>
 
       <div class="page main-menu" v-if="currentPage === 'mainMenu'">
         <h1>SPACE GAME <sup>alpha</sup></h1>
 
         <span>Online: {{ online }}</span>
-        <ul>
-          <li @click="goTo('newGame')" @mouseenter="menuItemMouse()"><span>New game</span></li>
-          <!--<li>Settings</li>-->
-          <!--<li @click="exit()" href="javascript:close_window();">Exit</li>-->
-          <li @click="goTo('credits')" @mouseenter="menuItemMouse()"><span>Credits</span></li>
+
+        <ul v-if="!inGame">
+          <li @click="goTo('newGame')" @mouseenter="menuItemMouse()">
+            <span>New game</span>
+          </li>
+          <li @click="goTo('credits')" @mouseenter="menuItemMouse()">
+            <span>Credits</span>
+          </li>
         </ul>
+
+        <ul v-if="inGame">
+          <li @click="leavematch()">Leave match</li>
+          <li @click="backToGame()">Back to game</li>
+        </ul>
+
+        <label class="mute">
+          <span>Sounds: </span>
+          <input
+            type="checkbox"
+            @change="onMuteSounds($event)"
+            :checked="soundsEnabled"
+          />
+        </label>
+
+        <label class="mute">
+          <span>Music: </span>
+          <input
+            type="checkbox"
+            @change="onMuteMusic($event)"
+            :checked="musicEnabled"
+          />
+        </label>
       </div>
 
       <div class="page authors" v-if="currentPage === 'credits'">
-          <span @click="back()" class="back">BACK</span>
-          <ul>
-            <li>venomsunset</li>
-            <li>mobix</li>
-          </ul>
+        <span @click="back()" class="back">BACK</span>
+        <ul>
+          <li>venomsunset</li>
+          <li>mobix</li>
+        </ul>
       </div>
 
       <div class="page new-game" v-if="currentPage === 'newGame'">
         <span @click="back()" class="back">BACK</span>
         <form class="new-game__content" @submit="submit($event)">
-       
           <input
             ref="input"
             type="text"
@@ -52,9 +80,8 @@
     </div>
 
     <div class="controls" v-if="getReady">
-      <div id="backToMain" @click="back()">Main menu</div>
       <div id="info">
-        <div>Controls - > WA/QE + mouse </div>
+        <div>Controls - > WA/QE + mouse</div>
         <div>Shift - constant speed</div>
         <div>Tab - change view mode</div>
       </div>
@@ -64,8 +91,7 @@
       <div id="gui-speed"><span id="gui-speed-value"></span> KM/H</div>
       <div id="timer"></div>
       <div class="damage"></div>
-      <app-user-list :class="{'active': showTab}"></app-user-list>
-
+      <app-user-list :class="{ active: showTab }"></app-user-list>
     </div>
   </div>
 </template>
@@ -74,16 +100,14 @@
 import { Game } from '../game'
 import SocketService from '../services/socket.service'
 import GlobalService from '../services/global.service'
+import AudioService from '../services/audio.service'
 
 import UserList from './list/UserList.vue'
 
-import {adjustVolume} from './audio';
-
-
 class InitState {
-  constructor() {
-    this.name = '';
-    this.color = 'red';
+  constructor () {
+    this.name = ''
+    this.color = 'red'
   }
 }
 
@@ -94,31 +118,36 @@ export default {
   },
   data: () => {
     return {
+      soundsEnabled: false,
+      musicEnabled: false,
       showTab: true,
       viewMode: 0,
       gameInstance: null,
       introMusic: null,
       currentPage: 'mainMenu',
       getReady: false,
+      inGame: false,
       online: 0,
       colors: ['red', 'yellow', 'lime', 'blue'],
       playerOptions: new InitState(),
-      menuItemSound: new Audio('sounds/menu.mp3'),
       user: {
         health: null
       }
     }
   },
   mounted () {
+    GlobalService.musicEnabled.subscribe(state => {
+      this.musicEnabled = state
+      if (state) {
+        AudioService.playAudio('menuMusic', 0.2, true)
+      } else {
+        AudioService.stopAudio('menuMusic')
+      }
+    })
 
-    //
-
-    // GlobalService.gameOver.subscribe(() => {
-    //   this.getReady = false
-    // })
-
-    this.playIntro();
-
+    GlobalService.soundsEnabled.subscribe(state => {
+      this.soundsEnabled = state
+    });
 
     SocketService.socket.on('online', online => {
       this.online = online
@@ -140,47 +169,58 @@ export default {
       }, 300)
     })
 
-    GlobalService.viewMode.subscribe((mode)=> {
+    GlobalService.viewMode.subscribe(mode => {
       // this.showTab = !this.showTab;
-      this.viewMode = mode;
-    });
+      this.viewMode = mode
+    })
+
+    GlobalService.backToMain.subscribe(() => {
+      if (this.getReady) {
+        this.goTo('mainMenu')
+        this.getReady = false
+        this.gameInstance.removeListeners()
+        AudioService.playAudio('menuMusic', 0.2, true)
+      }
+    })
   },
   methods: {
-    playIntro() {
-      this.introMusic = new Audio('sounds/fine.mp3')
-      this.introMusic.volume = 0.2
-      this.introMusic.autoplay = true
-      this.introMusic.play()
+    onMuteSounds (e) {
+      GlobalService.setSoundsEnabled(e.target.checked)
     },
-    menuItemMouse() {
-      this.menuItemSound.pause()
-      this.menuItemSound.currentTime = 0;
-      this.menuItemSound.volume = 0.2
-      this.menuItemSound.play()
+    onMuteMusic (e) {
+      GlobalService.setMusicEnabled(e.target.checked)
     },
-    exit () {
-      if (confirm('Close Window?')) {
-        close()
-      }
+
+    menuItemMouse () {
+      AudioService.playAudio('menuSelect')
     },
-    goTo(page){
-      this.currentPage = page;
-      if(page === 'newGame') {
+
+    goTo (page) {
+      this.currentPage = page
+      if (page === 'newGame') {
         setTimeout(() => {
           this.$refs.input.focus()
         })
       }
     },
     back () {
-      this.goTo('mainMenu');
-      
-      if(this.gameInstance) {
-          this.getReady = false
-          this.gameInstance.disconnect();
-          this.gameInstance = undefined;
-          this.playerOptions = new InitState();
-          this.playIntro();
+      this.goTo('mainMenu')
+    },
+    leavematch () {
+      if (this.gameInstance) {
+        this.getReady = false
+        this.inGame = false
+        this.gameInstance.disconnect()
+        this.gameInstance = undefined
+        this.playerOptions = new InitState()
+        AudioService.playAudio('menuMusic', null, false, true)
+        this.goTo('mainMenu')
       }
+    },
+    backToGame() {
+        this.getReady = true;
+        this.gameInstance.addListeners();
+        AudioService.stopAudio('menuMusic')
     },
     submit (e) {
       e.preventDefault()
@@ -193,8 +233,8 @@ export default {
     },
     start () {
       this.getReady = true
-      adjustVolume(this.introMusic, 0);
-
+      this.inGame = true
+      AudioService.stopAudio('menuMusic')
 
       this.gameInstance = new Game(this.playerOptions)
     }

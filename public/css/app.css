@@ -151,11 +151,12 @@ canvas {
 .container .page {
   width: 400px;
   height: 500px;
+  position: relative;
+  z-index: 100;
 }
 .container .main-menu {
   color: #fff;
   position: relative;
-  z-index: 1;
   padding-bottom: 200px;
 }
 .container .main-menu h1 {
@@ -168,6 +169,7 @@ canvas {
 }
 .container .main-menu ul {
   margin-top: 100px;
+  margin-bottom: 40px;
 }
 .container .main-menu ul li {
   font-size: 30px;
@@ -179,6 +181,14 @@ canvas {
 }
 .container .main-menu ul li:hover {
   margin-left: -10px;
+}
+.container .main-menu .mute {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+}
+.container .main-menu .mute input {
+  margin-left: 10px;
 }
 .container .authors {
   color: #fff;

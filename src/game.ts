@@ -2,6 +2,7 @@ import './polyfills';
 import Helpers from './helper';
 
 import GlobalService from './services/global.service';
+import AudioService from './services/audio.service';
 
 declare var window: any;
 declare var document: any;
@@ -9,12 +10,6 @@ declare var document: any;
 import createWorker from './vendor/create-worker';
 
 
-function playAudio (name, volume, start?) {
-    var audio = new Audio('sounds/' + name)
-    if(start) audio.currentTime = 0;
-    audio.volume = volume
-    audio.play()
-}
 
 export class Game {
     public container: any;
@@ -53,12 +48,12 @@ export class Game {
                 GlobalService.runes.next(e.data.runes)
             }
             if(e.data.type === 'playShot') {
-                playAudio('blaster-1.mp3', e.data.volume || 0.1);
+                AudioService.playAudio('blaster', e.data.volume);
             }
             if(e.data.type === 'readyForListeners') {
                 this.addListeners();
             }
-            if(e.data.type==='speed'){
+            if(e.data.type==='speed' && this.speedBlock){
                 this.speedBlock.innerHTML = e.data.speed.moveMult;
             }
 
@@ -74,16 +69,14 @@ export class Game {
             }
 
             if(e.data.type === 'damageDone') {
-                playAudio('damage.mp3', e.data.volume || 0.3, true);
+                AudioService.playAudio('damage', e.data.volume, true);
             }
 
             if(e.data.type === 'removeRune') {
-                playAudio('rune.mp3', e.data.volume || 0.3, true);
+                AudioService.playAudio('rune', e.data.volume, true);
             }
 
-            // if(e.data.type === 'gameOver') {
-            //     GlobalService.gameOver.next();
-            // }
+       
         });
         
         this.worker.post({type: 'connection', playerOptions: opts})
@@ -173,11 +166,10 @@ export class Game {
     }
 
     onKeyDown(e) {
-        // if(e.keyCode === 32) {
-        //     this.worker.post({
-        //         type: 'startFire'
-        //     });
-        // }
+
+        if(e.keyCode === 27){
+            GlobalService.backToMain.next();
+        }
 
         if(e.keyCode === 9) {
             e.preventDefault();
