@@ -1,5 +1,5 @@
 export default function (canvas, workerUrl, listener) {
-  if (canvas.transferControlToOffscreen) {
+  // if (canvas.transferControlToOffscreen) {
     var worker = new Worker(workerUrl)
     worker.onmessage = listener
     var offscreen = canvas.transferControlToOffscreen()
@@ -14,34 +14,34 @@ export default function (canvas, workerUrl, listener) {
       },
       worker: worker
     }
-  } else {
-    var randomId = 'Offscreen' + Math.round(Math.random() * 1000)
-    var script = document.createElement('script')
-    script.src = workerUrl
-    script.async = true
-    script.dataset.id = randomId
+  // } else {
+  //   var randomId = 'Offscreen' + Math.round(Math.random() * 1000)
+  //   var script = document.createElement('script')
+  //   script.src = workerUrl
+  //   script.async = true
+  //   script.dataset.id = randomId
 
-    var connection = { msgs: [], host: listener }
-    var api = {
-      post: function (data) {
-        if (connection.worker) {
-          connection.worker({ data: data })
-        } else {
-          connection.msgs.push(data)
-        }
-      }
-    }
+  //   var connection = { msgs: [], host: listener }
+  //   var api = {
+  //     post: function (data) {
+  //       if (connection.worker) {
+  //         connection.worker({ data: data })
+  //       } else {
+  //         connection.msgs.push(data)
+  //       }
+  //     }
+  //   }
 
-    script.onload = function () {
-      api.post({
-        canvas: canvas,
-        width: canvas.clientWidth,
-        height: canvas.clientHeight
-      })
-    }
+  //   script.onload = function () {
+  //     api.post({
+  //       canvas: canvas,
+  //       width: canvas.clientWidth,
+  //       height: canvas.clientHeight
+  //     })
+  //   }
 
-    document.head.appendChild(script)
-    window[randomId] = connection
-    return api
-  }
+  //   document.head.appendChild(script)
+  //   window[randomId] = connection
+  //   return api
+  // }
 }

@@ -8,14 +8,17 @@ declare var document: any;
 
 import createWorker from './vendor/create-worker';
 
-
+interface IOptions {
+    name: string;
+    color: string;
+}
 
 export class Game {
-    public container: any;
-    public worker: any;
-    public speedBlock:any;
+    public container: HTMLCanvasElement;
+    public worker: {worker: Worker, post(o): any  };
+    public speedBlock: HTMLElement;
  
-    constructor(opts: any) {
+    constructor(opts: IOptions) {
         this.init(opts);
 
         this.onWindowResize = this.onWindowResize.bind(this);
@@ -32,7 +35,7 @@ export class Game {
         this.onMouseWheel = this.onMouseWheel.bind(this);
     }
 
-    init(opts: any) {
+    init(opts: IOptions) {
         this.container = document.createElement('canvas');
         document.body.appendChild(this.container);
 
@@ -111,7 +114,7 @@ export class Game {
 		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
     }
 
-    onMouseDown(e) {
+    onMouseDown(e: MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -131,7 +134,7 @@ export class Game {
         })
     }
 
-    onMouseMove(e) {
+    onMouseMove(e: MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
         this.worker.post({
@@ -145,7 +148,7 @@ export class Game {
         })
     }
 
-    onMouseUp(e) {
+    onMouseUp(e: MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -164,7 +167,7 @@ export class Game {
         })
     }
 
-    onKeyDown(e) {
+    onKeyDown(e: KeyboardEvent) {
         if(e.keyCode === 9) {
             e.preventDefault();
             this.worker.post({
@@ -182,7 +185,7 @@ export class Game {
         })
     }
 
-    onKeyPress(e) {
+    onKeyPress(e: KeyboardEvent) {
         this.worker.post({
             type: 'keypress',
             mouse: {
@@ -192,12 +195,7 @@ export class Game {
         })
     }
 
-    onKeyUp(e) {
-
-        // this.worker.post({
-        //     type: 'stopFire'
-        // });
-        
+    onKeyUp(e: KeyboardEvent) {
         this.worker.post({
             type: 'keyup',
             mouse: {
@@ -207,18 +205,18 @@ export class Game {
         })
     }
 
-    onContextmenu(e) {
+    onContextmenu(e: MouseEvent) {
         e.preventDefault();
     }
 
-    onMouseWheel(e) {
+    onMouseWheel(e: MouseWheelEvent) {
         e = window.event || e;
-        const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+        // const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
         this.worker.post({
             type: 'mousewheel',
             mouse: {
-                wheelDelta: e.wheelDelta,
+                // wheelDelta: e.wheelDelta,
                 deltaY: e.deltaY
             }
         })
