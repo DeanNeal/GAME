@@ -5,7 +5,7 @@ import FlyControls from './FlyControls'
 import OrbitControls from './OrbitControls';
 
 // import { loadStarship } from './utils'
-import SocketService from './socket.service'
+import SocketService from '../services/socket.service'
 import Helpers from '../helper'
 import * as THREE from 'three'
 import { createUserMesh, createAim, createBullet} from './objects'
@@ -19,7 +19,7 @@ const clock = new THREE.Clock()
 const scene = new THREE.Scene()
 
 const camera1 = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
-camera1.position.set(0, 50, 50)
+// camera1.position.set(0, 50, 50)
 
 const camera2 = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
 
@@ -37,7 +37,7 @@ let controls
 // let lastCollisionId
 // let lastBulletCollisionId
 let start = new Date().getTime()
-const duration = 120
+const duration = 220
 let isShooting = false
 
 let viewMode = 0;
@@ -87,7 +87,11 @@ SocketService.socket.on('updateUsersCoords', users => {
           user.rotation._y,
           user.rotation._z
         )
-          
+
+        // var distance = p.mesh.position.distanceTo(MainPlayer.position).toFixed(0);
+        
+        // p.userTextMesh.geometry.parameters.text =  distance;
+  
         p.userTextMesh.position.set(user.position.x + 100, user.position.y + 100, user.position.z + 100);
       }
     })
@@ -233,7 +237,7 @@ function initThirdPersonMode() {
   controls.zoomSpeed = 2;
   controls.rotateSpeed = 0.1;
 
-  controls.maxPolarAngle = Math.PI/2;
+  controls.maxPolarAngle = Math.PI;
 }
 
 
@@ -245,6 +249,7 @@ function createNewPlayer (user) {
 
   var loader = new THREE.FontLoader()
   loader.load('./helvetiker_regular.typeface.json', function (font) {
+
     var textGeo = new THREE.TextGeometry(user.playerName, {
       font: font,
       size: 20,
@@ -262,7 +267,7 @@ function createNewPlayer (user) {
 
     const userTextMesh = new THREE.Mesh(textGeo, material)
 
-    players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh })
+    players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
 
     scene.add(newPlayer)
     scene.add(userTextMesh)
@@ -329,7 +334,7 @@ function render () {
 
   camera2.copy(fakeCamera);
 
-  // controls.updateShip(delta);
+ 
   renderer.render(scene, viewMode === 0 ? camera1 : camera2)
 }
 
@@ -365,7 +370,6 @@ function animate () {
 
   players.forEach(user => {
     if (user.userTextMesh) {
-      // const factor = user.mesh.position.distanceTo(MainPlayer.position) / 300;
       var scaleVector = new THREE.Vector3();
       var scaleFactor = 2000;
       var sprite = user.userTextMesh;
@@ -374,8 +378,15 @@ function animate () {
       sprite.scale.set(scale, scale, scale); 
       sprite.position.set(70 + scale*6,70 + scale*6, 70 + scale*6);
 
-      user.userTextMesh.lookAt(MainPlayer.position)
-      user.userTextMesh.quaternion.copy( MainPlayer.quaternion );
+
+      if(viewMode === 0) {
+        user.userTextMesh.lookAt(MainPlayer.position)
+        user.userTextMesh.quaternion.copy(MainPlayer.quaternion);
+      } else {
+        user.userTextMesh.lookAt(camera2.getWorldPosition(camera2.position))
+        user.userTextMesh.quaternion.copy(camera2.getWorldQuaternion(camera2.quaternion));
+      }
+
     }
   })
 
@@ -391,11 +402,11 @@ function animate () {
   }
 
   if (bullets.length) {
-    damageCollisionDetection(players, bullets, currentUser, MainPlayer, worker)
+    damageCollisionDetection(scene, players, bullets, currentUser, MainPlayer, worker)
   }
 
   if(allAsteroids.length && MainPlayer) {
-    asteroidCollision(allAsteroids, bullets, MainPlayer, worker);
+    asteroidCollision(scene, allAsteroids, bullets, MainPlayer, worker);
   }
 }
 
@@ -423,7 +434,7 @@ const worker = insideWorker(e => {
     scene.add(dLight)
 
 
-    var light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.3 );
+    var light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.4 );
     scene.add( light );
 
     // let ambient = new THREE.AmbientLight(0x000000)

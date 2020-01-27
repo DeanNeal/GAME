@@ -1,7 +1,7 @@
 import './polyfills';
 import Helpers from './helper';
 
-import GlobalService from './global.service';
+import GlobalService from './services/global.service';
 
 declare var window: any;
 declare var document: any;
@@ -46,7 +46,7 @@ export class Game {
             }
             if(e.data.type === 'playShot') {
                 var audio = new Audio('sounds/blaster-1.mp3')
-                audio.currentTime = 0;
+                // audio.currentTime = 0;
                 audio.volume = e.data.volume || 0.1
                 audio.play()
             }

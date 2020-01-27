@@ -72,8 +72,8 @@
 
 <script>
 import { Game } from '../game'
-import SocketService from '../worker/socket.service'
-import GlobalService from '../global.service'
+import SocketService from '../services/socket.service'
+import GlobalService from '../services/global.service'
 
 import UserList from './list/UserList.vue'
 

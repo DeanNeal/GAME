@@ -1,4 +1,4 @@
-import SocketService from "./socket.service";
+import SocketService from "../services/socket.service";
 import * as THREE from 'three';
 import { getVolumeFromDistance } from "./utils";
 
@@ -19,15 +19,15 @@ function detectCollisionCubes(object1, object2){
 
  
 let lastBulletWithAsteroidCollisionId;
-export function asteroidCollision(asteroids, bullets, MainPlayer, worker) {
+export function asteroidCollision(scene, asteroids, bullets, MainPlayer, worker) {
 
   asteroids.forEach(asteroid=> {
       bullets.forEach(bullet=> {
-         const obj =  bullet.mesh;
-         if(detectCollisionCubes(asteroid, obj)) {
-            if(obj.id !== lastBulletWithAsteroidCollisionId) {
-               obj.remove();
-               lastBulletWithAsteroidCollisionId = obj.id;
+         const bulletMesh =  bullet.mesh;
+         if(detectCollisionCubes(asteroid, bulletMesh)) {
+            if(bulletMesh.id !== lastBulletWithAsteroidCollisionId) {
+              scene.remove(bulletMesh);
+               lastBulletWithAsteroidCollisionId = bulletMesh.id;
                SocketService.socket.emit('damageToAsteroid', asteroid.userData)
 
                const volume = getVolumeFromDistance(MainPlayer, asteroid);
@@ -54,42 +54,23 @@ export function runesCollisionDetection(MainPlayer, allRunes, worker) {
 }
 
 let lastBulletWithEnemyCollisionId;
-export function damageCollisionDetection (players, bullets, currentUser, MainPlayer, worker) {
-   players
-     .filter(r => r.mesh)
-     .forEach(player => {
-       let plMesh = player.mesh
-       let originPoint = plMesh.position.clone()
- 
-       for (
-         let vertexIndex = 0;
-         vertexIndex < plMesh.geometry.vertices.length;
-         vertexIndex++
-       ) {
-         let localVertex = plMesh.geometry.vertices[vertexIndex].clone()
-         let globalVertex = localVertex.applyMatrix4(plMesh.matrix)
-         let directionVector = globalVertex.sub(plMesh.position)
-         let ray = new THREE.Raycaster(
-           originPoint,
-           directionVector.clone().normalize()
-         )
- 
-         let collisionResults = ray.intersectObjects(bullets.map(r => r.mesh))
-         if (
-           collisionResults.length > 0 &&
-           collisionResults[0].distance <= directionVector.length()
-         ) {
-           let obj = collisionResults[0].object
-           
-           if (obj.id !== lastBulletWithEnemyCollisionId) {
-             obj.remove()
-             lastBulletWithEnemyCollisionId = obj.id
-             
-             SocketService.socket.emit('damage', player.user, currentUser)
-             const volume = getVolumeFromDistance(MainPlayer, plMesh);
-             worker.post({type: 'damageDone', volume: volume})
-           }
-         }
-       }
-     })
+export function damageCollisionDetection (scene, players, bullets, currentUser, MainPlayer, worker) {
+  players
+  .filter(r => r.mesh)
+  .forEach(player => {
+    let plMesh = player.mesh
+    bullets.forEach(r=> {
+      let bulletMesh = r.mesh;
+      if(detectCollisionCubes(bulletMesh, plMesh)) {
+          if(lastBulletWithEnemyCollisionId !== bulletMesh.id) {
+            scene.remove(bulletMesh);
+            lastBulletWithEnemyCollisionId = bulletMesh.id
+
+            SocketService.socket.emit('damage', player.user, currentUser)
+            const volume = getVolumeFromDistance(MainPlayer, plMesh);
+            worker.post({type: 'damageDone', volume: volume})
+          }
+      }
+    })
+  })
  }

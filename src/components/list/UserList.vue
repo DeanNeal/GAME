@@ -15,7 +15,7 @@
 
 <script>
 
-import GlobalService from '../../global.service';
+import GlobalService from '../../services/global.service'
 
 export default {
   components: {},
