@@ -23,7 +23,7 @@ function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
  
 let lastBulletWithAsteroidCollisionId;
 export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, player, worker) {
-
+  return;
   asteroids.forEach(asteroid=> {
       bullets.forEach(bullet=> {
          const bulletMesh =  bullet.mesh;
