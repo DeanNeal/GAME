@@ -35,3 +35,4 @@ dist
 public/app.js
 public/worker.js
 public/css/
+package-lock.json
