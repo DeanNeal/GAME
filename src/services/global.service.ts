@@ -13,6 +13,7 @@ class GlobalService {
     public damage = new Subject();
     public toggleTab = new Subject();
     // public backToMain= new Subject();
+    public speed = new Subject<number>();
 
     public viewMode = new BehaviorSubject<GameMode>(0);
 

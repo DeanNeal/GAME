@@ -6,7 +6,7 @@ import AudioService from './services/audio.service';
 declare var window: any;
 declare var document: any;
 
-import createWorker from './vendor/create-worker';
+import createWorker from './worker/create-worker';
 
 interface IOptions {
     name: string;
@@ -19,8 +19,6 @@ export class Game {
     public speedBlock: HTMLElement;
  
     constructor(opts: IOptions) {
-        this.init(opts);
-
         this.onWindowResize = this.onWindowResize.bind(this);
 
         this.onMouseDown = this.onMouseDown.bind(this);
@@ -33,6 +31,8 @@ export class Game {
 
         this.onContextmenu =  this.onContextmenu.bind(this);
         this.onMouseWheel = this.onMouseWheel.bind(this);
+
+        this.init(opts);
     }
 
     init(opts: IOptions) {
@@ -40,9 +40,6 @@ export class Game {
         document.body.appendChild(this.container);
 
         this.worker = createWorker(this.container, './worker.js', (e: any)=> {
-
-            this.speedBlock = document.querySelector('#gui-speed-value');
-            
             if(e.data.type === 'startTimer') {
                 this.startTimer();
             }
@@ -52,11 +49,9 @@ export class Game {
             if(e.data.type === 'playShot') {
                 AudioService.playAudio('blaster', e.data.volume);
             }
-            if(e.data.type === 'readyForListeners') {
-                this.addListeners();
-            }
-            if(e.data.type==='speed' && this.speedBlock){
-                this.speedBlock.innerHTML = e.data.speed.moveMult;
+
+            if(e.data.type==='speed'){
+                GlobalService.speed.next(e.data.speed.moveMult);
             }
 
             if(e.data.type === 'userUpdated') {
@@ -77,13 +72,13 @@ export class Game {
             if(e.data.type === 'removeRune') {
                 AudioService.playAudio('rune', e.data.volume, true);
             }
-
-       
         });
         
         this.worker.post({type: 'connection', playerOptions: opts})
 
         this.onWindowResize();
+
+        this.addListeners();
     }
 
     startTimer() {
@@ -209,14 +204,14 @@ export class Game {
         e.preventDefault();
     }
 
-    onMouseWheel(e: MouseWheelEvent) {
+    onMouseWheel(e) {
         e = window.event || e;
-        // const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+        const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
         this.worker.post({
             type: 'mousewheel',
             mouse: {
-                // wheelDelta: e.wheelDelta,
+                wheelDelta: e.wheelDelta,
                 deltaY: e.deltaY
             }
         })

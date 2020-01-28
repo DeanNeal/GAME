@@ -21,7 +21,9 @@
         </ul>
 
         <ul v-if="inGame">
-          <li @click="leavematch()" @mouseenter="menuItemMouse()">Leave match</li>
+          <li @click="leavematch()" @mouseenter="menuItemMouse()">
+            Leave match
+          </li>
           <!--<li @click="backToGame()">Back to game</li>-->
         </ul>
 
@@ -88,7 +90,9 @@
       <div id="position"></div>
       <div id="rotation"></div>
       <div id="gui">HP {{ user.health }}</div>
-      <div id="gui-speed"><span id="gui-speed-value"></span> KM/H</div>
+      <div id="gui-speed">
+        <span id="gui-speed-value">{{ speed }}</span> KM/H
+      </div>
       <div id="timer"></div>
       <div class="damage"></div>
       <app-user-list :class="{ active: showTab }"></app-user-list>
@@ -132,7 +136,8 @@ export default {
       playerOptions: new InitState(),
       user: {
         health: null
-      }
+      },
+      speed: 0
     }
   },
   mounted () {
@@ -147,7 +152,7 @@ export default {
 
     GlobalService.soundsEnabled.subscribe(state => {
       this.soundsEnabled = state
-    });
+    })
 
     SocketService.socket.on('online', online => {
       this.online = online
@@ -174,12 +179,22 @@ export default {
       this.viewMode = mode
     })
 
-	window.addEventListener('keydown', e => {
+    GlobalService.speed.subscribe(speed => {
+      this.speed = speed
+    })
+
+    window.addEventListener(
+      'keydown',
+      e => {
         //esc
-        if (e.keyCode === 27) {
+        if (this.inGame) {
+          if (e.keyCode === 27) {
             this.getReady ? this.goToMenu() : this.backToGame()
+          }
         }
-      }, false)
+      },
+      false
+    )
   },
   methods: {
     onMuteSounds (e) {
@@ -215,18 +230,18 @@ export default {
         this.goTo('mainMenu')
       }
     },
-	goToMenu() {
-		this.gameInstance.worker.post({type: 'stopFire'})
+    goToMenu () {
+      this.gameInstance.worker.post({ type: 'stopFire' })
 
-		this.goTo('mainMenu')
-		this.getReady = false
-		this.gameInstance.removeListeners()
-		AudioService.playAudio('menuMusic', 0.2, true)
-	},
-    backToGame() {
-        this.getReady = true;
-        this.gameInstance.addListeners();
-        AudioService.stopAudio('menuMusic')
+      this.goTo('mainMenu')
+      this.getReady = false
+      this.gameInstance.removeListeners()
+      AudioService.playAudio('menuMusic', 0.2, true)
+    },
+    backToGame () {
+      this.getReady = true
+      this.gameInstance.addListeners()
+      AudioService.stopAudio('menuMusic')
     },
     submit (e) {
       e.preventDefault()

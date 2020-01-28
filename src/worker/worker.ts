@@ -1,17 +1,16 @@
-import insideWorker from '../vendor/inside-worker'
+import insideWorker from './inside-worker'
 
 import FlyControls from './FlyControls'
-// import {ThirdPersonControl} from './3rdPersonControls'
 import OrbitControls from './OrbitControls';
 
 // import { loadStarship } from './utils'
 import SocketService from '../services/socket.service'
-import Helpers from '../helper'
+
 import * as THREE from 'three'
 import { createUserMesh, createAim, createBullet} from './objects'
 import { addAsteroids, addRunes, addSky} from './environment'
 import { asteroidCollision, runesCollisionDetection, damageCollisionDetection } from './collision'
-import { getVolumeFromDistance } from './utils'
+import { getVolumeFromDistance, LoadPlayerModel } from './utils'
 
 let container
 let renderer
@@ -34,13 +33,14 @@ let players = []
 let controls
 
 let start = new Date().getTime()
-const duration = 220
+const duration = 200
 let isShooting = false
 
 let viewMode = 0;
 
 
-SocketService.socket.on('userUpdated', user => {
+SocketService.socket
+.on('userUpdated', user => {
   players.push({ mesh: null, user: user })
   currentUser = user
   worker.post({ type: 'userUpdated', user })
@@ -49,16 +49,13 @@ SocketService.socket.on('userUpdated', user => {
     scene.add(sky)
   })
 })
-
-SocketService.socket.on('userList', users => {
+.on('userList', users => {
   worker.post({ type: 'userList', users })
 })
-
-SocketService.socket.on('gotDamage', user => {
+.on('gotDamage', user => {
   worker.post({ type: 'userUpdated', user, damage: true })
 })
-
-SocketService.socket.on('updateRunes', runes => {
+.on('updateRunes', runes => {
   addRunes(runes, (mesh)=> {
     scene.add(mesh)
     allRunes.push(mesh)
@@ -66,15 +63,13 @@ SocketService.socket.on('updateRunes', runes => {
 
   worker.post({ type: 'updateRunes', runes: allRunes.length })
 })
-
-SocketService.socket.on('updateAsteroids', asteroids => {
+.on('updateAsteroids', asteroids => {
   addAsteroids(asteroids, (mesh)=> {
      scene.add(mesh)
      allAsteroids.push(mesh)
   });
 })
-
-SocketService.socket.on('updateUsersCoords', users => {
+.on('updateUsersCoords', users => {
   users.forEach((user, i) => {
     players.forEach(p => {
       if (p.mesh && p.user.id === user.id) {
@@ -95,8 +90,7 @@ SocketService.socket.on('updateUsersCoords', users => {
     })
   })
 })
-
-SocketService.socket.on('otherNewPlayer', users => {
+.on('otherNewPlayer', users => {
   users.forEach((user, i) => {
     let exists = players
       .map(x => {
@@ -109,8 +103,7 @@ SocketService.socket.on('otherNewPlayer', users => {
     }
   })
 })
-
-SocketService.socket.on('otherFire', params => {
+.on('otherFire', params => {
   let userMesh = players.filter(r => r.user.id == params.userId)[0].mesh
   let pos = userMesh.position.clone()
   let bulletMesh = createBullet(params.color)
@@ -140,13 +133,11 @@ SocketService.socket.on('otherFire', params => {
     othersBullets.splice(0, 1)
   }, 5000)
 })
-
-SocketService.socket.on('killed', function ({position, rotation}) {
+.on('killed', function ({position, rotation}) {
   MainPlayer.position.set(position.x, position.y, position.z)
   MainPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
 })
-
-SocketService.socket.on('deletePlayer', userId => {
+.on('deletePlayer', userId => {
   console.log('deletePlayer')
 
   for (let i = 0; i < players.length; i++) {
@@ -158,8 +149,7 @@ SocketService.socket.on('deletePlayer', userId => {
     }
   }
 })
-
-SocketService.socket.on('runeWasRemoved', rune => {
+.on('runeWasRemoved', rune => {
   for (let i = 0; i < allRunes.length; i++) {
     if (allRunes[i].userData.id === rune.id) {
       scene.remove(allRunes[i])
@@ -175,8 +165,7 @@ SocketService.socket.on('runeWasRemoved', rune => {
     }
   }
 })
-
-SocketService.socket.on('asteroidWasRemoved', asteroid => {
+.on('asteroidWasRemoved', asteroid => {
   for (let i = 0; i < allAsteroids.length; i++) {
     if (allAsteroids[i].userData.id === asteroid.id) {
       scene.remove(allAsteroids[i])
@@ -188,23 +177,26 @@ SocketService.socket.on('asteroidWasRemoved', asteroid => {
 
 
 function addMainPlayer ({color, position, rotation}) {
-  MainPlayer = createUserMesh(color, true)
+  // MainPlayer = createUserMesh(color, true)
 
-  MainPlayer.position.set(position.x, position.y, position.z)
-  MainPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
+  LoadPlayerModel(color, (data)=> {
+    MainPlayer = data;
 
-  MainPlayer.add(camera1)
-  MainPlayer.add(camera2);
+    // MainPlayer.castShadow = true;
+    // MainPlayer.receiveShadow = true;
+    
+    MainPlayer.position.set(position.x, position.y, position.z)
+    MainPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
 
- 
+    MainPlayer.add(camera1)
+    MainPlayer.add(camera2);
 
-  initFirstPersonMode();
   
-  // camera.add(createAim(0, 0, -50))
+    initFirstPersonMode();
+    
+    scene.add(MainPlayer)
+  });
 
-  scene.add(MainPlayer)
-
-  worker.post({ type: 'readyForListeners' })
 }
 
 function initFirstPersonMode() {
@@ -242,41 +234,45 @@ function initThirdPersonMode() {
 
 
 function createNewPlayer (user) {
-  const {position, rotation} = user;
-  let newPlayer = createUserMesh(user.color)
-  newPlayer.userData = {
-    id: user.id
-  }
+  const {position, rotation, color} = user;
 
-  newPlayer.position.set(position.x, position.y, position.z)
-  newPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
+  LoadPlayerModel(color, (data)=> {
+    let newPlayer = data//createUserMesh(user.color)
+    newPlayer.userData = {
+      id: user.id
+    }
   
-  const loader = new THREE.FontLoader()
-  loader.load('./helvetiker_regular.typeface.json', function (font) {
-
-    const textGeo = new THREE.TextGeometry(user.playerName, {
-      font: font,
-      size: 20,
-      height: 1,
-      bevelEnabled : false,
-      bevelThickness : 1,
-      bevelSize : 0.01,
-      bevelSegments: 10,
+    newPlayer.position.set(position.x, position.y, position.z)
+    newPlayer.rotation.set(rotation.x, rotation.y, rotation.z)
+    
+    const loader = new THREE.FontLoader()
+    loader.load('./helvetiker_regular.typeface.json', function (font) {
+  
+      const textGeo = new THREE.TextGeometry(user.playerName, {
+        font: font,
+        size: 20,
+        height: 1,
+        bevelEnabled : false,
+        bevelThickness : 1,
+        bevelSize : 0.01,
+        bevelSegments: 10,
+      })
+  
+      let material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        emissive: 0xffffff,
+      })
+  
+      const userTextMesh = new THREE.Mesh(textGeo, material)
+  
+      scene.add(newPlayer)
+      scene.add(userTextMesh)
+  
+      //should be after
+      players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
     })
+  });
 
-    let material = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
-      emissive: 0xffffff,
-    })
-
-    const userTextMesh = new THREE.Mesh(textGeo, material)
-
-    scene.add(newPlayer)
-    scene.add(userTextMesh)
-
-    //should be after
-    players.push({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
-  })
 }
 
 function shot () {
@@ -439,7 +435,7 @@ const worker = insideWorker(e => {
     scene.add(dLight)
 
 
-    const light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.7 );
+    const light = new THREE.HemisphereLight( 0xffffff, 0x000000, 0.5 );
     scene.add( light );
 
     // let ambient = new THREE.AmbientLight(0x000000)
@@ -481,6 +477,8 @@ const worker = insideWorker(e => {
   if (e.data.type === 'stopFire') {
     isShooting = false
   }
+
+  if(!controls) return;
 
   if (e.data.type === 'mousedown') {
     controls.mousedown(e.data.mouse)

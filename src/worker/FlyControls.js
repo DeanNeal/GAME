@@ -6,7 +6,7 @@ import  * as THREE from 'three';
 export default function ( object, camera, container) {
 
 	this.object = object;
-	camera.position.set(0, 50,40);
+	camera.position.set(0, 48, 0);
 	this.cameraInitPosition = camera.position.clone();
 
 	this.domElement = container || /*( domElement !== undefined ) ? domElement : */document;

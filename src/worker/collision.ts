@@ -2,7 +2,7 @@ import SocketService from "../services/socket.service";
 import * as THREE from 'three';
 import { getVolumeFromDistance } from "./utils";
 
-function detectCollisionCubes(object1, object2){
+function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
    object1.geometry.computeBoundingBox(); //not needed if its already calculated
    object2.geometry.computeBoundingBox();
    object1.updateMatrixWorld();
@@ -19,7 +19,7 @@ function detectCollisionCubes(object1, object2){
 
  
 let lastBulletWithAsteroidCollisionId;
-export function asteroidCollision(scene, asteroids, bullets, MainPlayer, worker) {
+export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, MainPlayer, worker) {
 
   asteroids.forEach(asteroid=> {
       bullets.forEach(bullet=> {
@@ -38,7 +38,7 @@ export function asteroidCollision(scene, asteroids, bullets, MainPlayer, worker)
   })
 }
 let lastRuneCollisionId;
-export function runesCollisionDetection(MainPlayer, allRunes, worker) {
+export function runesCollisionDetection(MainPlayer, allRunes: THREE.Mesh[], worker) {
   
   allRunes.forEach(rune=> {
     const obj =  rune;
@@ -54,7 +54,7 @@ export function runesCollisionDetection(MainPlayer, allRunes, worker) {
 }
 
 let lastBulletWithEnemyCollisionId;
-export function damageCollisionDetection (scene, players, bullets, currentUser, MainPlayer, worker) {
+export function damageCollisionDetection (scene: THREE.Scene, players, bullets, currentUser, MainPlayer, worker) {
   players
   .filter(r => r.mesh)
   .forEach(player => {
