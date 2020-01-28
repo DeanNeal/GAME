@@ -43,19 +43,31 @@ function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
  
 let lastBulletWithAsteroidCollisionId;
 export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, player, worker) {
-    bullets.forEach(bullet=> {
+    let toDispose = [];
+    bullets
+    .forEach((bullet, index)=> {
         const bulletMesh =  bullet.mesh;
         let asteroid = detectCollision(bullet.mesh, asteroids);
+  
         if(asteroid) {
             if(bulletMesh.id !== lastBulletWithAsteroidCollisionId) {
+              
                 scene.remove(bulletMesh);
+                toDispose.push(index);
                 lastBulletWithAsteroidCollisionId = bulletMesh.id;
-                SocketService.socket.emit('damageToAsteroid', asteroid.userData)
 
+                if(bullet.notifyServer) {
+                  SocketService.socket.emit('damageToAsteroid', asteroid.userData)
+                }
+          
                 const volume = getVolumeFromDistance(player.mesh, asteroid);
                 worker.post({type: 'damageDone', volume: volume})
             }
         }
+    })
+
+    toDispose.forEach(index=> {
+      bullets.splice(index, 1)
     })
 }
 let lastRuneCollisionId;

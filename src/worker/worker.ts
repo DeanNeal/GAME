@@ -46,7 +46,7 @@ class Game {
   allRunes = []
   allAsteroids = []
   bullets = []
-  othersBullets = []
+  // othersBullets = []
 
   players: Player[] = []
   controls
@@ -185,7 +185,6 @@ class Game {
         .indexOf(user.id)
 
       if (exists === -1 && user.id !== this.player.params.id) {
-        console.log('2222');
         this.createNewPlayer(user)
       }
     })
@@ -194,31 +193,35 @@ class Game {
   otherFire(params) {
     let userMesh = this.players.filter(r => r.params.id == params.userId)[0].mesh
     let pos = userMesh.position.clone()
-    let bulletMesh = createBullet()
+    let bullet = createBullet()
 
-    bulletMesh.position.set(pos.x, pos.y, pos.z)
-    bulletMesh.rotation.set(
+    bullet.position.set(pos.x, pos.y, pos.z)
+    bullet.rotation.set(
       params.rotation._x,
       params.rotation._y,
       params.rotation._z
     )
 
     //offset
-    bulletMesh.translateZ(-50);
+    bullet.translateZ(-50);
 
-    this.othersBullets.push({
-      mesh: bulletMesh,
+    this.bullets.push({
+      mesh: bullet,
       matrixWorld: params.matrixWorld,
-      camPos: params.camPos
+      camPos: params.camPos,
+      notifyServer: false
     })
 
-    this.scene.add(bulletMesh);
+    this.scene.add(bullet);
 
     worker.post({ type: 'playShot', volume: getVolumeFromDistance(this.player.mesh, userMesh) })
 
     setTimeout(() => {
-      this.scene.remove(bulletMesh)
-      this.othersBullets.splice(0, 1)
+      if(!bullet.parent) {
+        this.scene.remove(bullet)
+      }
+      
+      this.bullets = this.bullets.filter(b=> b.mesh.id !== bullet.id);
     }, 5000)
   }
 
@@ -361,7 +364,8 @@ class Game {
       this.bullets.push({
         mesh: bullet,
         matrixWorld: matrixWorld,
-        camPos: camPos
+        camPos: camPos,
+        notifyServer: true
       })
 
       this.scene.add(bullet);
@@ -376,8 +380,11 @@ class Game {
       worker.post({ type: 'playShot', volume: 0.1 })
 
       setTimeout(() => {
-        this.scene.remove(bullet)
-        this.bullets.splice(0, 1);
+        if(!bullet.parent) {
+          this.scene.remove(bullet)
+        }
+        
+        this.bullets = this.bullets.filter(b=> b.mesh.id !== bullet.id);
       }, 5000)
     }
   }
@@ -417,12 +424,12 @@ class Game {
       this.bullets[i].mesh.position.add(dir.multiplyScalar(250))
     }
 
-    for (let i = 0; i < this.othersBullets.length; i++) {
-      const pLocal = new THREE.Vector3(0, 0, -1)
-      const pWorld = pLocal.applyMatrix4(this.othersBullets[i].matrixWorld)
-      const dir = pWorld.sub(this.othersBullets[i].camPos).normalize()
-      this.othersBullets[i].mesh.position.add(dir.multiplyScalar(250))
-    }
+    // for (let i = 0; i < this.othersBullets.length; i++) {
+    //   const pLocal = new THREE.Vector3(0, 0, -1)
+    //   const pWorld = pLocal.applyMatrix4(this.othersBullets[i].matrixWorld)
+    //   const dir = pWorld.sub(this.othersBullets[i].camPos).normalize()
+    //   this.othersBullets[i].mesh.position.add(dir.multiplyScalar(250))
+    // }
 
 
     this.players.forEach(user => {
