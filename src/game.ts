@@ -6,18 +6,15 @@ declare var window: any;
 declare var document: any;
 
 import createWorker from './worker/create-worker';
+import { IWorker, IGameOptions } from './interfaces/interfaces';
 
-interface IOptions {
-    name: string;
-    color: string;
-}
 
 export class Game {
     public container: HTMLCanvasElement;
-    public worker: {worker: Worker, post(o): any  };
+    public worker: IWorker;
     public speedBlock: HTMLElement;
  
-    constructor(opts: IOptions) {
+    constructor(opts: IGameOptions) {
         this.onWindowResize = this.onWindowResize.bind(this);
 
         this.onMouseDown = this.onMouseDown.bind(this);
@@ -34,42 +31,44 @@ export class Game {
         this.init(opts);
     }
 
-    init(opts: IOptions) {
+    private init(opts: IGameOptions): void {
         this.container = document.createElement('canvas');
         document.body.appendChild(this.container);
 
-        this.worker = createWorker(this.container, './worker.js', (e: any)=> {
-            if(e.data.type === 'startTimer') {
-                this.startTimer();
-            }
-            if(e.data.type === 'updateRunes') {
-                GlobalService.runes.next(e.data.runes)
-            }
-            if(e.data.type === 'playShot') {
-                AudioService.playAudio('blaster', e.data.volume);
-            }
-
-            if(e.data.type==='speed'){
-                GlobalService.speed.next(e.data.speed.moveMult);
-            }
-
-            if(e.data.type === 'userUpdated') {
-                GlobalService.user.next(e.data.user);
-                if(e.data.damage) {
-                    GlobalService.damage.next();
-                }
-            }
-
-            if(e.data.type === 'userList') {
-                GlobalService.users.next(e.data.users);
-            }
-
-            if(e.data.type === 'damageDone') {
-                AudioService.playAudio('damage', e.data.volume, true);
-            }
-
-            if(e.data.type === 'removeRune') {
-                AudioService.playAudio('rune', e.data.volume, true);
+        this.worker = createWorker(this.container, './worker.js', (e: MessageEvent)=> {
+            switch(e.data.type) {
+                case 'startTimer':
+                    this.startTimer();
+                break;
+                case 'updateRunes':
+                    GlobalService.runes.next(e.data.runes)
+                break;
+                case 'playShot':
+                    AudioService.playAudio('blaster', e.data.volume);
+                break;
+    
+                case 'speed':
+                    GlobalService.speed.next(e.data.speed.moveMult);
+                break;
+    
+                case 'userUpdated':
+                    GlobalService.user.next(e.data.user);
+                    if(e.data.damage) {
+                        GlobalService.damage.next();
+                    }
+                break;
+    
+                case 'userList':
+                    GlobalService.users.next(e.data.users);
+                break;
+    
+                case 'damageDone':
+                    AudioService.playAudio('damage', e.data.volume, true);
+                break;
+    
+                case 'removeRune':
+                    AudioService.playAudio('rune', e.data.volume, true);
+                break;
             }
         });
         
@@ -80,35 +79,19 @@ export class Game {
         this.addListeners();
     }
 
-    startTimer() {
+    private startTimer(): void {
         let fiveMinutes = 5,
             display = document.querySelector('#timer');
         Helpers.startTimer(fiveMinutes, display);
     }
 
-    onWindowResize() {
+    private onWindowResize(): void {
         this.worker.post({
              type: 'resize', width: window.innerWidth, height: window.innerHeight
         });
     }
 
-    addListeners() {
-        window.addEventListener('mousedown', this.onMouseDown, false);
-        window.addEventListener('mousemove', this.onMouseMove, false);
-        window.addEventListener('mouseup', this.onMouseUp, false);
-        
-        window.addEventListener('keydown', this.onKeyDown, false);
-        window.addEventListener('keyup', this.onKeyUp, false);
-        window.addEventListener('keypress', this.onKeyPress, false);
-
-        window.addEventListener('contextmenu', this.onContextmenu, false);
-        window.addEventListener('resize', this.onWindowResize, false);
-
-        window.addEventListener("mousewheel", this.onMouseWheel);
-		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
-    }
-
-    onMouseDown(e: MouseEvent) {
+    private onMouseDown(e: MouseEvent): void {
         e.preventDefault();
         e.stopPropagation();
 
@@ -128,7 +111,7 @@ export class Game {
         })
     }
 
-    onMouseMove(e: MouseEvent) {
+    private onMouseMove(e: MouseEvent): void {
         e.preventDefault();
         e.stopPropagation();
         this.worker.post({
@@ -142,7 +125,7 @@ export class Game {
         })
     }
 
-    onMouseUp(e: MouseEvent) {
+    private onMouseUp(e: MouseEvent): void {
         e.preventDefault();
         e.stopPropagation();
 
@@ -161,7 +144,7 @@ export class Game {
         })
     }
 
-    onKeyDown(e: KeyboardEvent) {
+    private onKeyDown(e: KeyboardEvent): void {
         if(e.keyCode === 9) {
             e.preventDefault();
             this.worker.post({
@@ -179,7 +162,7 @@ export class Game {
         })
     }
 
-    onKeyPress(e: KeyboardEvent) {
+    private onKeyPress(e: KeyboardEvent): void {
         this.worker.post({
             type: 'keypress',
             mouse: {
@@ -189,7 +172,7 @@ export class Game {
         })
     }
 
-    onKeyUp(e: KeyboardEvent) {
+    private onKeyUp(e: KeyboardEvent): void{
         this.worker.post({
             type: 'keyup',
             mouse: {
@@ -199,11 +182,11 @@ export class Game {
         })
     }
 
-    onContextmenu(e: MouseEvent) {
+    private onContextmenu(e: MouseEvent): void {
         e.preventDefault();
     }
 
-    onMouseWheel(e) {
+    private onMouseWheel(e): void {
         e = window.event || e;
         const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
@@ -218,7 +201,23 @@ export class Game {
         // e.preventDefault();
     }
 
-    removeListeners() {
+    public addListeners(): void {
+        window.addEventListener('mousedown', this.onMouseDown, false);
+        window.addEventListener('mousemove', this.onMouseMove, false);
+        window.addEventListener('mouseup', this.onMouseUp, false);
+        
+        window.addEventListener('keydown', this.onKeyDown, false);
+        window.addEventListener('keyup', this.onKeyUp, false);
+        window.addEventListener('keypress', this.onKeyPress, false);
+
+        window.addEventListener('contextmenu', this.onContextmenu, false);
+        window.addEventListener('resize', this.onWindowResize, false);
+
+        window.addEventListener("mousewheel", this.onMouseWheel);
+		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
+    }
+
+    public removeListeners(): void {
         window.removeEventListener('resize', this.onWindowResize, false);
 
         window.removeEventListener('mousedown', this.onMouseDown, false);
@@ -235,7 +234,7 @@ export class Game {
 		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
     }
 
-    disconnect() {
+    public disconnect(): void {
         this.removeListeners();
         this.worker.worker.terminate();
         this.worker = undefined;

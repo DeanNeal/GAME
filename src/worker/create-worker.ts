@@ -1,4 +1,4 @@
-export default function (canvas, workerUrl, listener) {
+export default function (canvas: HTMLCanvasElement, workerUrl: string, listener: (e:any)=> any) {
   // if (canvas.transferControlToOffscreen) {
     var worker = new Worker(workerUrl)
     worker.onmessage = listener
@@ -9,7 +9,7 @@ export default function (canvas, workerUrl, listener) {
       height: canvas.clientHeight
     }, [offscreen])
     return {
-      post: function (a, b) {
+      post: function (a: {type: string}, b?) {
         worker.postMessage(a, b)
       },
       worker: worker
