@@ -19,7 +19,7 @@
 //     '#4A9586'
 // ];
 
-// let Helpers = {
+let Helpers = {
 //     roundRect: (ctx, x, y, w, h, r) => {
 //         ctx.beginPath();
 //         ctx.moveTo(x + r, y);
@@ -180,24 +180,24 @@
 //         return result;
 //     },
 
-//     startTimer(duration, display) {
-//         var timer = duration, minutes, seconds;
-//         var interval = setInterval(function () {
-//             // minutes = parseInt(timer / 60, 10)
-//             seconds = parseInt(timer % 60, 10);
+    startTimer(duration, display) {
+        var timer = duration, minutes, seconds;
+        var interval = setInterval(function () {
+            // minutes = parseInt(timer / 60, 10)
+            seconds = parseInt(timer % 60, 10);
 
-//             // minutes = minutes < 10 ? "0" + minutes : minutes;
-//             // seconds = seconds < 10 ? "0" + seconds : seconds;
+            // minutes = minutes < 10 ? "0" + minutes : minutes;
+            // seconds = seconds < 10 ? "0" + seconds : seconds;
 
-//             display.textContent = /*minutes + ":" +*/ seconds;
+            display.textContent = /*minutes + ":" +*/ seconds;
 
-//             if (--timer < 0) {
-//                 timer = duration;
-//                 display.textContent = '';
-//                 clearInterval(interval);
-//             }
-//         }, 1000);
-//     }
+            if (--timer < 0) {
+                timer = duration;
+                display.textContent = '';
+                clearInterval(interval);
+            }
+        }, 1000);
+    }
 
-// }
-// export default Helpers;
+}
+export default Helpers;

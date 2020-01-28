@@ -81,20 +81,18 @@
       </div>
     </div>
 
-    <div class="controls" v-if="getReady">
-      <div id="info">
+    <div class="gui" v-if="getReady">
+      <div class="gui__info">
         <div>Controls - > WA/QE + mouse</div>
         <div>Shift - constant speed</div>
         <div>Tab - change view mode</div>
       </div>
-      <div id="position"></div>
-      <div id="rotation"></div>
-      <div id="gui">HP {{ user.health }}</div>
-      <div id="gui-speed">
-        <span id="gui-speed-value">{{ speed }}</span> KM/H
+      <div class="gui__hp">HP {{ user.health }}</div>
+      <div class="gui__speed">
+        <span class="gui__speed-value">{{ speed }}</span> KM/H
       </div>
-      <div id="timer"></div>
-      <div class="damage"></div>
+      <div class="gui__timer"></div>
+      <div class="gui__damage"></div>
       <app-user-list :class="{ active: showTab }"></app-user-list>
     </div>
   </div>

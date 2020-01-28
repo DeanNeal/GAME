@@ -1,0 +1,68 @@
+.gui {
+  &.damage {
+    .damage {
+      display: block;
+    }
+  }
+  .damage {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(255, 0, 0, 0.3);
+    width: 100%;
+    height: 100%;
+  }
+
+  &__hp {
+    position: absolute;
+    width: 200px;
+    text-align: left;
+    font-size: 48px;
+    color: #fff;
+    text-align: center;
+    bottom: 40px;
+    left: 10px;
+    margin: auto;
+    height: 50px;
+    white-space: nowrap;
+  }
+
+  &__speed {
+    position: absolute;
+    width: 250px;
+    text-align: right;
+    font-size: 48px;
+    color: #fff;
+    text-align: center;
+    bottom: 40px;
+    right: 10px;
+    margin: auto;
+    height: 50px;
+    white-space: nowrap;
+  }
+
+  &__info {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    color: #fff;
+    padding: 5px;
+    font-size: 13px;
+    text-align: center;
+    z-index: 1;
+  }
+  &__timer {
+    position: absolute;
+    width: 200px;
+    font-size: 180px;
+    color: #fff;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 200px;
+  }
+}

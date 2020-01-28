@@ -1,5 +1,4 @@
 import Helpers from './helper';
-
 import GlobalService from './services/global.service';
 import AudioService from './services/audio.service';
 
