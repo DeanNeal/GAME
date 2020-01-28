@@ -21,11 +21,11 @@ class Player {
     this.params = params;
     // this.mesh.position.set(position.x, position.y, position.z)
     // this.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
-   
+
     this.userTextMesh = userTextMesh;
   }
 
-  setMesh(mesh: THREE.Mesh | THREE.Object3D,  position: THREE.Vector3, rotation: THREE.Euler) {
+  setMesh(mesh: THREE.Mesh | THREE.Object3D, position: THREE.Vector3, rotation: THREE.Euler) {
     this.mesh = mesh;
     this.mesh.position.set(position.x, position.y, position.z)
     this.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
@@ -114,7 +114,7 @@ class Game {
 
       // this.players.push();//{ mesh: null, user: user })
       // currentUser = user
-     
+
 
       this.player.setMesh(mesh, position, rotation);
 
@@ -136,7 +136,7 @@ class Game {
   }
 
   addRunesToScene(runes) {
-    addRunes(runes, (mesh)=> {
+    addRunes(runes, (mesh) => {
       this.scene.add(mesh)
       this.allRunes.push(mesh)
     });
@@ -149,9 +149,9 @@ class Game {
       if (this.allRunes[i].userData.id === rune.id) {
         this.scene.remove(this.allRunes[i])
         this.allRunes.splice(i, 1)
-  
+
         worker.post({ type: 'updateRunes', runes: this.allRunes.length })
-  
+
         if (this.allRunes.length === 0) {
           worker.post({ type: 'startTimer' })
           SocketService.socket.emit('startAgain')
@@ -183,7 +183,7 @@ class Game {
           return x.params.id
         })
         .indexOf(user.id)
-        
+
       if (exists === -1 && user.id !== this.player.params.id) {
         console.log('2222');
         this.createNewPlayer(user)
@@ -195,27 +195,27 @@ class Game {
     let userMesh = this.players.filter(r => r.params.id == params.userId)[0].mesh
     let pos = userMesh.position.clone()
     let bulletMesh = createBullet()
-  
+
     bulletMesh.position.set(pos.x, pos.y, pos.z)
     bulletMesh.rotation.set(
       params.rotation._x,
       params.rotation._y,
       params.rotation._z
     )
-  
+
     //offset
     bulletMesh.translateZ(-50);
-  
+
     this.othersBullets.push({
       mesh: bulletMesh,
       matrixWorld: params.matrixWorld,
       camPos: params.camPos
     })
-  
+
     this.scene.add(bulletMesh);
-  
+
     worker.post({ type: 'playShot', volume: getVolumeFromDistance(this.player.mesh, userMesh) })
-  
+
     setTimeout(() => {
       this.scene.remove(bulletMesh)
       this.othersBullets.splice(0, 1)
@@ -235,25 +235,25 @@ class Game {
     }
   }
 
-  createNewPlayer (user) {
-    const {position, rotation, shipType} = user;
+  createNewPlayer(user) {
+    const { position, rotation, shipType } = user;
 
-    LoadPlayerModel(shipType, (mesh)=> {
+    LoadPlayerModel(shipType, (mesh) => {
       let newPlayer = mesh//createUserMesh(user.color)
       // newPlayer.userData = {
       //   id: user.id
       // }
 
       const loader = new THREE.FontLoader()
-      loader.load('./helvetiker_regular.typeface.json', (font)=> {
+      loader.load('./helvetiker_regular.typeface.json', (font) => {
 
         const textGeo = new THREE.TextGeometry(user.playerName, {
           font: font,
           size: 20,
           height: 1,
-          bevelEnabled : false,
-          bevelThickness : 1,
-          bevelSize : 0.01,
+          bevelEnabled: false,
+          bevelThickness: 1,
+          bevelSize: 0.01,
           bevelSegments: 10,
         })
 
@@ -286,12 +286,12 @@ class Game {
             user.rotation._y,
             user.rotation._z
           )
-  
+
           let distance = p.mesh.position.distanceTo(this.player.mesh.position) / 10;
-  
-          distance = distance > 1000 ? 1000 : distance; 
-          distance = distance < 100 ? 100 : distance; 
-  
+
+          distance = distance > 1000 ? 1000 : distance;
+          distance = distance < 100 ? 100 : distance;
+
           p.userTextMesh.position.set(user.position.x + distance, user.position.y + distance, user.position.z + distance);
         }
       })
@@ -577,24 +577,24 @@ SocketService.socket
   .on('updateAsteroids', asteroids => {
     game.addAsteroidsToScene(asteroids);
   })
-.on('updateUsersCoords', users => {
+  .on('updateUsersCoords', users => {
     game.updateUsersCoords(users);
-})
-.on('anotherNewPlayer', users => {
+  })
+  .on('anotherNewPlayer', users => {
     game.anotherNewPlayer(users);
-})
-.on('otherFire', params => {
+  })
+  .on('otherFire', params => {
     game.otherFire(params);
-})
-.on('killed', function ({position, rotation}) {
-  game.killed(position, rotation)
-})
-.on('deletePlayer', userId => {
+  })
+  .on('killed', function ({ position, rotation }) {
+    game.killed(position, rotation)
+  })
+  .on('deletePlayer', userId => {
     game.deletePlayer(userId);
-})
-.on('runeWasRemoved', rune => {
-  game.runeWasRemoved(rune);
-})
-.on('asteroidWasRemoved', asteroid => {
-  game.asteroidWasRemoved(asteroid);
-})
+  })
+  .on('runeWasRemoved', rune => {
+    game.runeWasRemoved(rune);
+  })
+  .on('asteroidWasRemoved', asteroid => {
+    game.asteroidWasRemoved(asteroid);
+  })

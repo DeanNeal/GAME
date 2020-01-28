@@ -7,7 +7,7 @@ export function addAsteroids (asteroids, cb) {
     gltfLoader['load']('models/simple-asteroid.glb', (object) => {
 
         let material = new THREE.MeshStandardMaterial({
-            color: 0xffffff, roughness: 0.5, metalness: .5
+            color: 0x999999, roughness: 0.8, metalness: 0.2
         });
 
         let geometry = object.scene.children[0].geometry;
