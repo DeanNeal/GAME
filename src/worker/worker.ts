@@ -3,11 +3,10 @@ import insideWorker from './inside-worker'
 import FlyControls from './FlyControls'
 import OrbitControls from './OrbitControls';
 
-// import { loadStarship } from './utils'
 import SocketService from '../services/socket.service'
 
 import * as THREE from 'three'
-import { createUserMesh, createAim, createBullet} from './objects'
+import { createBullet} from './objects'
 import { addAsteroids, addRunes, addSky} from './environment'
 import { asteroidCollision, runesCollisionDetection, damageCollisionDetection } from './collision'
 import { getVolumeFromDistance, LoadPlayerModel } from './utils'
@@ -106,7 +105,7 @@ SocketService.socket
 .on('otherFire', params => {
   let userMesh = players.filter(r => r.user.id == params.userId)[0].mesh
   let pos = userMesh.position.clone()
-  let bulletMesh = createBullet(params.color)
+  let bulletMesh = createBullet()
 
   bulletMesh.position.set(pos.x, pos.y, pos.z)
   bulletMesh.rotation.set(
@@ -176,10 +175,10 @@ SocketService.socket
 })
 
 
-function addMainPlayer ({color, position, rotation}) {
+function addMainPlayer ({shipType, position, rotation}) {
   // MainPlayer = createUserMesh(color, true)
 
-  LoadPlayerModel(color, (data)=> {
+  LoadPlayerModel(shipType, (data)=> {
     MainPlayer = data;
 
     // MainPlayer.castShadow = true;
@@ -234,9 +233,9 @@ function initThirdPersonMode() {
 
 
 function createNewPlayer (user) {
-  const {position, rotation, color} = user;
+  const {position, rotation, shipType} = user;
 
-  LoadPlayerModel(color, (data)=> {
+  LoadPlayerModel(shipType, (data)=> {
     let newPlayer = data//createUserMesh(user.color)
     newPlayer.userData = {
       id: user.id
@@ -277,7 +276,7 @@ function createNewPlayer (user) {
 
 function shot () {
   if (currentUser) {
-    let bullet = createBullet(currentUser.color)
+    let bullet = createBullet()
 
     let pos = MainPlayer.position.clone()
     let rot = MainPlayer.rotation.clone()
@@ -300,8 +299,8 @@ function shot () {
       userId: currentUser.id,
       matrixWorld: matrixWorld,
       camPos: camPos,
-      rotation: rot,
-      color: currentUser.color
+      rotation: rot
+      // color: currentUser.color
     })
 
     worker.post({ type: 'playShot', volume: 0.1 })

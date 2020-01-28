@@ -1,15 +1,5 @@
-import {
-  Observable,
-  Subject,
-  ReplaySubject,
-  BehaviorSubject,
-  from,
-  of,
-  range
-} from "rxjs";
 import GlobalService from "./global.service";
-
-interface IAudio {}
+import { IAudio } from "../interfaces/interfaces";
 
 class AudioService {
   public collection = {};
@@ -22,7 +12,7 @@ class AudioService {
     this.collection["blaster"] = this.createSound("blaster-1.mp3", 0.1);
   }
 
-  createSound(name, volume, isMusic = false) {
+  createSound(name: string, volume: number, isMusic = false): IAudio {
     var audio = new Audio("sounds/" + name);
     audio.currentTime = 0;
     audio.volume = volume;
@@ -30,7 +20,7 @@ class AudioService {
     return {audio, isMusic};
   }
 
-  playAudio(name, volume?, start?, smooth?) {
+  playAudio(name: string, volume?: number, start?: boolean, smooth?: boolean): void {
     const a = this.collection[name];
     if(!a.isMusic && GlobalService.soundsEnabled.getValue() === false) return;
     if(a.isMusic && GlobalService.musicEnabled.getValue() === false) return;
@@ -47,7 +37,7 @@ class AudioService {
     }
     a.audio.play();
   }
-  stopAudio(name, smooth?) {
+  stopAudio(name: string, smooth?: boolean): void {
     const a = this.collection[name];
     if (smooth) {
       adjustVolume(a.audio, 0);

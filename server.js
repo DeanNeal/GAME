@@ -87,7 +87,8 @@ io.sockets.on('connection', function (socket) {
 let addUser = function (user, playerOptions) {
   user = Object.assign(user, {
     playerName: playerOptions.name,
-    color: playerOptions.color,
+    // color: playerOptions.color,
+    shipType: playerOptions.shipType,
     size: 80,
     position: randomPosition(),
     rotation: randomRotation(),
@@ -207,7 +208,7 @@ function createAsteroids () {
       health: 100,
       size: randomInteger(200, 2000),
       id: i,
-      color: 0xcccccc,
+      // color: 0xcccccc,
       position: {
         x: 60000 * (2.0 * Math.random() - 1.0),
         y: 60000 * (2.0 * Math.random() - 1.0),

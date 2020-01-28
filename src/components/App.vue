@@ -66,8 +66,9 @@
             @keydown="keyPress($event)"
             required
           />
-          <label>Ship color</label>
-          <div class="colors">
+          <label>Ship: default</label>
+          
+          <!--<div class="colors">
             <div
               @click="playerOptions.color = color"
               :style="{ background: color }"
@@ -75,7 +76,7 @@
               :class="{ active: playerOptions.color === color }"
               v-for="color of colors"
             ></div>
-          </div>
+          </div>-->
           <button class="btn" :disabled="getReady" type="submit">START</button>
         </form>
       </div>
@@ -109,7 +110,7 @@ import UserList from './list/UserList.vue'
 class InitState {
   constructor () {
     this.name = ''
-    this.color = 'red'
+    this.shipType = 'default';
   }
 }
 
@@ -130,7 +131,7 @@ export default {
       getReady: false,
       inGame: false,
       online: 0,
-      colors: ['red', 'yellow', 'lime', 'blue'],
+      // colors: ['red'],// 'yellow', 'lime', 'blue'],
       playerOptions: new InitState(),
       user: {
         health: null
