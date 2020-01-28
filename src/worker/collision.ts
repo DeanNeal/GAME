@@ -2,6 +2,9 @@ import SocketService from "../services/socket.service";
 import * as THREE from 'three';
 import { getVolumeFromDistance } from "./utils";
 
+/**
+ * deprecated
+ */
 function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
   if(object1 instanceof THREE.Group || object2 instanceof THREE.Group) {
     return;
@@ -20,25 +23,40 @@ function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
    return box1.intersectsBox(box2);
  }
 
+ function detectCollision(object1, object2List) {
+     let originPoint = object1.position.clone();
+     for (let vertexIndex = 0; vertexIndex < object1.geometry.vertices.length; vertexIndex++)
+     {
+         let localVertex = object1.geometry.vertices[vertexIndex].clone();
+         let globalVertex = localVertex.applyMatrix4( object1.matrix );
+         let directionVector = globalVertex.sub( object1.position );
+
+         let ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+         let collisionResults = ray.intersectObjects( object2List );
+         if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+            return collisionResults[0].object;
+         }
+     }
+     return false;
+ }
+
  
 let lastBulletWithAsteroidCollisionId;
 export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, player, worker) {
-  return;
-  asteroids.forEach(asteroid=> {
-      bullets.forEach(bullet=> {
-         const bulletMesh =  bullet.mesh;
-         if(detectCollisionCubes(asteroid, bulletMesh)) {
+    bullets.forEach(bullet=> {
+        const bulletMesh =  bullet.mesh;
+        let asteroid = detectCollision(bullet.mesh, asteroids);
+        if(asteroid) {
             if(bulletMesh.id !== lastBulletWithAsteroidCollisionId) {
-              scene.remove(bulletMesh);
-               lastBulletWithAsteroidCollisionId = bulletMesh.id;
-               SocketService.socket.emit('damageToAsteroid', asteroid.userData)
+                scene.remove(bulletMesh);
+                lastBulletWithAsteroidCollisionId = bulletMesh.id;
+                SocketService.socket.emit('damageToAsteroid', asteroid.userData)
 
-               const volume = getVolumeFromDistance(player.mesh, asteroid);
-               worker.post({type: 'damageDone', volume: volume})
+                const volume = getVolumeFromDistance(player.mesh, asteroid);
+                worker.post({type: 'damageDone', volume: volume})
             }
-         }
-      })
-  })
+        }
+    })
 }
 let lastRuneCollisionId;
 export function runesCollisionDetection(player, allRunes: THREE.Mesh[], worker) {
