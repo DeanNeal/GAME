@@ -4,8 +4,6 @@ import GLTFLoader from "./three/GLTFLoader";
 export function addAsteroids (asteroids, cb) {
     var gltfLoader = new GLTFLoader();
 
-
-
     gltfLoader['load']('models/simple-asteroid.glb', (object) => {
 
         let material = new THREE.MeshStandardMaterial({

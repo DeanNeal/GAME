@@ -3,6 +3,9 @@ import * as THREE from 'three';
 import { getVolumeFromDistance } from "./utils";
 
 function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
+  if(object1 instanceof THREE.Group || object2 instanceof THREE.Group) {
+    return;
+  }
    object1.geometry.computeBoundingBox(); //not needed if its already calculated
    object2.geometry.computeBoundingBox();
    object1.updateMatrixWorld();
