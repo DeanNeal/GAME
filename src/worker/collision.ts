@@ -28,6 +28,7 @@ function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
      for (let vertexIndex = 0; vertexIndex < object1.geometry.vertices.length; vertexIndex++)
      {
          let localVertex = object1.geometry.vertices[vertexIndex].clone();
+
          let globalVertex = localVertex.applyMatrix4( object1.matrix );
          let directionVector = globalVertex.sub( object1.position );
 
@@ -75,7 +76,8 @@ export function runesCollisionDetection(player, allRunes: THREE.Mesh[], worker) 
   
   allRunes.forEach(rune=> {
     const obj =  rune;
-    if(detectCollisionCubes(rune, player.mesh)) {
+    
+    if(detectCollisionCubes(rune, player.mesh.children[0])) {
         if(obj.id !== lastRuneCollisionId) {
           lastRuneCollisionId = obj.id
           SocketService.socket.emit('removeRune', obj.userData)
