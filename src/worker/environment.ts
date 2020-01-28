@@ -1,29 +1,40 @@
 import * as THREE from 'three'
+import GLTFLoader from "./three/GLTFLoader";
 
 export function addAsteroids (asteroids, cb) {
-   asteroids.forEach(c => {
-     let cube = new THREE.BoxGeometry(c.size, c.size, c.size);
- 
-     let material = new THREE.MeshStandardMaterial({
-      color: 0xffffff, roughness: 0.5, metalness: .5
-     })
-     let mesh = new THREE.Mesh(cube, material)
-     
-     mesh.castShadow = true; //default is false
-     mesh.receiveShadow = true; //default
- 
-     mesh.userData = c
-     mesh.position.x = c.position.x
-     mesh.position.y = c.position.y
-     mesh.position.z = c.position.z
- 
-     mesh.rotation.x = c.position.x
-     mesh.rotation.y = c.position.y
-     mesh.rotation.z = c.position.z
- 
+    var gltfLoader = new GLTFLoader();
 
-     cb(mesh);
-   })
+
+
+    gltfLoader['load']('models/simple-asteroid.glb', (object) => {
+
+        let material = new THREE.MeshStandardMaterial({
+            color: 0xffffff, roughness: 0.5, metalness: .5
+        });
+
+        let geometry = object.scene.children[0].geometry;
+
+        asteroids.forEach(c => {
+            let mesh = new THREE.Mesh(geometry, material);
+
+            mesh.scale.set(c.size, c.size, c.size);
+            mesh.userData = c;
+            mesh.position.x = c.position.x;
+            mesh.position.y = c.position.y;
+            mesh.position.z = c.position.z;
+
+            mesh.rotation.x = c.position.x;
+            mesh.rotation.y = c.position.y;
+            mesh.rotation.z = c.position.z;
+
+            cb(mesh);
+        });
+    }, undefined, (error) => {
+        // object loading error
+        console.log(error);
+    });
+
+
  }
 
  export function addRunes(runes, cb) {

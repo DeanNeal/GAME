@@ -206,7 +206,7 @@ function createAsteroids () {
   for (let i = 0; i < 100; i++) {
     asteroids.push({
       health: 100,
-      size: randomInteger(200, 2000),
+      size: randomInteger(5, 20),
       id: i,
       // color: 0xcccccc,
       position: {
