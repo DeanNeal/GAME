@@ -88,22 +88,30 @@ export function runesCollisionDetection(player, allRunes: THREE.Mesh[], worker) 
 
 let lastBulletWithEnemyCollisionId;
 export function damageCollisionDetection (scene: THREE.Scene, players, bullets, player, worker) {
-  players
-  .filter(r => r.mesh)
-  .forEach(pl => {
-    let plMesh = pl.mesh
-    bullets.forEach(r=> {
-      let bulletMesh = r.mesh;
-      if(detectCollisionCubes(bulletMesh, plMesh)) {
-          if(lastBulletWithEnemyCollisionId !== bulletMesh.id) {
-            scene.remove(bulletMesh);
-            lastBulletWithEnemyCollisionId = bulletMesh.id
+    let toDispose = [];
+    bullets
+    .forEach((bullet, index)=> {
+        const bulletMesh =  bullet.mesh;
+        let pl:any = detectCollision(bullet.mesh, players.map(r=> r.mesh.children[0]));
 
-            SocketService.socket.emit('damage', pl.params, player.params)
-            const volume = getVolumeFromDistance(player.mesh, plMesh);
-            worker.post({type: 'damageDone', volume: volume})
-          }
-      }
+        if(pl) {
+            if(bulletMesh.id !== lastBulletWithEnemyCollisionId) {
+                scene.remove(bulletMesh);
+                toDispose.push(index);
+                lastBulletWithEnemyCollisionId = bulletMesh.id;
+
+                const enemy = players.find(r=> r.mesh == pl.parent);
+                if(bullet.notifyServer) {
+                  SocketService.socket.emit('damage', enemy.params, player.params)
+                }
+                
+                const volume = getVolumeFromDistance(player.mesh, pl);
+                worker.post({type: 'damageDone', volume: volume})
+            }
+        }
     })
-  })
+
+    toDispose.forEach(index=> {
+      bullets.splice(index, 1)
+    })
  }

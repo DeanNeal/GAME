@@ -217,7 +217,7 @@ class Game {
     worker.post({ type: 'playShot', volume: getVolumeFromDistance(this.player.mesh, userMesh) })
 
     setTimeout(() => {
-      if(!bullet.parent) {
+      if(bullet.parent) {
         this.scene.remove(bullet)
       }
       
@@ -380,7 +380,7 @@ class Game {
       worker.post({ type: 'playShot', volume: 0.1 })
 
       setTimeout(() => {
-        if(!bullet.parent) {
+        if(bullet.parent) {
           this.scene.remove(bullet)
         }
         
