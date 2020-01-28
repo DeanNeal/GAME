@@ -19,7 +19,7 @@ function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
 
  
 let lastBulletWithAsteroidCollisionId;
-export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, MainPlayer, worker) {
+export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, player, worker) {
 
   asteroids.forEach(asteroid=> {
       bullets.forEach(bullet=> {
@@ -30,7 +30,7 @@ export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], b
                lastBulletWithAsteroidCollisionId = bulletMesh.id;
                SocketService.socket.emit('damageToAsteroid', asteroid.userData)
 
-               const volume = getVolumeFromDistance(MainPlayer, asteroid);
+               const volume = getVolumeFromDistance(player.mesh, asteroid);
                worker.post({type: 'damageDone', volume: volume})
             }
          }
@@ -38,11 +38,11 @@ export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], b
   })
 }
 let lastRuneCollisionId;
-export function runesCollisionDetection(MainPlayer, allRunes: THREE.Mesh[], worker) {
+export function runesCollisionDetection(player, allRunes: THREE.Mesh[], worker) {
   
   allRunes.forEach(rune=> {
     const obj =  rune;
-    if(detectCollisionCubes(rune, MainPlayer)) {
+    if(detectCollisionCubes(rune, player.mesh)) {
         if(obj.id !== lastRuneCollisionId) {
           lastRuneCollisionId = obj.id
           SocketService.socket.emit('removeRune', obj.userData)
@@ -54,11 +54,11 @@ export function runesCollisionDetection(MainPlayer, allRunes: THREE.Mesh[], work
 }
 
 let lastBulletWithEnemyCollisionId;
-export function damageCollisionDetection (scene: THREE.Scene, players, bullets, currentUser, MainPlayer, worker) {
+export function damageCollisionDetection (scene: THREE.Scene, players, bullets, player, worker) {
   players
   .filter(r => r.mesh)
-  .forEach(player => {
-    let plMesh = player.mesh
+  .forEach(pl => {
+    let plMesh = pl.mesh
     bullets.forEach(r=> {
       let bulletMesh = r.mesh;
       if(detectCollisionCubes(bulletMesh, plMesh)) {
@@ -66,8 +66,8 @@ export function damageCollisionDetection (scene: THREE.Scene, players, bullets, 
             scene.remove(bulletMesh);
             lastBulletWithEnemyCollisionId = bulletMesh.id
 
-            SocketService.socket.emit('damage', player.user, currentUser)
-            const volume = getVolumeFromDistance(MainPlayer, plMesh);
+            SocketService.socket.emit('damage', pl.params, player.params)
+            const volume = getVolumeFromDistance(player.mesh, plMesh);
             worker.post({type: 'damageDone', volume: volume})
           }
       }

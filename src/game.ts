@@ -51,7 +51,7 @@ export class Game {
                     GlobalService.speed.next(e.data.speed.moveMult);
                 break;
     
-                case 'userUpdated':
+                case 'userCreated':
                     GlobalService.user.next(e.data.user);
                     if(e.data.damage) {
                         GlobalService.damage.next();

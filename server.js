@@ -34,9 +34,9 @@ io.sockets.on('connection', function (socket) {
   socket.on('addNewPlayer', function (playerOptions) {
     addUser(user, playerOptions)
     // socket.emit("userInit", user );
-    socket.emit('userUpdated', user)
+    socket.emit('userCreated', user)
 
-    io.sockets.emit('otherNewPlayer', users)
+    io.sockets.emit('anotherNewPlayer', users)
     io.sockets.emit('userList', users)
     socket.emit('updateRunes', runes)
     socket.emit('updateAsteroids', asteroids)
