@@ -31,3 +31,7 @@ node_modules/
 .tmp
 dist
 .idea/
+
+public/app.js
+public/worker.js
+public/css/
