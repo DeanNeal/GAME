@@ -1,3 +1,135 @@
+.user-list {
+  float: right;
+  width: 400px;
+  padding: 5px;
+  z-index: 10;
+  position: fixed;
+  right: -400px;
+  border: 1px solid #999;
+  background: #fff;
+  transition: 0.2s;
+  background: rgba(245, 245, 245, 0.8);
+}
+.user-list.active {
+  right: 0px;
+}
+.user-list #welcome {
+  font-size: 12px;
+}
+.user-list__left-count {
+  float: left;
+  font-size: 20px;
+}
+.user-list__users {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.user-list__users .title {
+  margin: 10px 0;
+  display: inline-block;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+.user-list__users ul {
+  width: 100%;
+  max-height: 200px;
+  overflow: auto;
+}
+.user-list__users ul li {
+  background: #eee;
+  padding: 3px 10px 3px 20px;
+  border: 1px solid #999;
+  border-bottom: none;
+  font-size: 14px;
+  position: relative;
+  height: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.user-list__users ul li.current-player {
+  background: rgba(17, 17, 17, 0.575);
+  font-weight: 700;
+  color: #fff;
+}
+.user-list__users ul li i {
+  position: absolute;
+  left: 7px;
+  top: 0;
+  border-radius: 100%;
+  width: 8px;
+  height: 8px;
+  display: block;
+  bottom: 0;
+  margin: auto;
+}
+.user-list__users ul li:last-child {
+  border-bottom: 1px solid #999;
+}
+
+.gui.damage .damage {
+  display: block;
+}
+.gui .damage {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(255, 0, 0, 0.3);
+  width: 100%;
+  height: 100%;
+}
+.gui__hp {
+  position: absolute;
+  width: 200px;
+  text-align: left;
+  font-size: 48px;
+  color: #fff;
+  text-align: center;
+  bottom: 40px;
+  left: 10px;
+  margin: auto;
+  height: 50px;
+  white-space: nowrap;
+}
+.gui__speed {
+  position: absolute;
+  width: 250px;
+  text-align: right;
+  font-size: 48px;
+  color: #fff;
+  text-align: center;
+  bottom: 40px;
+  right: 10px;
+  margin: auto;
+  height: 50px;
+  white-space: nowrap;
+}
+.gui__info {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  color: #fff;
+  padding: 5px;
+  font-size: 13px;
+  text-align: center;
+  z-index: 1;
+}
+.gui__timer {
+  position: absolute;
+  width: 200px;
+  font-size: 180px;
+  color: #fff;
+  text-align: center;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  height: 200px;
+}
 * {
   margin: 0;
   padding: 0;
@@ -19,95 +151,6 @@ body {
 }
 ul {
   list-style: none;
-}
-.player {
-  border-radius: 100%;
-  background: #999;
-  width: 50px;
-  height: 50px;
-}
-#stats {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-#stats #fps {
-  background: transparent !important;
-}
-#stats #fps #fpsText {
-  color: #aaa !important;
-}
-#stats #fps #fpsGraph {
-  display: none;
-}
-#timer {
-  position: absolute;
-  width: 200px;
-  font-size: 180px;
-  color: #fff;
-  text-align: center;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-  height: 200px;
-}
-#gui {
-  position: absolute;
-  width: 200px;
-  text-align: left;
-  font-size: 48px;
-  color: #fff;
-  text-align: center;
-  bottom: 40px;
-  left: 10px;
-  margin: auto;
-  height: 50px;
-  white-space: nowrap;
-}
-#gui-speed {
-  position: absolute;
-  width: 250px;
-  text-align: right;
-  font-size: 48px;
-  color: #fff;
-  text-align: center;
-  bottom: 40px;
-  right: 10px;
-  margin: auto;
-  height: 50px;
-  white-space: nowrap;
-}
-#backToMain {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  color: #fff;
-  cursor: pointer;
-  z-index: 2;
-}
-#position {
-  color: #fff;
-  position: absolute;
-  top: 20px;
-  font-size: 14px;
-}
-#rotation {
-  font-size: 14px;
-  color: #fff;
-  position: absolute;
-  top: 40px;
-}
-#info {
-  position: absolute;
-  top: 10px;
-  width: 100%;
-  color: #fff;
-  padding: 5px;
-  font-size: 13px;
-  text-align: center;
-  z-index: 1;
 }
 canvas {
   width: 100vw;
@@ -270,117 +313,8 @@ canvas {
   box-shadow: 0 0 0px 2px #fff;
   border-color: #494949;
 }
-.container .version {
-  font-size: 12px;
-  position: absolute;
-  bottom: 10px;
-  left: 5px;
-}
-.container .version.dark {
-  color: white;
-}
-.container .sidebar {
-  float: right;
-  width: 400px;
-  padding: 5px;
-  z-index: 10;
-  position: fixed;
-  right: -400px;
-  border: 1px solid #999;
-  background: #fff;
-  transition: 0.2s;
-  background: rgba(245, 245, 245, 0.8);
-}
-.container .sidebar.active {
-  right: 0px;
-}
-.container .sidebar #welcome {
-  font-size: 12px;
-}
-.container .sidebar__left-count {
-  float: left;
-  font-size: 20px;
-}
-.container .sidebar__users {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-.container .sidebar__users .title {
-  margin: 10px 0;
-  display: inline-block;
-  font-size: 18px;
-  text-transform: uppercase;
-}
-.container .sidebar__users ul {
-  width: 100%;
-  max-height: 200px;
-  overflow: auto;
-}
-.container .sidebar__users ul li {
-  background: #eee;
-  padding: 3px 10px 3px 20px;
-  border: 1px solid #999;
-  border-bottom: none;
-  font-size: 14px;
-  position: relative;
-  height: 21px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.container .sidebar__users ul li.current-player {
-  background: rgba(17, 17, 17, 0.575);
-  font-weight: 700;
-  color: #fff;
-}
-.container .sidebar__users ul li i {
-  position: absolute;
-  left: 7px;
-  top: 0;
-  border-radius: 100%;
-  width: 8px;
-  height: 8px;
-  display: block;
-  bottom: 0;
-  margin: auto;
-}
-.container .sidebar__users ul li:last-child {
-  border-bottom: 1px solid #999;
-}
-.container .player {
-  border-radius: 100%;
-  background: blue;
-  width: 50px;
-  height: 50px;
-  position: absolute;
-  box-shadow: 0 0 12px 0px #000;
-}
-.container .player span {
-  position: absolute;
-  top: -20px;
-  margin: auto;
-  left: 0;
-  right: 0;
-  display: inline;
-  text-align: center;
-  font-size: 12px;
-}
 .container.absolute {
   position: absolute;
   top: 0;
-}
-.controls.damage .damage {
-  display: block;
-}
-.controls .damage {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: rgba(255, 0, 0, 0.3);
-  width: 100%;
-  height: 100%;
 }
 

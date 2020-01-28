@@ -10,8 +10,8 @@
   "scripts": {
     "publish": "npm publish --access=public",
     "watch": "webpack --watch",
-    "dev": "webpack --watch  --progress --profile",
-    "prod": "cross-env NODE_ENV=prod webpack --config webpack.config.js --progress",
+    "dev": "webpack --mode=development --watch  --progress --profile",
+    "prod": "cross-env --mode=production webpack --config webpack.config.js --progress",
     "server": "node server.js",
     "start": "node server.js"
   },
@@ -67,6 +67,7 @@
     "url-loader": "^0.5.9",
     "vue": "^2.6.10",
     "vue-loader": "^15.7.0",
+    "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.10",
     "webpack": "^4.41.5",
     "webpack-dev-server": "^3.10.1",

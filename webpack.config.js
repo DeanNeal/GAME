@@ -37,23 +37,6 @@ module.exports = {
                 }]
             },
 
-            // {
-            //     test: /\.scss$/,
-            //     use: ExtractTextPlugin.extract({
-            //         fallback: "style-loader",
-            //         use: ['css-loader', 'sass-loader']
-            //     })
-            // },
-            // {
-            //     test: /\.(sass|scss)$/,
-            //     use: [{
-            //         loader: MiniCssExtractPlugin.loader,
-            //     }, {
-            //         loader: "css-loader",
-            //     }, {
-            //         loader: "sass-loader"
-            //     }]
-            // },
             {
                 test: /\.(less)$/,
                 use: [
