@@ -1,5 +1,6 @@
 import OBJLoader  from './three/OBJLoader';
 import MTLLoader from './three/MTLLoader';
+import GLTFLoader from "./three/GLTFLoader";
 import * as THREE from 'three';
 
 export function getVolumeFromDistance(fromMesh: THREE.Mesh, toMesh: THREE.Mesh): number {
@@ -11,18 +12,16 @@ export function getVolumeFromDistance(fromMesh: THREE.Mesh, toMesh: THREE.Mesh):
 
 export function LoadPlayerModel(shipType: string, cb: (mesh: THREE.Object3D)=> void) {
 
-  var objLoader = new OBJLoader();
-  const mtlLoader = new MTLLoader();
+  var gltfLoader = new GLTFLoader();
 
   if(shipType === 'default') {
-    mtlLoader.load('models/ship.mtl', (mtlParseResult: THREE.Material) => {
-      objLoader.setMaterials(mtlParseResult);
-      objLoader['load']('models/ship.obj', (root: THREE.Object3D) => {
-        cb(root.children[0]);
-      });
+    gltfLoader['load']('models/ship.glb', (object) => {
+      cb(object.scene.children[0]);
+    }, undefined, (error) => {
+      // object loading error
+      console.log(error);
     });
   } else {
     throw new Error('There is no another type');
   }
-
 }
