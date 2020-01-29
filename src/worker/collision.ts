@@ -1,6 +1,8 @@
 import SocketService from "../services/socket.service";
 import * as THREE from 'three';
 import { getVolumeFromDistance } from "./utils";
+import { IBullet } from "../interfaces/interfaces";
+import { Player, Bullet } from "./models";
 
 /**
  * deprecated
@@ -43,7 +45,7 @@ function detectCollisionCubes(object1: THREE.Mesh, object2: THREE.Mesh){
 
  
 let lastBulletWithAsteroidCollisionId;
-export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets, player, worker) {
+export function asteroidWithBulletCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], bullets: IBullet[], player: Player, worker) {
     let toDispose = [];
     bullets
     .forEach((bullet, index)=> {
@@ -72,24 +74,24 @@ export function asteroidCollision(scene: THREE.Scene, asteroids: THREE.Mesh[], b
     })
 }
 let lastRuneCollisionId;
-export function runesCollisionDetection(player, allRunes: THREE.Mesh[], worker) {
+export function runesCollisionDetection(player: Player, allRunes: THREE.Mesh[], worker) {
   
   allRunes.forEach(rune=> {
-    const obj =  rune;
-    
-    if(detectCollisionCubes(rune, player.mesh.children[0])) {
-        if(obj.id !== lastRuneCollisionId) {
-          lastRuneCollisionId = obj.id
-          SocketService.socket.emit('removeRune', obj.userData)
-          worker.post({type: 'removeRune', volume: 0.5})
+    let pl:any = detectCollision(rune, [player.mesh.children[0]]);
+
+    if(pl) {
+        if(rune.id !== lastRuneCollisionId) {
+            lastRuneCollisionId = rune.id;
+            SocketService.socket.emit('removeRune', rune.userData)
+            worker.post({type: 'removeRune', volume: 0.5})
         }
     }
-  });
-
+  })
+  
 }
 
 let lastBulletWithEnemyCollisionId;
-export function damageCollisionDetection (scene: THREE.Scene, players, bullets, player, worker) {
+export function bulletsWithEnemyCollisionDetection (scene: THREE.Scene, players: Player[], bullets: Bullet[], player: Player, worker) {
     let toDispose = [];
     bullets
     .forEach((bullet, index)=> {

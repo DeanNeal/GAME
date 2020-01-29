@@ -8,29 +8,10 @@ import SocketService from '../services/socket.service'
 import * as THREE from 'three'
 import { createBullet } from './objects'
 import { addAsteroids, addRunes, addSky } from './environment'
-import { asteroidCollision, runesCollisionDetection, damageCollisionDetection } from './collision'
+import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
 import { getVolumeFromDistance, LoadPlayerModel } from './utils'
+import { Player, Bullet } from './models';
 
-
-
-class Player {
-  mesh: THREE.Object3D;
-  params: any;
-  userTextMesh: THREE.Mesh;
-  constructor(params: any, userTextMesh?: THREE.Mesh) {
-    this.params = params;
-    // this.mesh.position.set(position.x, position.y, position.z)
-    // this.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
-
-    this.userTextMesh = userTextMesh;
-  }
-
-  setMesh(mesh: THREE.Mesh | THREE.Object3D, position: THREE.Vector3, rotation: THREE.Euler) {
-    this.mesh = mesh;
-    this.mesh.position.set(position.x, position.y, position.z)
-    this.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
-  }
-}
 
 class Game {
   canvas: HTMLCanvasElement;
@@ -205,12 +186,14 @@ class Game {
     //offset
     bullet.translateZ(-50);
 
-    this.bullets.push({
-      mesh: bullet,
-      matrixWorld: params.matrixWorld,
-      camPos: params.camPos,
-      notifyServer: false
-    })
+    // this.bullets.push({
+    //   mesh: bullet,
+    //   matrixWorld: params.matrixWorld,
+    //   camPos: params.camPos,
+    //   notifyServer: false
+    // })
+
+    this.bullets.push(new Bullet(bullet, params.matrixWorld, params.camPos, false));
 
     this.scene.add(bullet);
 
@@ -361,12 +344,13 @@ class Game {
       const camPos = this.player.mesh.position.clone();
       const matrixWorld = this.player.mesh.matrixWorld.clone();
 
-      this.bullets.push({
-        mesh: bullet,
-        matrixWorld: matrixWorld,
-        camPos: camPos,
-        notifyServer: true
-      })
+      // this.bullets.push({
+      //   mesh: bullet,
+      //   matrixWorld: matrixWorld,
+      //   camPos: camPos,
+      //   notifyServer: true
+      // })
+      this.bullets.push(new Bullet(bullet, matrixWorld, camPos, true))
 
       this.scene.add(bullet);
 
@@ -462,15 +446,20 @@ class Game {
     }
 
     if (this.allRunes.length && this.player && this.player.mesh) {
+    
       runesCollisionDetection(this.player, this.allRunes, worker)
+
     }
 
     if (this.bullets.length) {
-      damageCollisionDetection(this.scene, this.players, this.bullets, this.player, worker)
+      bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets, this.player, worker)
     }
 
     if (this.allAsteroids.length && this.player && this.player.mesh) {
-      asteroidCollision(this.scene, this.allAsteroids, this.bullets, this.player, worker);
+        // var t0 = performance.now();
+      asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets, this.player, worker);
+            // var t1 = performance.now();
+      // console.log((t1 - t0) );
     }
   }
 

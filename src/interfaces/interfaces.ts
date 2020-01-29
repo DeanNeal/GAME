@@ -1,4 +1,4 @@
-
+import * as THREE from 'three';
 export interface IGameOptions {
    name: string;
    color: string;
@@ -13,4 +13,9 @@ export interface IWorker {
 export interface IAudio {
    audio: HTMLAudioElement;
    isMusic: boolean;
+}
+
+export interface IBullet {
+   mesh: THREE.Mesh;
+   notifyServer: boolean;
 }

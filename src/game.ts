@@ -81,7 +81,7 @@ export class Game {
 
     private startTimer(): void {
         let fiveMinutes = 5,
-            display = document.querySelector('#timer');
+            display = document.querySelector('.gui__timer');
         Helpers.startTimer(fiveMinutes, display);
     }
 

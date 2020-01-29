@@ -181,7 +181,7 @@ function getRandColor () {
 
 function createRunes () {
   let runes = []
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 30; i++) {
     runes.push({
       id: i,
       color: getRandColor(),
