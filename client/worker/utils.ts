@@ -26,6 +26,8 @@ export function LoadPlayerModel(shipType: string, cb: (mesh: THREE.Object3D)=> v
   }
 }
 
+
+
 // mtlLoader.load('models/ship.mtl', (mtlParseResult: THREE.Material) => {
 //   objLoader.setMaterials(mtlParseResult);
 //   objLoader['load']('models/ship.obj', (root: THREE.Object3D) => {

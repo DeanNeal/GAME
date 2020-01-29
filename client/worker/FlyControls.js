@@ -3,7 +3,7 @@
  */
 import  * as THREE from 'three';
 
-export default function ( object, camera, container) {
+export default function flyControls( object, camera, container) {
 
 	this.object = object;
 	camera.position.set(0, 48, 0);

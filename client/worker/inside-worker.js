@@ -1,4 +1,4 @@
-export default function (listener) {
+export default function insideWorker(listener) {
   if (typeof window !== 'object') {
     onmessage = listener
     return {

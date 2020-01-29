@@ -36,13 +36,13 @@ class Game {
 
   //shooting
   startTimeShooting = new Date().getTime();
-  durationBetweenShots = 200;
+  readonly durationBetweenShots = 200;
   isShooting = false;
 
   //red zone
   startTimeRedZone = new Date().getTime();
-  durationBetweenZoneDamage = 1000;
-  zoneRadius = 30000;
+  readonly durationBetweenZoneDamage = 1000;
+  readonly zoneRadius = 30000;
 
   constructor() {
     this.animate = this.animate.bind(this);
@@ -96,7 +96,7 @@ class Game {
       // MainPlayer.castShadow = true;
       // MainPlayer.receiveShadow = true;
       mesh.add(this.camera1)
-      mesh.add(this.camera2);
+      mesh.add(this.camera2)
 
       // this.players.push();//{ mesh: null, user: user })
       // currentUser = user
@@ -109,9 +109,8 @@ class Game {
       this.scene.add(mesh)
     }, this);
 
-    addSky((sky) => {
-      this.scene.add(sky)
-    })
+
+    this.scene.add(addSky())
   }
 
   addAsteroidsToScene(asteroids) {
@@ -137,11 +136,6 @@ class Game {
         this.allRunes.splice(i, 1)
 
         worker.post({ type: 'updateRunes', runes: this.allRunes.length })
-
-        if (this.allRunes.length === 0) {
-          worker.post({ type: 'startTimer' })
-          SocketService.socket.emit('startAgain')
-        }
         return
       }
     }
@@ -157,7 +151,7 @@ class Game {
     }
   }
 
-  killed(position, rotation) {
+  resetPosition(position, rotation) {
     this.player.mesh.position.set(position.x, position.y, position.z)
     this.player.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
   }
@@ -205,11 +199,11 @@ class Game {
     worker.post({ type: 'playShot', volume: getVolumeFromDistance(this.player.mesh, userMesh) })
 
     setTimeout(() => {
-      if(bullet.parent) {
+      if (bullet.parent) {
         this.scene.remove(bullet)
       }
-      
-      this.bullets = this.bullets.filter(b=> b.mesh.id !== bullet.id);
+
+      this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
     }, 5000)
   }
 
@@ -314,7 +308,7 @@ class Game {
     this.controls.screenSpacePanning = false;
 
     this.controls.minDistance = 300;
-    this.controls.maxDistance = 2500;
+    this.controls.maxDistance = 10000;
 
     this.controls.zoomSpeed = 2;
     this.controls.rotateSpeed = 0.1;
@@ -367,11 +361,11 @@ class Game {
       worker.post({ type: 'playShot', volume: 0.1 })
 
       setTimeout(() => {
-        if(bullet.parent) {
+        if (bullet.parent) {
           this.scene.remove(bullet)
         }
-        
-        this.bullets = this.bullets.filter(b=> b.mesh.id !== bullet.id);
+
+        this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
       }, 5000)
     }
   }
@@ -449,7 +443,7 @@ class Game {
     }
 
     if (this.allRunes.length && this.player && this.player.mesh) {
-    
+
       runesCollisionDetection(this.player, this.allRunes, worker)
 
     }
@@ -459,24 +453,21 @@ class Game {
     }
 
     if (this.allAsteroids.length && this.player && this.player.mesh) {
-        // var t0 = performance.now();
       asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets, this.player, worker);
-            // var t1 = performance.now();
-      // console.log((t1 - t0) );
     }
 
 
-    if(this.player && this.player.mesh) {
-        let {x,y,z} = this.player.mesh.position;
+    if (this.player && this.player.mesh) {
+      let { x, y, z } = this.player.mesh.position;
 
-        if(Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius, Math.abs(z) > this.zoneRadius) {
-            const elapsed = new Date().getTime() - this.startTimeRedZone
-            if (elapsed > this.durationBetweenZoneDamage) {
-              // console.log('RED ZONE', x,y,z);
-              SocketService.socket.emit('outsideZone', this.player.params);
-              this.startTimeRedZone = new Date().getTime()
-            }
+      if (Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius, Math.abs(z) > this.zoneRadius) {
+        const elapsed = new Date().getTime() - this.startTimeRedZone
+        if (elapsed > this.durationBetweenZoneDamage) {
+          // console.log('RED ZONE', x,y,z);
+          SocketService.socket.emit('outsideZone', this.player.params);
+          this.startTimeRedZone = new Date().getTime()
         }
+      }
     }
   }
 
@@ -599,8 +590,8 @@ SocketService.socket
   .on('otherFire', params => {
     game.otherFire(params);
   })
-  .on('killed', function ({ position, rotation }) {
-    game.killed(position, rotation)
+  .on('dead', function ({ position, rotation }) {
+    game.resetPosition(position, rotation)
   })
   .on('deletePlayer', userId => {
     game.deletePlayer(userId);

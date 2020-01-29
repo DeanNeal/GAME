@@ -12,10 +12,11 @@
     "watch": "webpack --watch",
     "dev": "webpack --mode=development --watch  --progress --profile",
     "prod": "cross-env --mode=production webpack --config webpack.config.js --progress",
-    "server": "node server.js",
-    "start": "node server.js"
+    "start": "ts-node --project server/tsconfig.json server/server.ts"
   },
   "devDependencies": {
+    "@types/express": "^4.17.2",
+    "@types/node": "^13.5.1",
     "@types/offscreencanvas": "^2019.6.1",
     "@types/socket.io": "^2.1.4",
     "@types/socket.io-client": "^1.4.32",
@@ -63,6 +64,7 @@
     "three-bmfont-text": "^2.3.0",
     "three-buffer-vertex-data": "^1.1.0",
     "ts-loader": "^5.3.3",
+    "ts-node": "^8.6.2",
     "typescript": "^3.3.4000",
     "url-loader": "^0.5.9",
     "vue": "^2.6.10",

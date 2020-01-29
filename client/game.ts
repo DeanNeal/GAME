@@ -1,4 +1,3 @@
-import Helpers from './helper';
 import GlobalService from './services/global.service';
 import AudioService from './services/audio.service';
 
@@ -37,9 +36,9 @@ export class Game {
 
         this.worker = createWorker(this.container, './worker.js', (e: MessageEvent)=> {
             switch(e.data.type) {
-                case 'startTimer':
-                    this.startTimer();
-                break;
+                // case 'startTimer':
+                    // this.startTimer();
+                // break;
                 case 'updateRunes':
                     GlobalService.runes.next(e.data.runes)
                 break;
@@ -82,11 +81,30 @@ export class Game {
         this.addListeners();
     }
 
-    private startTimer(): void {
-        let fiveMinutes = 5,
-            display = document.querySelector('.gui__timer');
-        Helpers.startTimer(fiveMinutes, display);
-    }
+    // private startTimer(): void {
+    //     let fiveMinutes = 5,
+    //         display = document.querySelector('.gui__timer');
+    //     this.startTimerFn(fiveMinutes, display);
+    // }
+
+    // private startTimerFn(duration, display) {
+    //     var timer = duration, minutes, seconds;
+    //     var interval = setInterval(function () {
+    //         // minutes = parseInt(timer / 60, 10)
+    //         seconds = parseInt(timer % 60, 10);
+      
+    //         // minutes = minutes < 10 ? "0" + minutes : minutes;
+    //         // seconds = seconds < 10 ? "0" + seconds : seconds;
+      
+    //         display.textContent = /*minutes + ":" +*/ seconds;
+      
+    //         if (--timer < 0) {
+    //             timer = duration;
+    //             display.textContent = '';
+    //             clearInterval(interval);
+    //         }
+    //     }, 1000);
+    // }
 
     private onWindowResize(): void {
         this.worker.post({
