@@ -42,6 +42,7 @@ class Game {
   //red zone
   startTimeRedZone = new Date().getTime();
   durationBetweenZoneDamage = 1000;
+  zoneRadius = 30000;
 
   constructor() {
     this.animate = this.animate.bind(this);
@@ -467,8 +468,8 @@ class Game {
 
     if(this.player && this.player.mesh) {
         let {x,y,z} = this.player.mesh.position;
-        let zoneRadius = 10000;
-        if(Math.abs(x) > zoneRadius || Math.abs(y) > zoneRadius, Math.abs(z) > zoneRadius) {
+
+        if(Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius, Math.abs(z) > this.zoneRadius) {
             const elapsed = new Date().getTime() - this.startTimeRedZone
             if (elapsed > this.durationBetweenZoneDamage) {
               // console.log('RED ZONE', x,y,z);
