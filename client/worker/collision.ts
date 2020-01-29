@@ -60,7 +60,7 @@ export function asteroidWithBulletCollision(scene: THREE.Scene, asteroids: THREE
                 lastBulletWithAsteroidCollisionId = bulletMesh.id;
 
                 if(bullet.notifyServer) {
-                  SocketService.socket.emit('damageToAsteroid', asteroid.userData)
+                  SocketService.socket.emit('damageToAsteroid', asteroid.userData.id)
                 }
           
                 const volume = getVolumeFromDistance(player.mesh, asteroid);

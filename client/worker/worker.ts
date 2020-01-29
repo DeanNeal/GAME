@@ -211,7 +211,7 @@ class Game {
     console.log('deletePlayer')
 
     for (let i = 0; i < this.players.length; i++) {
-      if (this.players[i].params.id === userId) {
+      if (this.players[i].params._id === userId) {
         this.scene.remove(this.players[i].mesh)
         this.scene.remove(this.players[i].userTextMesh)
         this.players.splice(i, 1)
@@ -437,6 +437,7 @@ class Game {
 
     if (this.player && this.player.mesh) {
       SocketService.socket.emit('move', {
+        id: this.player.params._id,
         position: this.player.mesh.position,
         rotation: this.player.mesh.rotation
       })
@@ -464,7 +465,7 @@ class Game {
         const elapsed = new Date().getTime() - this.startTimeRedZone
         if (elapsed > this.durationBetweenZoneDamage) {
           // console.log('RED ZONE', x,y,z);
-          SocketService.socket.emit('outsideZone', this.player.params);
+          SocketService.socket.emit('outsideZone', this.player.params._id);
           this.startTimeRedZone = new Date().getTime()
         }
       }

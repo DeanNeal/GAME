@@ -1,44 +1,17 @@
-interface Vector3 {
-   x: number;
-   y: number;
-   z: number;
-}
-
-
-interface IUser {
-   id: string;
-   _id: string;
-   health: number;
-   death: number;
-   kills: number;
-   position: Vector3;
-   rotation: Vector3;
-}
-
-interface IRune {
-   id: string;
-   position: Vector3;
-   rotation: Vector3;
-}
-
-interface IAsteroid {
-   id: string;
-   health: number;
-   size: number;
-   position: Vector3;
-   rotation: Vector3;
-}
+import { IUser, IAsteroid, IRune, IPlayerOptions } from './interfaces';
 
 export class Game {
    private io: SocketIO.Server;
    private users: IUser[] = [];
    private runes: IRune[] = [];
    private asteroids: IAsteroid[] = [];
-   constructor(io) {
+   constructor(io: SocketIO.Server) {
       this.io = io;
 
       setInterval(() => {
-         this.io.sockets.emit('updateUsersCoords', this.users)
+         if(this.users.length) {
+            this.io.sockets.emit('updateUsersCoords', this.users)
+         }
       }, 10)
 
       this.runes = this.createRunes();
@@ -48,18 +21,11 @@ export class Game {
    }
 
    connection() {
-      this.io.sockets.on('connection', (socket) => {
-         let user = {
-            id: socket.id.slice(0, 4),
-            _id: socket.id
-         }
-
+      this.io.sockets.on('connection', (socket: SocketIO.Socket) => {
          this.io.sockets.emit('online', this.users.length)
 
-         socket.on('addNewPlayer', (playerOptions) => {
-            this.addUser(user, playerOptions)
-            // socket.emit("userInit", user );
-            socket.emit('userCreated', user)
+         socket.on('addNewPlayer', (playerOptions: IPlayerOptions) => {
+            socket.emit('userCreated', this.addUser(socket, playerOptions))
 
             this.io.sockets.emit('anotherNewPlayer', this.users)
             this.io.sockets.emit('userList', this.users)
@@ -70,50 +36,41 @@ export class Game {
          })
 
          socket.on('disconnect', () => {
-            this.removeUser(user)
+            this.removeUser(socket.id)
             this.io.sockets.emit('online', this.users.length)
          })
-         socket.on('move', (data, log) => {
-            this.updateUsersCoords(user.id, data)
+         socket.on('move', (params) => {
+            if(this.users.length) {
+               this.updateUsersCoords(params)
+            }
          })
 
-         // socket.on("increaseScores", function() {
-         //     increaseScores(user);
-         // });
-
-         socket.on('removeRune', (rune) => {
+         socket.on('removeRune', (rune: IRune) => {
             this.removeRune(rune)
          })
-
-         // socket.on('startAgain', (rune) => {
-         //    setTimeout(function () {
-         //       this.runes = this.createRunes()
-         //       socket.emit('updateRunes', this.runes)
-         //    }, 6000);
-         // })
 
          socket.on('fire', (bullet) => {
             socket.broadcast.emit('otherFire', bullet)
          })
 
-         socket.on('damage', (userDemaged, userDamaging) => {
+         socket.on('damage', (userDemaged: IUser, userDamaging: IUser) => {
             this.decreaseHealth(userDemaged._id, userDamaging._id)
          })
 
-         socket.on('damageToAsteroid', (asteroid) => {
-            this.removeAsteroid(asteroid.id);
+         socket.on('damageToAsteroid', (id) => {
+            this.removeAsteroid(id);
          });
 
-         socket.on('outsideZone', (user) => {
+         socket.on('outsideZone', (id) => {
             for (let i = 0; i < this.users.length; i++) {
-               if (this.users[i]._id == user._id) {
+               if (this.users[i]._id === id) {
                   this.users[i].health -= 10
                   if (this.users[i].health <= 0) {
                      this.users[i].health = 100
                      this.users[i].death++;
 
                      this.io.sockets
-                        .to(user._id)
+                        .to(id)
                         .emit('dead', {
                            position: Game.randomPosition(),
                            rotation: Game.randomRotation()
@@ -121,7 +78,7 @@ export class Game {
 
                   }
 
-                  this.io.sockets.to(user._id).emit('gotDamage', this.users[i])
+                  this.io.sockets.to(id).emit('gotDamage', this.users[i])
                }
             }
             this.io.sockets.emit('userList', this.users)
@@ -130,36 +87,29 @@ export class Game {
    }
 
 
-   addUser(user, playerOptions) {
-      user = Object.assign(user, {
+   addUser(socket: SocketIO.Socket, playerOptions: IPlayerOptions): IUser {
+      const user = {
+         id: socket.id.slice(0, 4),
+         _id: socket.id,
          playerName: playerOptions.name,
-         // color: playerOptions.color,
          shipType: playerOptions.shipType,
-         // size: 80,
          position: Game.randomPosition(),
          rotation: Game.randomRotation(),
-         // scores: 0,
          kills: 0,
          health: 100,
          death: 0
-      })
+      };
       this.users.push(user)
       return user
    }
 
-   removeUser(user) {
-      // console.log('deletePlayer', user);
-      for (let i = 0; i < this.users.length; i++) {
-         if (user.id === this.users[i].id) {
-            this.users.splice(i, 1)
-            this.io.sockets.emit('deletePlayer', user.id)
-            this.io.sockets.emit('userList', this.users)
-            return
-         }
-      }
+   removeUser(id: string) {
+      this.users = this.users.filter(user=> user._id !== id)
+      this.io.sockets.emit('deletePlayer', id)
+      this.io.sockets.emit('userList', this.users)
    }
 
-   decreaseHealth(userDemagedId, userDemagingId) {
+   decreaseHealth(userDemagedId: string, userDemagingId: string) {
       for (let i = 0; i < this.users.length; i++) {
          if (this.users[i]._id == userDemagedId) {
             this.users[i].health -= 10
@@ -183,18 +133,11 @@ export class Game {
       this.io.sockets.emit('userList', this.users)
    }
 
-
-
-   updateUsersCoords(id, data) {
-      for (let i = 0; i < this.users.length; i++) {
-         let user = this.users[i]
-         if (user.id == id) {
-            user.position = data.position
-            user.rotation = data.rotation
-         }
-      }
+   updateUsersCoords({ id, position, rotation }) {
+      const user = this.users.find(r => r._id === id);
+      user.position = position
+      user.rotation = rotation
    }
-
 
    removeRune(rune: IRune) {
       const r = this.runes.find(r => r.id === rune.id);
@@ -210,15 +153,11 @@ export class Game {
    }
 
    removeAsteroid(id) {
-      for (let i = 0; i < this.asteroids.length; i++) {
-         if (id === this.asteroids[i].id) {
-            this.asteroids[i].health -= 20;
-            if (this.asteroids[i].health <= 0) {
-               this.io.sockets.emit('asteroidWasRemoved', this.asteroids[i])
-               this.asteroids.splice(i, 1)
-            }
-            return
-         }
+      let asteriod = this.asteroids.find(r=> r.id === id);
+      asteriod.health -= 20;
+      if (asteriod.health <= 0) {
+         this.io.sockets.emit('asteroidWasRemoved', asteriod)
+         this.asteroids = this.asteroids.filter(r=> r.id !== id);
       }
    }
 
@@ -290,7 +229,7 @@ export class Game {
    }
 
    static randomDecemal(from: number, to: number) {
-      return (Math.random() * (to - from) + from).toFixed(4)
+      return parseFloat((Math.random() * (to - from) + from).toFixed(4))
    }
 
 }
