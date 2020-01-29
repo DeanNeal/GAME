@@ -461,6 +461,16 @@ class Game {
             // var t1 = performance.now();
       // console.log((t1 - t0) );
     }
+
+
+    if(this.player && this.player.mesh) {
+        let {x,y,z} = this.player.mesh.position;
+        let zoneRadius = 10000;
+        if(Math.abs(x) > zoneRadius || Math.abs(y) > zoneRadius, Math.abs(z) > zoneRadius) {
+          console.log('RED ZONE', x,y,z);
+          SocketService.socket.emit('outsideZone', this.player.params);
+        }
+    }
   }
 
   onResize(e) {

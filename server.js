@@ -79,6 +79,20 @@ io.sockets.on('connection', function (socket) {
     removeAsteroid(asteroid.id);
   });
 
+  socket.on('outsideZone', function(user) {
+    for (let i = 0; i < users.length; i++) {
+      if (users[i]._id == user._id) {
+          console.log(user._id);
+          io.sockets
+          .to(user._id)
+          .emit('killed', {
+            position: randomPosition(),
+            rotation: randomRotation()
+          })
+      }
+    }
+  });
+
   // socket.on('chat message', function(data) {
   //     io.emit('chat message', data);
   // });
