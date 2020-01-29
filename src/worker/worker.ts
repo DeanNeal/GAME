@@ -34,10 +34,14 @@ class Game {
   viewMode: 0 | 1 = 0;
   player: Player;
 
-  startTime = new Date().getTime();
-  duration = 200;
+  //shooting
+  startTimeShooting = new Date().getTime();
+  durationBetweenShots = 200;
   isShooting = false;
 
+  //red zone
+  startTimeRedZone = new Date().getTime();
+  durationBetweenZoneDamage = 1000;
 
   constructor() {
     this.animate = this.animate.bind(this);
@@ -320,14 +324,12 @@ class Game {
 
 
   shotAnimate() {
-    // let cl = clock.getElapsedTime();
-    const elapsed = new Date().getTime() - this.startTime
-
-    if (elapsed > this.duration) {
-      if (this.isShooting) {
+    if (this.isShooting) {
+      const elapsed = new Date().getTime() - this.startTimeShooting
+      if (elapsed > this.durationBetweenShots) {
         this.shot()
+        this.startTimeShooting = new Date().getTime()
       }
-      this.startTime = new Date().getTime()
     }
   }
 
@@ -376,6 +378,7 @@ class Game {
 
   render() {
     let delta = this.clock.getDelta()
+
     if (this.controls) {
       const speed = this.controls.update(delta)
       worker.post({ type: 'speed', speed })
@@ -391,7 +394,6 @@ class Game {
 
     this.render()
     this.shotAnimate()
-
 
     for (let i = 0; i < this.allRunes.length; i++) {
       this.allRunes[i].rotation.y += 0.01
@@ -467,8 +469,12 @@ class Game {
         let {x,y,z} = this.player.mesh.position;
         let zoneRadius = 10000;
         if(Math.abs(x) > zoneRadius || Math.abs(y) > zoneRadius, Math.abs(z) > zoneRadius) {
-          console.log('RED ZONE', x,y,z);
-          SocketService.socket.emit('outsideZone', this.player.params);
+            const elapsed = new Date().getTime() - this.startTimeRedZone
+            if (elapsed > this.durationBetweenZoneDamage) {
+              // console.log('RED ZONE', x,y,z);
+              SocketService.socket.emit('outsideZone', this.player.params);
+              this.startTimeRedZone = new Date().getTime()
+            }
         }
     }
   }
@@ -575,7 +581,7 @@ SocketService.socket
     worker.post({ type: 'userList', users })
   })
   .on('gotDamage', user => {
-    worker.post({ type: 'userUpdated', user, damage: true })
+    worker.post({ type: 'gotDamage', user })
   })
   .on('updateRunes', runes => {
     game.addRunesToScene(runes);

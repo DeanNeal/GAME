@@ -82,7 +82,7 @@
       </div>
     </div>
 
-    <div class="gui" v-if="getReady">
+    <div class="gui" v-if="inGame">
       <div class="gui__info">
         <div>Controls - > WA/QE + mouse</div>
         <div>Shift - constant speed</div>
@@ -165,7 +165,7 @@ export default {
 
     GlobalService.damage.subscribe(() => {
       clearTimeout(this.timeout)
-      var c = document.querySelector('.controls')
+      var c = document.querySelector('.gui')
       c.classList.add('damage')
 
       this.timeout = setTimeout(() => {

@@ -82,15 +82,21 @@ io.sockets.on('connection', function (socket) {
   socket.on('outsideZone', function(user) {
     for (let i = 0; i < users.length; i++) {
       if (users[i]._id == user._id) {
-          console.log(user._id);
-          io.sockets
-          .to(user._id)
-          .emit('killed', {
-            position: randomPosition(),
-            rotation: randomRotation()
-          })
+            users[i].health -= 10
+            if(users[i].health <= 0) {
+                users[i].health = 100
+                io.sockets
+                .to(user._id)
+                .emit('killed', {
+                  position: randomPosition(),
+                  rotation: randomRotation()
+                })
+            } else {
+              io.sockets.to(user._id).emit('gotDamage', users[i])
+            }
       }
     }
+    io.sockets.emit('userList', users)
   });
 
   // socket.on('chat message', function(data) {
@@ -136,16 +142,6 @@ let updateUsersCoords = function (id, data, socket) {
   // socket.broadcast.emit("updateUsersCoords", users);
   // io.sockets.emit("updateUsersCoords", users);
 }
-
-// let increaseScores = function(curUser) {
-//     for (let i = 0; i < users.length; i++) {
-//         if (users[i].id == curUser.id) {
-//             // users[i].scores += 1;
-//             // users[i].health = 100;
-//         }
-//     }
-//     io.sockets.emit("userList", users);
-// }
 
 let decreaseHealth = function (userDemagedId, userDemagingId) {
   for (let i = 0; i < users.length; i++) {

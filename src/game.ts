@@ -57,12 +57,18 @@ export class Game {
                         GlobalService.damage.next();
                     }
                 break;
-    
+
                 case 'userList':
                     GlobalService.users.next(e.data.users);
                 break;
     
                 case 'damageDone':
+                    AudioService.playAudio('damage', e.data.volume, true);
+                break;
+
+                case 'gotDamage':
+                    GlobalService.user.next(e.data.user);
+                    GlobalService.damage.next();
                     AudioService.playAudio('damage', e.data.volume, true);
                 break;
     
