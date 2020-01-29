@@ -53,9 +53,6 @@ export class Game {
     
                 case 'userCreated':
                     GlobalService.user.next(e.data.user);
-                    if(e.data.damage) {
-                        GlobalService.damage.next();
-                    }
                 break;
 
                 case 'userList':
