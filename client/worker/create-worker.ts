@@ -2,7 +2,7 @@ export default function createWorker(canvas: HTMLCanvasElement, workerUrl: strin
     // if (canvas.transferControlToOffscreen) {
     const worker: any = new Worker(workerUrl)
     worker.onmessage = listener
-    const offscreen = canvas.transferControlToOffscreen()
+    const offscreen: OffscreenCanvas = canvas.transferControlToOffscreen();
     worker.postMessage({
         canvas: offscreen,
         width: canvas.clientWidth,
