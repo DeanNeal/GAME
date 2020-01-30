@@ -3,9 +3,15 @@ import MTLLoader from './three/MTLLoader';
 import GLTFLoader from "./three/GLTFLoader";
 import * as THREE from 'three';
 
-export function getVolumeFromDistance(fromMesh: THREE.Mesh | THREE.Object3D, toMesh: THREE.Mesh | THREE.Object3D): number {
+// export function getVolumeFromDistance(fromMesh: THREE.Mesh | THREE.Object3D, toMesh: THREE.Mesh | THREE.Object3D): number {
+//   const factor = 0.9998;
+//   const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
+//   return (1 / (1 + (distanceToPlayer - distanceToPlayer * factor))) * 0.5;
+// }
+
+export function getVolumeFromDistance(from: THREE.Vector3, to: THREE.Vector3): number {
   const factor = 0.9998;
-  const distanceToPlayer = toMesh.position.distanceTo(fromMesh.position);
+  const distanceToPlayer = from.distanceTo(to);
   return (1 / (1 + (distanceToPlayer - distanceToPlayer * factor))) * 0.5;
 }
 

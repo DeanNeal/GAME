@@ -67,7 +67,7 @@
             required
           />
           <label>Ship: default</label>
-          
+
           <!--<div class="colors">
             <div
               @click="playerOptions.color = color"
@@ -110,7 +110,7 @@ import UserList from './list/UserList.vue'
 class InitState {
   constructor () {
     this.name = ''
-    this.shipType = 'default';
+    this.shipType = 'default'
   }
 }
 
@@ -190,6 +190,16 @@ export default {
           if (e.keyCode === 27) {
             this.getReady ? this.goToMenu() : this.backToGame()
           }
+        }
+      },
+      false
+    )
+
+    window.addEventListener(
+      'resize',
+      () => {
+        if (this.gameInstance) {
+          this.gameInstance.onWindowResize();
         }
       },
       false

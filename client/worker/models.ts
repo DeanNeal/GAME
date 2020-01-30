@@ -20,10 +20,11 @@ export class Player {
  export class Bullet {
    public mesh: THREE.Mesh;
    public direction;
-   public notifyServer: boolean;
-   constructor(mesh, direction, notifyServer = false) {
+   public collision: boolean;
+   public isDestroyed: boolean = false;
+   constructor(mesh, direction, collision = false) {
      this.mesh = mesh;
      this.direction = direction;
-     this.notifyServer = notifyServer;
+     this.collision = collision;
    }
  }

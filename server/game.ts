@@ -9,7 +9,7 @@ export class Game {
       this.io = io;
 
       setInterval(() => {
-         if(this.users.length) {
+         if (this.users.length) {
             this.io.sockets.emit('updateUsersCoords', this.users)
          }
       }, 10)
@@ -40,25 +40,26 @@ export class Game {
             this.io.sockets.emit('online', this.users.length)
          })
          socket.on('move', (params) => {
-            if(this.users.length) {
+            if (this.users.length) {
                this.updateUsersCoords(params)
             }
          })
 
-         socket.on('removeRune', (rune: IRune) => {
-            this.removeRune(rune)
+         socket.on('removeRune', (id) => {
+            this.removeRune(id)
          })
 
          socket.on('fire', (bullet) => {
+            this.io.sockets.emit('playSound', {sound: 'blaster', position: bullet.position});
             socket.broadcast.emit('otherFire', bullet)
          })
 
-         socket.on('damage', (userDemaged: IUser, userDamaging: IUser) => {
-            this.decreaseHealth(userDemaged._id, userDamaging._id)
+         socket.on('damageToEnemy', (userDemaged: IUser, userDamaging: IUser) => {
+            this.damageToEnemy(userDemaged._id, userDamaging._id)
          })
 
          socket.on('damageToAsteroid', (id) => {
-            this.removeAsteroid(id);
+            this.damageToAsteroid(id);
          });
 
          socket.on('outsideZone', (id) => {
@@ -104,12 +105,12 @@ export class Game {
    }
 
    removeUser(id: string) {
-      this.users = this.users.filter(user=> user._id !== id)
+      this.users = this.users.filter(user => user._id !== id)
       this.io.sockets.emit('deletePlayer', id)
       this.io.sockets.emit('userList', this.users)
    }
 
-   decreaseHealth(userDemagedId: string, userDemagingId: string) {
+   damageToEnemy(userDemagedId: string, userDemagingId: string) {
       for (let i = 0; i < this.users.length; i++) {
          if (this.users[i]._id == userDemagedId) {
             this.users[i].health -= 10
@@ -126,7 +127,7 @@ export class Game {
                   })
                this.users.find(r => r._id === userDemagingId).kills += 1
             }
-
+            this.io.sockets.emit('playSound', {sound: 'damage', position: this.users[i].position});
             this.io.sockets.to(userDemagedId).emit('gotDamage', this.users[i])
          }
       }
@@ -135,17 +136,19 @@ export class Game {
 
    updateUsersCoords({ id, position, rotation }) {
       const user = this.users.find(r => r._id === id);
-      if(user) {
+      if (user) {
          user.position = position
          user.rotation = rotation
       }
    }
 
-   removeRune(rune: IRune) {
-      const r = this.runes.find(r => r.id === rune.id);
+   removeRune(id: string) {
+      const r = this.runes.find(r => r.id === id);
       this.io.sockets.emit('runeWasRemoved', r);
-      this.runes = this.runes.filter(r => r.id !== rune.id);
+      this.runes = this.runes.filter(r => r.id !== id);
 
+      this.io.sockets.emit('playSound', {sound: 'rune', position: r.position});
+      
       if (this.runes.length === 0) {
          setTimeout(() => {
             this.runes = this.createRunes();
@@ -154,12 +157,15 @@ export class Game {
       }
    }
 
-   removeAsteroid(id) {
-      let asteriod = this.asteroids.find(r=> r.id === id);
+   damageToAsteroid(id) {
+      let asteriod = this.asteroids.find(r => r.id === id);
       asteriod.health -= 20;
+
+      this.io.sockets.emit('playSound', {sound: 'damage', position: asteriod.position});
+
       if (asteriod.health <= 0) {
-         this.io.sockets.emit('asteroidWasRemoved', asteriod)
-         this.asteroids = this.asteroids.filter(r=> r.id !== id);
+         this.io.sockets.emit('asteroidWasRemoved', asteriod.id)
+         this.asteroids = this.asteroids.filter(r => r.id !== id);
       }
    }
 
@@ -189,7 +195,7 @@ export class Game {
 
    createRunes() {
       let runes = [];
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < 10; i++) {
          runes.push({
             id: i,
             // color: getRandColor(),

@@ -14,7 +14,7 @@ export class Game {
     public speedBlock: HTMLElement;
  
     constructor(opts: IGameOptions) {
-        this.onWindowResize = this.onWindowResize.bind(this);
+        // this.onWindowResize = this.onWindowResize.bind(this);
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
@@ -36,16 +36,10 @@ export class Game {
 
         this.worker = createWorker(this.container, './worker.js', (e: MessageEvent)=> {
             switch(e.data.type) {
-                // case 'startTimer':
-                    // this.startTimer();
-                // break;
                 case 'updateRunes':
                     GlobalService.runes.next(e.data.runes)
                 break;
-                case 'playShot':
-                    AudioService.playAudio('blaster', e.data.volume);
-                break;
-    
+                
                 case 'speed':
                     GlobalService.speed.next(e.data.speed.moveMult);
                 break;
@@ -58,18 +52,13 @@ export class Game {
                     GlobalService.users.next(e.data.users);
                 break;
     
-                case 'damageDone':
-                    AudioService.playAudio('damage', e.data.volume, true);
+                case 'playSound':
+                    AudioService.playAudio(e.data.params.sound, e.data.params.volume, true);
                 break;
 
                 case 'gotDamage':
                     GlobalService.user.next(e.data.user);
                     GlobalService.damage.next();
-                    AudioService.playAudio('damage', e.data.volume, true);
-                break;
-    
-                case 'removeRune':
-                    AudioService.playAudio('rune', e.data.volume, true);
                 break;
             }
         });
@@ -77,7 +66,6 @@ export class Game {
         this.worker.post({type: 'connection', playerOptions: opts})
 
         this.onWindowResize();
-
         this.addListeners();
     }
 
@@ -232,14 +220,16 @@ export class Game {
         window.addEventListener('keypress', this.onKeyPress, false);
 
         window.addEventListener('contextmenu', this.onContextmenu, false);
-        window.addEventListener('resize', this.onWindowResize, false);
+        // window.addEventListener('resize', this.onWindowResize, false);
 
         window.addEventListener("mousewheel", this.onMouseWheel);
-		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
+        window.addEventListener("DOMMouseScroll", this.onMouseWheel);
+        
+        // this.onWindowResize();
     }
 
     public removeListeners(): void {
-        window.removeEventListener('resize', this.onWindowResize, false);
+        // window.removeEventListener('resize', this.onWindowResize, false);
 
         window.removeEventListener('mousedown', this.onMouseDown, false);
         window.removeEventListener('mousemove', this.onMouseMove, false);

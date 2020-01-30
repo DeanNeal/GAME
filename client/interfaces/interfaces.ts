@@ -14,8 +14,3 @@ export interface IAudio {
    audio: HTMLAudioElement;
    isMusic: boolean;
 }
-
-export interface IBullet {
-   mesh: THREE.Mesh;
-   notifyServer: boolean;
-}
