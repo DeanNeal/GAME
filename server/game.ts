@@ -1,4 +1,4 @@
-import { IUser, IAsteroid, IRune, IPlayerOptions } from './interfaces';
+import { IUser, IAsteroid, IRune, IPlayerOptions, IVector3 } from './interfaces';
 
 export class Game {
    private io: SocketIO.Server;
@@ -50,7 +50,7 @@ export class Game {
          })
 
          socket.on('fire', (bullet) => {
-            this.io.sockets.emit('playSound', {sound: 'blaster', position: bullet.position});
+            this.io.sockets.emit('playSound', { sound: 'blaster', position: bullet.position });
             socket.broadcast.emit('otherFire', bullet)
          })
 
@@ -127,7 +127,7 @@ export class Game {
                   })
                this.users.find(r => r._id === userDemagingId).kills += 1
             }
-            this.io.sockets.emit('playSound', {sound: 'damage', position: this.users[i].position});
+            this.io.sockets.emit('playSound', { sound: 'damage', position: this.users[i].position });
             this.io.sockets.to(userDemagedId).emit('gotDamage', this.users[i])
          }
       }
@@ -144,11 +144,11 @@ export class Game {
 
    removeRune(id: string) {
       const r = this.runes.find(r => r.id === id);
-      this.io.sockets.emit('runeWasRemoved', r);
+      this.io.sockets.emit('runeWasRemoved', r.id);
       this.runes = this.runes.filter(r => r.id !== id);
 
-      this.io.sockets.emit('playSound', {sound: 'rune', position: r.position});
-      
+      this.io.sockets.emit('playSound', { sound: 'rune', position: r.position });
+
       if (this.runes.length === 0) {
          setTimeout(() => {
             this.runes = this.createRunes();
@@ -157,11 +157,11 @@ export class Game {
       }
    }
 
-   damageToAsteroid(id) {
+   damageToAsteroid(id: string) {
       let asteriod = this.asteroids.find(r => r.id === id);
       asteriod.health -= 20;
 
-      this.io.sockets.emit('playSound', {sound: 'damage', position: asteriod.position});
+      this.io.sockets.emit('playSound', { sound: 'damage', position: asteriod.position });
 
       if (asteriod.health <= 0) {
          this.io.sockets.emit('asteroidWasRemoved', asteriod.id)
@@ -169,7 +169,7 @@ export class Game {
       }
    }
 
-   createAsteroids() {
+   createAsteroids(): IAsteroid[] {
       let asteroids = []
       for (let i = 0; i < 100; i++) {
          asteroids.push({
@@ -193,7 +193,7 @@ export class Game {
       return asteroids
    }
 
-   createRunes() {
+   createRunes(): IRune[] {
       let runes = [];
       for (let i = 0; i < 10; i++) {
          runes.push({
@@ -215,7 +215,7 @@ export class Game {
       return runes
    }
 
-   static randomPosition() {
+   static randomPosition(): IVector3 {
       return {
          x: 2500 * (5.0 * Math.random() - 1.0),
          y: 2500 * (5.0 * Math.random() - 1.0),
@@ -223,7 +223,7 @@ export class Game {
       }
    }
 
-   static randomRotation() {
+   static randomRotation(): IVector3 {
       return {
          x: this.randomDecemal(0, Math.PI),
          y: this.randomDecemal(0, Math.PI),
@@ -231,12 +231,12 @@ export class Game {
       }
    }
 
-   static randomInteger(min: number, max: number) {
+   static randomInteger(min: number, max: number): number {
       let rand = min - 0.5 + Math.random() * (max - min + 1)
       return Math.round(rand)
    }
 
-   static randomDecemal(from: number, to: number) {
+   static randomDecemal(from: number, to: number): number {
       return parseFloat((Math.random() * (to - from) + from).toFixed(4))
    }
 

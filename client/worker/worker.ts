@@ -12,6 +12,7 @@ import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyC
 import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
 
+type ViewMode = 0 | 1;
 
 class Game {
     public canvas: HTMLCanvasElement
@@ -19,36 +20,35 @@ class Game {
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
-    camera2: THREE.Camera  = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
 
-    fakeCamera: THREE.Camera ;
+    public fakeCamera: THREE.Camera;
 
-    allRunes = []
-    allAsteroids = []
-    bullets: Bullet[] = []
-    // othersBullets = []
+    public allRunes: THREE.Mesh[] = []
+    public allAsteroids: THREE.Mesh[] = []
+    public bullets: Bullet[] = []
 
-    players: Player[] = []
-    controls
-    viewMode: 0 | 1 = 0;
-    player: Player;
+    public players: Player[] = []
+    public controls
+    public viewMode: ViewMode = 0;
+    public player: Player;
 
     //shooting
-    startTimeShooting = new Date().getTime();
-    readonly durationBetweenShots = 200;
-    isShooting = false;
+    public startTimeShooting: number = new Date().getTime();
+    readonly durationBetweenShots: number = 200;
+    public isShooting: boolean = false;
 
     //red zone
-    startTimeRedZone = new Date().getTime();
-    readonly durationBetweenZoneDamage = 1000;
-    readonly zoneRadius = 30000;
+    public startTimeRedZone: number = new Date().getTime();
+    public readonly durationBetweenZoneDamage: number = 1000;
+    public readonly zoneRadius: number = 30000;
 
     constructor() {
         this.animate = this.animate.bind(this);
     }
 
-    start(canvas) {
+    start(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.fakeCamera = this.camera2.clone();
 
@@ -91,7 +91,7 @@ class Game {
 
         worker.post({ type: 'userCreated', user })
 
-        LoadPlayerModel(shipType, (mesh) => {
+        LoadPlayerModel(shipType, (mesh: THREE.Mesh) => {
 
             // MainPlayer.castShadow = true;
             // MainPlayer.receiveShadow = true;
@@ -109,7 +109,6 @@ class Game {
             this.scene.add(mesh)
         }, this);
 
-
         this.scene.add(addSky())
     }
 
@@ -121,7 +120,7 @@ class Game {
     }
 
     addRunesToScene(runes) {
-        addRunes(runes, (mesh) => {
+        addRunes(runes, (mesh: THREE.Mesh) => {
             this.scene.add(mesh)
             this.allRunes.push(mesh)
         });
@@ -129,9 +128,9 @@ class Game {
         worker.post({ type: 'updateRunes', runes: this.allRunes.length })
     }
 
-    runeWasRemoved(rune) {
+    runeWasRemoved(id) {
         for (let i = 0; i < this.allRunes.length; i++) {
-            if (this.allRunes[i].userData.id === rune.id) {
+            if (this.allRunes[i].userData.id === id) {
                 this.scene.remove(this.allRunes[i])
                 this.allRunes.splice(i, 1)
 
@@ -142,9 +141,9 @@ class Game {
     }
 
     asteroidWasRemoved(id: string) {
-        const asteroid = this.allAsteroids.find(r=> r.userData.id === id);
+        const asteroid = this.allAsteroids.find(r => r.userData.id === id);
         this.scene.remove(asteroid);
-        this.allAsteroids = this.allAsteroids.filter(r=> r.userData.id !== id);
+        this.allAsteroids = this.allAsteroids.filter(r => r.userData.id !== id);
     }
 
     resetPosition(position, rotation) {
@@ -212,11 +211,6 @@ class Game {
         const { position, rotation, shipType } = user;
 
         LoadPlayerModel(shipType, (mesh) => {
-            let newPlayer = mesh//createUserMesh(user.color)
-            // newPlayer.userData = {
-            //   id: user.id
-            // }
-
             const loader = new THREE.FontLoader()
             loader.load('./helvetiker_regular.typeface.json', (font) => {
 
@@ -237,7 +231,7 @@ class Game {
 
                 const userTextMesh = new THREE.Mesh(textGeo, material)
 
-                this.scene.add(newPlayer)
+                this.scene.add(mesh)
                 this.scene.add(userTextMesh)
 
                 //should be after
@@ -354,7 +348,7 @@ class Game {
     }
 
     playSound(params) {
-        console.log('SOUND: ' + params.sound , params);
+        console.log('SOUND: ' + params.sound, params);
         const pos = new THREE.Vector3(params.position.x, params.position.y, params.position.z);
         params.volume = getVolumeFromDistance(this.player.mesh.position, pos);
         worker.post({ type: 'playSound', params })
@@ -434,12 +428,12 @@ class Game {
         }
 
         if (this.bullets.length) {
-            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r=> r.collision), this.player)
+            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision), this.player)
         }
 
         if (this.allAsteroids.length && this.player && this.player.mesh) {
             // getPerformanceOfFunction(() => {
-                asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets.filter(r=> r.collision), this.player);
+            asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets.filter(r => r.collision), this.player);
             // });
         }
 
@@ -550,8 +544,6 @@ const worker = insideWorker(e => {
 })
 
 
-
-
 SocketService.socket
     .on('userCreated', user => {
         game.userCreated(user);
@@ -559,9 +551,9 @@ SocketService.socket
     .on('userList', users => {
         worker.post({ type: 'userList', users })
     })
-    // .on('gotDamage', user => {
-    //     worker.post({ type: 'gotDamage', user })
-    // })
+    .on('gotDamage', user => {
+        worker.post({ type: 'gotDamage', user })
+    })
     .on('updateRunes', runes => {
         game.addRunesToScene(runes);
     })
@@ -583,13 +575,12 @@ SocketService.socket
     .on('deletePlayer', userId => {
         game.deletePlayer(userId);
     })
-    .on('runeWasRemoved', rune => {
-        game.runeWasRemoved(rune);
+    .on('runeWasRemoved', id => {
+        game.runeWasRemoved(id);
     })
     .on('asteroidWasRemoved', id => {
         game.asteroidWasRemoved(id);
     })
-
-    .on('playSound', (params)=> {
+    .on('playSound', (params) => {
         game.playSound(params);
     });

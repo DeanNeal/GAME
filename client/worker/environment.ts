@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import GLTFLoader from "./three/GLTFLoader";
-import { Vector3 } from 'three';
 
 export function addAsteroids(asteroids: any[], cb) {
     var gltfLoader = new GLTFLoader();
@@ -68,13 +67,13 @@ export function addRunes(runes, cb) {
 }
 
 export function addSky(): THREE.Group {
-    const array = new Array(3000).fill('');
+    const array = new Array(5000).fill('');
 
     const material = new THREE.MeshPhongMaterial({
         color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1
     });
 
-    const geometry = new THREE.OctahedronGeometry(100);
+    const geometry = new THREE.OctahedronGeometry(80);
     const group = new THREE.Group();
 
     array.forEach(() => {
@@ -89,7 +88,7 @@ export function addSky(): THREE.Group {
         const scale = 7 * Math.random();
         mesh.scale.set(scale, scale, scale);
 
-        mesh.position.add(angle.multiplyScalar(700000));
+        mesh.position.add(angle.multiplyScalar(600000));
         group.add(mesh);
     });
 
