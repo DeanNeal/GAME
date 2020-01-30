@@ -87,8 +87,8 @@ class Game {
         // renderer.setPixelRatio(1)
 
         this.scene.add(addSky())
-        this.scene.add(addSun(this.sunPosition))
-
+        addSun(dLight, this.sunPosition)
+ 
         this.animate()
     }
 

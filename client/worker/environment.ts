@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 import GLTFLoader from "./three/GLTFLoader";
+import { Lensflare, LensflareElement } from './three/Lensflare';
+
 import { Mesh } from 'three';
 
 export function addAsteroids(asteroids: any[], cb) {
@@ -96,10 +98,38 @@ export function addSky(): THREE.Group {
     return group;
 }
 
-export function addSun(position): THREE.Mesh {
-    const geometry = new THREE.SphereGeometry(10000, 25, 25);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.copy(position);
-    return mesh;
+function addLensFlare(cb) {
+    const loader = new THREE.ImageBitmapLoader()
+    const lensflare = new Lensflare();
+
+    loader.load("./images/lensflare0.png", (imageBitmap: any) => {
+        var textureFlare0 = new THREE.CanvasTexture(imageBitmap)
+
+        lensflare.addElement(new LensflareElement(textureFlare0, 512, 0));
+        loader.load("./images/lensflare2.png", (imageBitmap: any) => {
+            var textureFlare1 = new THREE.CanvasTexture(imageBitmap)
+            lensflare.addElement(new LensflareElement(textureFlare1, 512, 0));
+
+            loader.load("./images/lensflare3.png", (imageBitmap: any) => {
+                var textureFlare2 = new THREE.CanvasTexture(imageBitmap)
+                lensflare.addElement(new LensflareElement(textureFlare2, 60, 0.6));
+
+                cb(lensflare);
+            });
+        });
+
+
+    })
+}
+
+export function addSun(light, position): void {
+    // const geometry = new THREE.SphereGeometry(10000, 25, 25);
+    // const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    // const mesh = new THREE.Mesh(geometry, material);
+    // mesh.position.copy(position);
+
+    addLensFlare((lens) => {
+        light.add(lens);
+    });
+    // return mesh;
 }
