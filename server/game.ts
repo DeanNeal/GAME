@@ -135,8 +135,10 @@ export class Game {
 
    updateUsersCoords({ id, position, rotation }) {
       const user = this.users.find(r => r._id === id);
-      user.position = position
-      user.rotation = rotation
+      if(user) {
+         user.position = position
+         user.rotation = rotation
+      }
    }
 
    removeRune(rune: IRune) {

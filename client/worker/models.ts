@@ -19,13 +19,11 @@ export class Player {
  
  export class Bullet {
    public mesh: THREE.Mesh;
-   public matrixWorld;
-   public camPos;
+   public direction;
    public notifyServer: boolean;
-   constructor(mesh, matrixWorld, camPos, notifyServer = false) {
+   constructor(mesh, direction, notifyServer = false) {
      this.mesh = mesh;
-     this.matrixWorld = matrixWorld;
-     this.camPos = camPos;
+     this.direction = direction;
      this.notifyServer = notifyServer;
    }
  }

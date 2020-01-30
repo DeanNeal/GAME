@@ -1,4 +1,4 @@
-import OBJLoader  from './three/OBJLoader';
+import OBJLoader from './three/OBJLoader';
 import MTLLoader from './three/MTLLoader';
 import GLTFLoader from "./three/GLTFLoader";
 import * as THREE from 'three';
@@ -10,11 +10,11 @@ export function getVolumeFromDistance(fromMesh: THREE.Mesh | THREE.Object3D, toM
 }
 
 
-export function LoadPlayerModel(shipType: string, cb: (mesh: THREE.Object3D)=> void, context) {
+export function LoadPlayerModel(shipType: string, cb: (mesh: THREE.Object3D) => void, context) {
 
   var gltfLoader = new GLTFLoader();
 
-  if(shipType === 'default') {
+  if (shipType === 'default') {
     gltfLoader['load']('models/ship.glb', (object) => {
       cb(object.scene.children[0]);
     }, undefined, (error) => {
@@ -26,7 +26,12 @@ export function LoadPlayerModel(shipType: string, cb: (mesh: THREE.Object3D)=> v
   }
 }
 
-
+export function getPerformanceOfFunction(fn) {
+  var t0 = performance.now();
+  fn();
+  var t1 = performance.now();
+  console.log((t1 - t0))
+}
 
 // mtlLoader.load('models/ship.mtl', (mtlParseResult: THREE.Material) => {
 //   objLoader.setMaterials(mtlParseResult);

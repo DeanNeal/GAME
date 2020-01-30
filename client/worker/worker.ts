@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { createBullet } from './objects'
 import { addAsteroids, addRunes, addSky } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
-import { getVolumeFromDistance, LoadPlayerModel } from './utils'
+import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
 
 
@@ -171,9 +171,10 @@ class Game {
   }
 
   otherFire(params) {
-    let userMesh = this.players.filter(r => r.params.id == params.userId)[0].mesh
+    let userMesh = this.players.find(r => r.params._id === params.userId).mesh
     let pos = userMesh.position.clone()
     let bullet = createBullet()
+    const direction = new THREE.Vector3(params.direction.x, params.direction.y, params.direction.z);
 
     bullet.position.set(pos.x, pos.y, pos.z)
     bullet.rotation.set(
@@ -185,14 +186,7 @@ class Game {
     //offset
     bullet.translateZ(-50);
 
-    // this.bullets.push({
-    //   mesh: bullet,
-    //   matrixWorld: params.matrixWorld,
-    //   camPos: params.camPos,
-    //   notifyServer: false
-    // })
-
-    this.bullets.push(new Bullet(bullet, params.matrixWorld, params.camPos, false));
+    this.bullets.push(new Bullet(bullet, direction, false));
 
     this.scene.add(bullet);
 
@@ -338,23 +332,19 @@ class Game {
       bullet.position.set(pos.x, pos.y, pos.z)
       bullet.rotation.set(rot.x, rot.y, rot.z)
 
-      const camPos = this.player.mesh.position.clone();
+      const playerPos = this.player.mesh.position.clone();
       const matrixWorld = this.player.mesh.matrixWorld.clone();
+      const direction = this.getDirectionOfBullet(matrixWorld, playerPos);
 
-      // this.bullets.push({
-      //   mesh: bullet,
-      //   matrixWorld: matrixWorld,
-      //   camPos: camPos,
-      //   notifyServer: true
-      // })
-      this.bullets.push(new Bullet(bullet, matrixWorld, camPos, true))
+      bullet.translateZ(-50);
+
+      this.bullets.push(new Bullet(bullet, direction, true))
 
       this.scene.add(bullet);
 
       SocketService.socket.emit('fire', {
-        userId: this.player.params.id,
-        matrixWorld: matrixWorld,
-        camPos: camPos,
+        userId: this.player.params._id,
+        direction: direction,
         rotation: rot
       })
 
@@ -384,6 +374,16 @@ class Game {
     this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
   }
 
+  getDirectionOfBullet(matrixWorld, camPos) {
+    //Pick a point in front of the camera in camera space:
+    const pLocal = new THREE.Vector3(0, 0, -1)
+    // //Now transform that point into world space:
+    const pWorld = pLocal.applyMatrix4(matrixWorld)
+    // //You can now construct the desired direction vector:
+    const dir = pWorld.sub(camPos).normalize()
+    return dir;
+  }
+
   animate() {
     requestAnimationFrame(this.animate)
 
@@ -395,13 +395,13 @@ class Game {
     }
 
     for (let i = 0; i < this.bullets.length; i++) {
-      //Pick a point in front of the camera in camera space:
-      const pLocal = new THREE.Vector3(0, 0, -1)
-      // //Now transform that point into world space:
-      const pWorld = pLocal.applyMatrix4(this.bullets[i].matrixWorld)
-      // //You can now construct the desired direction vector:
-      const dir = pWorld.sub(this.bullets[i].camPos).normalize()
-
+      // //Pick a point in front of the camera in camera space:
+      // const pLocal = new THREE.Vector3(0, 0, -1)
+      // // //Now transform that point into world space:
+      // const pWorld = pLocal.applyMatrix4(this.bullets[i].matrixWorld)
+      // // //You can now construct the desired direction vector:
+      // const dir = pWorld.sub(this.bullets[i].camPos).normalize()
+      const dir = this.bullets[i].direction.clone();
       this.bullets[i].mesh.position.add(dir.multiplyScalar(250))
     }
 
@@ -444,9 +444,7 @@ class Game {
     }
 
     if (this.allRunes.length && this.player && this.player.mesh) {
-
       runesCollisionDetection(this.player, this.allRunes, worker)
-
     }
 
     if (this.bullets.length) {
@@ -454,7 +452,10 @@ class Game {
     }
 
     if (this.allAsteroids.length && this.player && this.player.mesh) {
-      asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets, this.player, worker);
+      getPerformanceOfFunction(()=> {
+        asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets, this.player, worker);
+      });
+      
     }
 
 
@@ -470,6 +471,7 @@ class Game {
         }
       }
     }
+
   }
 
   onResize(e) {
