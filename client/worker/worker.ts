@@ -7,7 +7,7 @@ import SocketService from '../services/socket.service'
 
 import * as THREE from 'three'
 import { createBullet } from './objects'
-import { addAsteroids, addRunes, addSky } from './environment'
+import { addAsteroids, addRunes, addSky, addSun } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
 import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
@@ -20,8 +20,8 @@ class Game {
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 800000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 1100000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 1100000)
 
     public fakeCamera: THREE.Camera;
 
@@ -44,6 +44,9 @@ class Game {
     public readonly durationBetweenZoneDamage: number = 1000;
     public readonly zoneRadius: number = 30000;
 
+    //sun
+    public readonly sunPosition: THREE.Vector3 = new THREE.Vector3(550000, 550000, 550000);
+
     constructor() {
         this.animate = this.animate.bind(this);
     }
@@ -54,7 +57,8 @@ class Game {
 
         // // lights
         let dLight = new THREE.DirectionalLight(0xffffff, 1)
-        dLight.position.set(0.5, 1, 0).normalize();
+    
+        dLight.position.copy(this.sunPosition);//.normalize();
         // dLight.castShadow = true
 
         // dLight.shadow.mapSize.width = 8000;  // default
@@ -82,6 +86,9 @@ class Game {
 
         // renderer.setPixelRatio(1)
 
+        this.scene.add(addSky())
+        this.scene.add(addSun(this.sunPosition))
+
         this.animate()
     }
 
@@ -108,8 +115,6 @@ class Game {
 
             this.scene.add(mesh)
         }, this);
-
-        this.scene.add(addSky())
     }
 
     addAsteroidsToScene(asteroids) {

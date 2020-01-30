@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import GLTFLoader from "./three/GLTFLoader";
+import { Mesh } from 'three';
 
 export function addAsteroids(asteroids: any[], cb) {
     var gltfLoader = new GLTFLoader();
@@ -93,4 +94,12 @@ export function addSky(): THREE.Group {
     });
 
     return group;
+}
+
+export function addSun(position): THREE.Mesh {
+    const geometry = new THREE.SphereGeometry(10000, 25, 25);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(position);
+    return mesh;
 }
