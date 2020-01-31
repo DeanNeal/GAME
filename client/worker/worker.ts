@@ -8,10 +8,15 @@ import SocketService from '../services/socket.service'
 import * as THREE from 'three'
 import { EffectComposer } from './three/post-processing/EffectComposer';
 import { RenderPass } from './three/post-processing/RenderPass'
-import { SSAOPass } from './three/post-processing/SSAOPass'
-import { UnrealBloomPass } from './three/post-processing/UnrealBloomPass';
+// import { SSAOPass } from './three/post-processing/SSAOPass'
+// import { SAOPass } from './three/post-processing/SAOPass';
+// import { UnrealBloomPass } from './three/post-processing/UnrealBloomPass';
 // import { ShaderPass } from './three/post-processing/ShaderPass';
 // import { LuminosityShader } from './three/post-processing/LuminosityShader';
+// import { SepiaShader } from './shaders';
+// import { ShaderPass } from './three/post-processing/ShaderPass';
+// import { FilmPass } from './three/post-processing/FilmPass';
+import { BokehPass } from './three/post-processing/BokehPass';
 
 import { createBullet } from './objects'
 import { addAsteroids, addRunes, addSky, addSun, addEarth } from './environment'
@@ -19,6 +24,8 @@ import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyC
 import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
 import { Preloader } from './preloader';
+
+
 
 type ViewMode = 0 | 1;
 
@@ -57,7 +64,7 @@ class Game {
     public readonly durationBetweenZoneDamage: number = 1000;
     public readonly zoneRadius: number = 80000;
 
-
+    public bokehPass;
     public dLight;
 
     constructor() {
@@ -104,7 +111,7 @@ class Game {
 
         addSun(this.dLight, this.assets)
 
-        // this.postprocessing()
+        this.postprocessing()
         this.animate()
     }
 
@@ -114,19 +121,26 @@ class Game {
         var renderPass = new RenderPass(this.scene, this.camera1);
         this.composer.addPass(renderPass);
 
-        var params = {
-            exposure: 1,
-            bloomStrength: 0.3,
-            bloomThreshold: 0,
-            bloomRadius: 0
-        };
+        // var params = {
+        //     exposure: 1,
+        //     bloomStrength: 0.3,
+        //     bloomThreshold: 0,
+        //     bloomRadius: 0
+        // };
 
-        var bloomPass = new UnrealBloomPass(new THREE.Vector2(1080, 1920), 1.5, 0.4, 0.85);
-        bloomPass.threshold = params.bloomThreshold;
-        bloomPass.strength = params.bloomStrength;
-        bloomPass.radius = params.bloomRadius;
+        // var bloomPass = new UnrealBloomPass(new THREE.Vector2(1080, 1920), 1.5, 0.4, 0.85);
+        // bloomPass.threshold = params.bloomThreshold;
+        // bloomPass.strength = params.bloomStrength;
+        // bloomPass.radius = params.bloomRadius;
 
-        this.composer.addPass(bloomPass);
+        // const saoPass = new SAOPass( this.scene, this.camera1, false, true );
+        // this.composer.addPass(saoPass);
+
+        // var shaderPass = new FilmPass(0.5, 0.1, 0, false);
+        // this.composer.addPass(shaderPass);
+
+        this.bokehPass = new BokehPass(this.scene, this.camera1, {focus: 1, width: 1080, height: 1920, maxblur: 0.02});
+        this.composer.addPass(this.bokehPass);
     }
 
     userCreated(user) {
@@ -141,7 +155,9 @@ class Game {
 
             this.player.setMesh(mesh, position, rotation);
 
-            this.initFirstPersonMode();
+            setTimeout(()=> {
+                this.initFirstPersonMode();
+            }, 3000)
 
             const earth = addEarth(this.camera1.getWorldPosition(this.camera1.position), this.assets);
 
@@ -404,7 +420,9 @@ class Game {
 
         this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
 
-        // this.composer.render();
+        if(this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
+        if(this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
+      
     }
 
     getDirectionOfBullet(matrixWorld, camPos) {
@@ -508,7 +526,7 @@ class Game {
     onResize(e) {
         if (this.renderer) {
             this.renderer.setSize(e.data.width, e.data.height)
-            // this.composer.setSize(e.data.width, e.data.height);
+            this.composer.setSize(e.data.width, e.data.height);
 
             this.camera1['aspect'] = e.data.width / e.data.height
             this.camera1['updateProjectionMatrix']()

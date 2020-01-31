@@ -116,7 +116,7 @@ import UserList from './list/UserList.vue'
 
 class InitState {
   constructor () {
-    this.name = ''
+    this.name = 'new player'
     this.shipType = 'default'
   }
 }
