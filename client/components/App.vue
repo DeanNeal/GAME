@@ -101,7 +101,7 @@
     </div>
 
     <div class="preloader" v-if="preloader">
-      <div>Loading...</div>
+      <div class="spinner"></div>
     </div>
   </div>
 </template>

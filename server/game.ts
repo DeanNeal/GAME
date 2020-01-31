@@ -13,7 +13,8 @@ export class Game {
             this.io.sockets.emit('updateUsersCoords', this.users)
          }
       }, 10)
-
+      
+      //initial state
       this.runes = this.createRunes();
       this.asteroids = this.createAsteroids();
 
@@ -24,7 +25,7 @@ export class Game {
       this.io.sockets.on('connection', (socket: SocketIO.Socket) => {
          this.io.sockets.emit('online', this.users.length)
 
-         socket.on('addNewPlayer', (playerOptions: IPlayerOptions) => {
+         socket.on('join', (playerOptions: IPlayerOptions) => {
             socket.emit('userCreated', this.addUser(socket, playerOptions))
 
             this.io.sockets.emit('anotherNewPlayer', this.users)

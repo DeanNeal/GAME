@@ -502,7 +502,7 @@ const worker = insideWorker(e => {
         Preloader().then(assets => {
             game.start(canvas, assets);
 
-            SocketService.socket.emit('addNewPlayer', e.data.opts)
+            SocketService.socket.emit('join', e.data.opts)
             setTimeout(() => {
                 worker.post({ type: 'preloader', enabled: false })
             }, 500)
