@@ -91,7 +91,6 @@ class Game {
         this.dLight.intensity = 2.5
         this.scene.add(this.dLight)
 
-
         // const light = new THREE.HemisphereLight(0xffffff, 0x000000, 0.05);
         // this.scene.add(light);
 
@@ -99,12 +98,7 @@ class Game {
         ambient.color.setHSL(0.01, 0.01, 0.05)
         this.scene.add(ambient)
 
-        // Helpers.addLight(scene, 0.55, 0.9, 0.5, 2000, 10000, 10000);
-
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-        // this.renderer['setPixelRatio'](1);
-        // this.renderer['toneMapping'] = THREE.ReinhardToneMapping;
-
 
 
         this.scene.add(addSky())
@@ -121,25 +115,7 @@ class Game {
         var renderPass = new RenderPass(this.scene, this.camera1);
         this.composer.addPass(renderPass);
 
-        // var params = {
-        //     exposure: 1,
-        //     bloomStrength: 0.3,
-        //     bloomThreshold: 0,
-        //     bloomRadius: 0
-        // };
-
-        // var bloomPass = new UnrealBloomPass(new THREE.Vector2(1080, 1920), 1.5, 0.4, 0.85);
-        // bloomPass.threshold = params.bloomThreshold;
-        // bloomPass.strength = params.bloomStrength;
-        // bloomPass.radius = params.bloomRadius;
-
-        // const saoPass = new SAOPass( this.scene, this.camera1, false, true );
-        // this.composer.addPass(saoPass);
-
-        // var shaderPass = new FilmPass(0.5, 0.1, 0, false);
-        // this.composer.addPass(shaderPass);
-
-        this.bokehPass = new BokehPass(this.scene, this.camera1, {focus: 1, width: 1080, height: 1920, maxblur: 0.02});
+        this.bokehPass = new BokehPass(this.scene, this.camera1, {focus: 1, width: 1080, height: 1920, maxblur: 0.05});
         this.composer.addPass(this.bokehPass);
     }
 
@@ -155,9 +131,9 @@ class Game {
 
             this.player.setMesh(mesh, position, rotation);
 
-            setTimeout(()=> {
-                this.initFirstPersonMode();
-            }, 3000)
+            
+            this.initFirstPersonMode();
+  
 
             const earth = addEarth(this.camera1.getWorldPosition(this.camera1.position), this.assets);
 
@@ -526,7 +502,7 @@ class Game {
     onResize(e) {
         if (this.renderer) {
             this.renderer.setSize(e.data.width, e.data.height)
-            this.composer.setSize(e.data.width, e.data.height);
+            this.composer && this.composer.setSize(e.data.width, e.data.height);
 
             this.camera1['aspect'] = e.data.width / e.data.height
             this.camera1['updateProjectionMatrix']()
