@@ -104,7 +104,7 @@ class Game {
 
         addSun(this.dLight, this.assets)
 
-        this.postprocessing()
+        // this.postprocessing()
         this.animate()
     }
 
@@ -118,7 +118,7 @@ class Game {
             exposure: 1,
             bloomStrength: 0.3,
             bloomThreshold: 0,
-            bloomRadius: 0.2
+            bloomRadius: 0
         };
 
         var bloomPass = new UnrealBloomPass(new THREE.Vector2(1080, 1920), 1.5, 0.4, 0.85);
@@ -404,7 +404,7 @@ class Game {
 
         this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
 
-        this.composer.render();
+        // this.composer.render();
     }
 
     getDirectionOfBullet(matrixWorld, camPos) {
@@ -508,7 +508,7 @@ class Game {
     onResize(e) {
         if (this.renderer) {
             this.renderer.setSize(e.data.width, e.data.height)
-            this.composer.setSize(e.data.width, e.data.height);
+            // this.composer.setSize(e.data.width, e.data.height);
 
             this.camera1['aspect'] = e.data.width / e.data.height
             this.camera1['updateProjectionMatrix']()
