@@ -1,8 +1,8 @@
 <template>
       <div class="user-list">
         <div class="user-list__users">
-         <!-- <span class="title">Online: <b>{{users.length}}</b></span> -->
-          <span class="user-list__left-count">Runes: {{runes}}</span>  
+           <div class="user-list__left-count">Online: <b>{{users.length}}</b></div> 
+           <!--<span class="user-list__left-count">Runes: {{runes}}</span>  -->
           <ul>
               <li v-for="user of users" :key="user.id" :class="{'current-player' : isCurrent(user)}">
                   <div><i :style="{background: user.color}"></i>{{user.playerName}}</div>
@@ -56,20 +56,23 @@ export default {
     z-index: 10;
     position: fixed;
     right: -400px;
-    border: 1px solid #999;
-    background: #fff;
+    // border: 1px solid #999;
+    // background: #fff;
     transition: 0.2s;
     &.active {
       right: 0px;
     }
 
-    background: rgba(245, 245, 245, 0.8);
+    // background: rgba(245, 245, 245, 0.8);
     #welcome {
       font-size: 12px;
     }
     &__left-count {
+      width: 100%;
       float: left;
       font-size: 20px;
+      color: #fff;
+      text-align: right;
     }
     &__users {
       display: flex;
@@ -87,9 +90,9 @@ export default {
         max-height: 200px;
         overflow: auto;
         li {
-          background: #eee;
-          padding: 3px 10px 3px 20px;
-          border: 1px solid #999;
+          // background: #eee;
+          padding: 3px 10px 3px 0;
+          // border: 1px solid #999;
           border-bottom: none;
           font-size: 14px;
           position: relative;
@@ -97,10 +100,12 @@ export default {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          &.current-player {
-            background: rgba(17, 17, 17, 0.575);
-            font-weight: 700;
             color: #fff;
+              border-bottom: 1px solid #999;  
+          &.current-player {
+            // background: rgba(17, 17, 17, 0.575);
+            font-weight: 700;
+          
           }
           i {
             position: absolute;
@@ -115,7 +120,7 @@ export default {
           }
 
           &:last-child {
-            border-bottom: 1px solid #999;
+          
           }
         }
       }

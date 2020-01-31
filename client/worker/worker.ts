@@ -6,6 +6,13 @@ import OrbitControls from './OrbitControls';
 import SocketService from '../services/socket.service'
 
 import * as THREE from 'three'
+import { EffectComposer } from './three/post-processing/EffectComposer';
+import { RenderPass } from './three/post-processing/RenderPass'
+import { SSAOPass } from './three/post-processing/SSAOPass'
+import { UnrealBloomPass } from './three/post-processing/UnrealBloomPass';
+// import { ShaderPass } from './three/post-processing/ShaderPass';
+// import { LuminosityShader } from './three/post-processing/LuminosityShader';
+
 import { createBullet } from './objects'
 import { addAsteroids, addRunes, addSky, addSun, addEarth } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
@@ -19,6 +26,7 @@ class Game {
     public assets = {};
     public canvas: HTMLCanvasElement
     public renderer: THREE.Renderer
+    public composer;
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
@@ -87,16 +95,38 @@ class Game {
         // Helpers.addLight(scene, 0.55, 0.9, 0.5, 2000, 10000, 10000);
 
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-        // this.renderer.shadowMap.enabled = true;
-        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // this.renderer['setPixelRatio'](1);
+        // this.renderer['toneMapping'] = THREE.ReinhardToneMapping;
+
 
 
         this.scene.add(addSky())
 
         addSun(this.dLight, this.assets)
 
-
+        this.postprocessing()
         this.animate()
+    }
+
+    postprocessing() {
+        this.composer = new EffectComposer(this.renderer);
+
+        var renderPass = new RenderPass(this.scene, this.camera1);
+        this.composer.addPass(renderPass);
+
+        var params = {
+            exposure: 1,
+            bloomStrength: 0.3,
+            bloomThreshold: 0,
+            bloomRadius: 0.2
+        };
+
+        var bloomPass = new UnrealBloomPass(new THREE.Vector2(1080, 1920), 1.5, 0.4, 0.85);
+        bloomPass.threshold = params.bloomThreshold;
+        bloomPass.strength = params.bloomStrength;
+        bloomPass.radius = params.bloomRadius;
+
+        this.composer.addPass(bloomPass);
     }
 
     userCreated(user) {
@@ -373,6 +403,8 @@ class Game {
         this.camera2.copy(this.fakeCamera);
 
         this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
+
+        this.composer.render();
     }
 
     getDirectionOfBullet(matrixWorld, camPos) {
@@ -409,7 +441,7 @@ class Game {
 
         for (let i = 0; i < this.bullets.length; i++) {
             const dir = this.bullets[i].direction.clone();
-            this.bullets[i].mesh.position.add(dir.multiplyScalar(300))
+            this.bullets[i].mesh.position.add(dir.multiplyScalar(350))
         }
 
         this.players.forEach(user => {
@@ -476,6 +508,7 @@ class Game {
     onResize(e) {
         if (this.renderer) {
             this.renderer.setSize(e.data.width, e.data.height)
+            this.composer.setSize(e.data.width, e.data.height);
 
             this.camera1['aspect'] = e.data.width / e.data.height
             this.camera1['updateProjectionMatrix']()
