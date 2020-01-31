@@ -175,35 +175,6 @@ class Game {
         })
     }
 
-    otherFire(params) {
-        let userMesh = this.players.find(r => r.params._id === params.userId).mesh
-        let pos = userMesh.position.clone()
-        let bullet = createBullet()
-        const direction = new THREE.Vector3(params.direction.x, params.direction.y, params.direction.z);
-
-        bullet.position.set(pos.x, pos.y, pos.z)
-        bullet.rotation.set(
-            params.rotation._x,
-            params.rotation._y,
-            params.rotation._z
-        )
-
-        //offset
-        bullet.translateZ(-50);
-
-        this.bullets.push(new Bullet(bullet, direction, false));
-
-        this.scene.add(bullet);
-
-        setTimeout(() => {
-            if (bullet.parent) {
-                this.scene.remove(bullet)
-            }
-
-            this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
-        }, 5000)
-    }
-
     deletePlayer(userId) {
         console.log('deletePlayer')
 
@@ -289,7 +260,6 @@ class Game {
     }
 
     initThirdPersonMode() {
-
         this.controls = new OrbitControls(this.player.mesh, this.fakeCamera, this.canvas);
         // controls.enablePan = true;
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -308,19 +278,46 @@ class Game {
         this.controls.maxPolarAngle = Math.PI;
     }
 
-
-
     shotAnimate() {
         if (this.isShooting) {
             const elapsed = new Date().getTime() - this.startTimeShooting
             if (elapsed > this.durationBetweenShots) {
-                this.shot()
+                this.fire()
                 this.startTimeShooting = new Date().getTime()
             }
         }
     }
 
-    shot() {
+    otherFire(params) {
+        let userMesh = this.players.find(r => r.params._id === params.userId).mesh
+        let pos = userMesh.position.clone()
+        let bullet = createBullet()
+        const direction = new THREE.Vector3(params.direction.x, params.direction.y, params.direction.z);
+
+        bullet.position.set(pos.x, pos.y, pos.z)
+        bullet.rotation.set(
+            params.rotation._x,
+            params.rotation._y,
+            params.rotation._z
+        )
+
+        //offset
+        bullet.translateZ(-50);
+
+        this.bullets.push(new Bullet(bullet, direction, false));
+
+        this.scene.add(bullet);
+
+        setTimeout(() => {
+            if (bullet.parent) {
+                this.scene.remove(bullet)
+            }
+
+            this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
+        }, 5000)
+    }
+
+    fire() {
         if (this.player.params) {
             let bullet = createBullet()
 
@@ -578,6 +575,9 @@ const worker = insideWorker(e => {
 SocketService.socket
     .on('userCreated', user => {
         game.userCreated(user);
+    })
+    .on('userUpdated', user => {
+        worker.post({ type: 'userUpdated', user })
     })
     .on('userList', users => {
         worker.post({ type: 'userList', users })

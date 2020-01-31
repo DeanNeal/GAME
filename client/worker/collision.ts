@@ -75,7 +75,7 @@ export function bulletsWithEnemyCollisionDetection(scene: THREE.Scene, players: 
                     lastBulletWithEnemyCollisionId = bulletMesh.id;
 
                     const enemy = players.find(r => r.mesh == pl.parent);
-                    SocketService.socket.emit('damageToEnemy', enemy.params, player.params)
+                    SocketService.socket.emit('damageToEnemy', enemy.params._id, player.params._id)
                 }
             }
         })

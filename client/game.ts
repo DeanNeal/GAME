@@ -54,6 +54,11 @@ export class Game {
                     this.onWindowResize();
                 break;
 
+                case 'userUpdated': 
+                    debugger
+                    GlobalService.user.next(e.data.user);
+                break;
+
                 case 'userList':
                     GlobalService.users.next(e.data.users);
                 break;
@@ -63,7 +68,6 @@ export class Game {
                 break;
 
                 case 'gotDamage':
-                    GlobalService.user.next(e.data.user);
                     GlobalService.damage.next();
                 break;
             }

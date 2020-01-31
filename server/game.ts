@@ -54,35 +54,16 @@ export class Game {
             socket.broadcast.emit('otherFire', bullet)
          })
 
-         socket.on('damageToEnemy', (userDemaged: IUser, userDamaging: IUser) => {
-            this.damageToEnemy(userDemaged._id, userDamaging._id)
+         socket.on('damageToEnemy', (userDemagedId: string, userDamagingId: string) => {
+            this.damageToPlayer(userDemagedId, userDamagingId);
          })
 
          socket.on('damageToAsteroid', (id) => {
             this.damageToAsteroid(id);
          });
 
-         socket.on('outsideZone', (id) => {
-            for (let i = 0; i < this.users.length; i++) {
-               if (this.users[i]._id === id) {
-                  this.users[i].health -= 10
-                  if (this.users[i].health <= 0) {
-                     this.users[i].health = 100
-                     this.users[i].death++;
-
-                     this.io.sockets
-                        .to(id)
-                        .emit('dead', {
-                           position: Game.randomPosition(),
-                           rotation: Game.randomRotation()
-                        })
-
-                  }
-
-                  this.io.sockets.to(id).emit('gotDamage', this.users[i])
-               }
-            }
-            this.io.sockets.emit('userList', this.users)
+         socket.on('outsideZone', (userDemagedId) => {
+            this.damageToPlayer(userDemagedId);
          });
       })
    }
@@ -110,27 +91,32 @@ export class Game {
       this.io.sockets.emit('userList', this.users)
    }
 
-   damageToEnemy(userDemagedId: string, userDemagingId: string) {
-      for (let i = 0; i < this.users.length; i++) {
-         if (this.users[i]._id == userDemagedId) {
-            this.users[i].health -= 10
+   damageToPlayer(userDemagedId: string, userDamagingId?: string) {
+      const user = this.users.find(r=> r._id === userDemagedId);
+      user.health -= 10;
+      
+      if (user.health <= 0) {
+         user.health = 100
+         user.death++;
 
-            if (this.users[i].health <= 0) {
-               this.users[i].health = 100
-               this.users[i].death++
+         this.io.sockets
+            .to(userDemagedId)
+            .emit('dead', {
+               position: Game.randomPosition(),
+               rotation: Game.randomRotation()
+            })
 
-               this.io.sockets
-                  .to(userDemagedId)
-                  .emit('dead', {
-                     position: Game.randomPosition(),
-                     rotation: Game.randomRotation()
-                  })
-               this.users.find(r => r._id === userDemagingId).kills += 1
-            }
-            this.io.sockets.emit('playSound', { sound: 'damage', position: this.users[i].position });
-            this.io.sockets.to(userDemagedId).emit('gotDamage', this.users[i])
+         if(userDamagingId) {
+            this.users.find(r => r._id === userDamagingId).kills += 1
          }
+      } else {
+         if(userDamagingId) this.io.sockets.emit('playSound', { sound: 'damage', position: user.position });
+         if(!userDamagingId) this.io.sockets.to(userDemagedId).emit('playSound', { sound: 'damage', position: user.position });
+         
+         this.io.sockets.to(userDemagedId).emit('gotDamage', user)
       }
+
+      this.io.sockets.to(userDemagedId).emit('userUpdated', user)
       this.io.sockets.emit('userList', this.users)
    }
 

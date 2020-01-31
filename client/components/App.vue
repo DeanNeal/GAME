@@ -15,6 +15,9 @@
           <li @click="goTo('newGame')" @mouseenter="menuItemMouse()">
             <span>New game</span>
           </li>
+          <li @click="goTo('settings')" @mouseenter="menuItemMouse()">
+            <span>Settings</span>
+          </li>
           <li @click="goTo('credits')" @mouseenter="menuItemMouse()">
             <span>Credits</span>
           </li>
@@ -282,18 +285,18 @@ export default {
 </script>
 
 <style lang="less">
-  .preloader {
-     position: fixed;
-     width: 100%;
-     height: 100%;
-     color: #fff;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     left: 0;
-     top: 0;
-     z-index: 100;
-     background: #000;
-     font-size: 32px;
-  }
+.preloader {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  background: #000;
+  font-size: 32px;
+}
 </style>
