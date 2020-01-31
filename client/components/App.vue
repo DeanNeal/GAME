@@ -96,6 +96,10 @@
       <div class="gui__damage"></div>
       <app-user-list :class="{ active: showTab }"></app-user-list>
     </div>
+
+    <div class="preloader" v-if="preloader">
+      <div>Loading...</div>
+    </div>
   </div>
 </template>
 
@@ -125,6 +129,7 @@ export default {
       musicEnabled: false,
       showTab: true,
       viewMode: 0,
+      preloader: false,
       gameInstance: null,
       introMusic: null,
       currentPage: 'mainMenu',
@@ -155,6 +160,10 @@ export default {
 
     SocketService.socket.on('online', online => {
       this.online = online
+    })
+
+    GlobalService.preloader.subscribe(state => {
+      this.preloader = state
     })
 
     GlobalService.user
@@ -199,7 +208,7 @@ export default {
       'resize',
       () => {
         if (this.gameInstance) {
-          this.gameInstance.onWindowResize();
+          this.gameInstance.onWindowResize()
         }
       },
       false
@@ -272,4 +281,19 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less">
+  .preloader {
+     position: fixed;
+     width: 100%;
+     height: 100%;
+     color: #fff;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     left: 0;
+     top: 0;
+     z-index: 100;
+     background: #000;
+     font-size: 32px;
+  }
+</style>

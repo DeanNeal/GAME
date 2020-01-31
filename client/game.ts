@@ -34,8 +34,13 @@ export class Game {
         this.container = document.createElement('canvas');
         document.body.appendChild(this.container);
 
+        GlobalService.preloader.next(true);
+
         this.worker = createWorker(this.container, './worker.js', (e: MessageEvent)=> {
             switch(e.data.type) {
+                case 'preloader':
+                    GlobalService.preloader.next(e.data.enabled);
+                break;
                 case 'updateRunes':
                     GlobalService.runes.next(e.data.runes)
                 break;
@@ -46,6 +51,7 @@ export class Game {
     
                 case 'userCreated':
                     GlobalService.user.next(e.data.user);
+                    this.onWindowResize();
                 break;
 
                 case 'userList':
@@ -61,11 +67,8 @@ export class Game {
                     GlobalService.damage.next();
                 break;
             }
-        });
+        }, opts);
         
-        this.worker.post({type: 'connection', playerOptions: opts})
-
-        this.onWindowResize();
         this.addListeners();
     }
 

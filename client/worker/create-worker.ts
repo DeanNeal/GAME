@@ -1,10 +1,11 @@
-export default function createWorker(canvas: HTMLCanvasElement, workerUrl: string, listener: (e: any) => any) {
+export default function createWorker(canvas: HTMLCanvasElement, workerUrl: string, listener: (e: any) => any, opts) {
     // if (canvas.transferControlToOffscreen) {
     const worker: any = new Worker(workerUrl)
     worker.onmessage = listener
     const offscreen: OffscreenCanvas = canvas.transferControlToOffscreen();
     worker.postMessage({
         canvas: offscreen,
+        opts: opts,
         width: canvas.clientWidth,
         height: canvas.clientHeight
     }, [offscreen])

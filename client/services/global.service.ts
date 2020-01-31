@@ -17,6 +17,8 @@ class GlobalService {
 
     public viewMode = new BehaviorSubject<GameMode>(0);
 
+    public preloader = new Subject();
+
     public soundsEnabled = new BehaviorSubject<boolean>(soundsEnabled);
     public musicEnabled = new BehaviorSubject<boolean>(musicEnabled);
 

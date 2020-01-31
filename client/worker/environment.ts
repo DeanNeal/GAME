@@ -3,6 +3,8 @@ import GLTFLoader from "./three/GLTFLoader";
 import { Lensflare, LensflareElement } from './three/Lensflare';
 
 import { Mesh } from 'three';
+import { vertexShader, fragmentShader } from './shaders';
+import { CustomImageLoader } from './loaders';
 
 export function addAsteroids(asteroids: any[], cb) {
     var gltfLoader = new GLTFLoader();
@@ -76,7 +78,7 @@ export function addSky(): THREE.Group {
         color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1
     });
 
-    const geometry = new THREE.OctahedronGeometry(80);
+    const geometry = new THREE.OctahedronGeometry(200);
     const group = new THREE.Group();
 
     array.forEach(() => {
@@ -91,45 +93,92 @@ export function addSky(): THREE.Group {
         const scale = 7 * Math.random();
         mesh.scale.set(scale, scale, scale);
 
-        mesh.position.add(angle.multiplyScalar(600000));
+        mesh.position.add(angle.multiplyScalar(2000000));
         group.add(mesh);
     });
 
     return group;
 }
 
-function addLensFlare(cb) {
-    const loader = new THREE.ImageBitmapLoader()
+function addLensFlare(assets) {
     const lensflare = new Lensflare();
 
-    loader.load("./images/lensflare0.png", (imageBitmap: any) => {
-        var textureFlare0 = new THREE.CanvasTexture(imageBitmap)
+    const textureFlare0 = assets.lens1;
+    const textureFlare1 = assets.lens2;
+    const textureFlare2 = assets.lens3;
 
-        lensflare.addElement(new LensflareElement(textureFlare0, 512, 0));
-        loader.load("./images/lensflare2.png", (imageBitmap: any) => {
-            var textureFlare1 = new THREE.CanvasTexture(imageBitmap)
-            lensflare.addElement(new LensflareElement(textureFlare1, 512, 0));
+    lensflare.addElement(new LensflareElement(textureFlare0, 512, 0));
+    lensflare.addElement(new LensflareElement(textureFlare1, 512, 0));
+    lensflare.addElement(new LensflareElement(textureFlare2, 60, 0.6));
 
-            loader.load("./images/lensflare3.png", (imageBitmap: any) => {
-                var textureFlare2 = new THREE.CanvasTexture(imageBitmap)
-                lensflare.addElement(new LensflareElement(textureFlare2, 60, 0.6));
-
-                cb(lensflare);
-            });
-        });
-
-
-    })
+    return lensflare;
 }
 
-export function addSun(light, position): void {
-    // const geometry = new THREE.SphereGeometry(10000, 25, 25);
-    // const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    // const mesh = new THREE.Mesh(geometry, material);
-    // mesh.position.copy(position);
+export function addSun(light, assets): void {
+    light.add(addLensFlare(assets));
+}
 
-    addLensFlare((lens) => {
-        light.add(lens);
-    });
-    // return mesh;
+export function addEarth(player, assets) {
+    const earthRadius = 500000;
+
+    const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
+    const textureMap = assets.earth;
+    const textureBump = assets.earth_bump;
+    const textureSpecular = assets.earth_specular;
+    const textureClouds = assets.earth_clouds;
+
+    const material: any = new THREE.MeshPhongMaterial({});
+
+    material.map = textureMap
+    material.bumpScale =  400
+    material.bumpMap = textureBump
+    material.specularMap = textureSpecular
+    material.specular = new THREE.Color('#bbb')
+    material.shininess = 14;
+
+    const meshEarth = new THREE.Mesh(geometry, material);
+    meshEarth.castShadow = false;
+    meshEarth.receiveShadow = false;
+
+    meshEarth.position.set(5000, -5000, -850000);
+    meshEarth.scale.y = -1;
+
+    var geometry1 = new THREE.SphereGeometry(earthRadius + 3000, 32, 32)
+    var material1 = new THREE.MeshPhongMaterial({
+        map: textureClouds,
+        side: THREE.FrontSide,
+        opacity: 0.35,
+        transparent: true,
+        depthWrite: false,
+    })
+    var cloudMesh = new THREE.Mesh(geometry1, material1)
+    cloudMesh.name = 'clouds';
+    meshEarth.add(cloudMesh);
+
+    meshEarth.add(addAtosphere(geometry, player));
+
+    return meshEarth;
+}
+
+function addAtosphere(geometry, position) {
+    const customMaterial = new THREE.ShaderMaterial(
+        {
+            uniforms:
+            {
+                "c": { type: "f", value: 0.05 },
+                "p": { type: "f", value: 5 },
+                glowColor: { type: "c", value: new THREE.Color(0x0053d0) },
+                viewVector: { type: "v3", value: position }
+            },
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            side: THREE.FrontSide,
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+
+    const glowMesh = new THREE.Mesh(geometry.clone(), customMaterial.clone());
+    glowMesh.scale.multiplyScalar(1.04);
+
+    return glowMesh;
 }

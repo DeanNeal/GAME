@@ -7,21 +7,23 @@ import SocketService from '../services/socket.service'
 
 import * as THREE from 'three'
 import { createBullet } from './objects'
-import { addAsteroids, addRunes, addSky, addSun } from './environment'
+import { addAsteroids, addRunes, addSky, addSun, addEarth } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
 import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
+import { Preloader } from './preloader';
 
 type ViewMode = 0 | 1;
 
 class Game {
+    public assets = {};
     public canvas: HTMLCanvasElement
     public renderer: THREE.Renderer
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 1100000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 1, 1100000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 300, 6000000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 300, 6000000)
 
     public fakeCamera: THREE.Camera;
 
@@ -34,6 +36,9 @@ class Game {
     public viewMode: ViewMode = 0;
     public player: Player;
 
+    public earth: THREE.Mesh;
+    public clouds: THREE.Mesh;
+
     //shooting
     public startTimeShooting: number = new Date().getTime();
     readonly durationBetweenShots: number = 200;
@@ -42,41 +47,42 @@ class Game {
     //red zone
     public startTimeRedZone: number = new Date().getTime();
     public readonly durationBetweenZoneDamage: number = 1000;
-    public readonly zoneRadius: number = 30000;
+    public readonly zoneRadius: number = 80000;
 
-    //sun
-    public readonly sunPosition: THREE.Vector3 = new THREE.Vector3(550000, 550000, 550000);
+
+    public dLight;
 
     constructor() {
         this.animate = this.animate.bind(this);
     }
 
-    start(canvas: HTMLCanvasElement) {
+    start(canvas: HTMLCanvasElement, assets) {
+        this.assets = assets;
         this.canvas = canvas;
         this.fakeCamera = this.camera2.clone();
 
         // // lights
-        let dLight = new THREE.DirectionalLight(0xffffff, 1)
-    
-        dLight.position.copy(this.sunPosition);//.normalize();
-        // dLight.castShadow = true
+        this.dLight = new THREE.DirectionalLight(0xffffff, 1)
 
-        // dLight.shadow.mapSize.width = 8000;  // default
-        // dLight.shadow.mapSize.height = 8000; // default
-        // dLight.shadow.camera.near = 10;    // default
-        // dLight.shadow.camera.far = 5000;     // default
+        this.dLight.position.set(800000, 0, -50000);//.normalize();
+        this.dLight.castShadow = false
 
-        // dLight.shadowMapWidth = dLight.shadowMapHeight = 1000
-        dLight.intensity = 1
-        this.scene.add(dLight)
+        // this.dLight.shadow.mapSize.width = 8000;  // default
+        // this.dLight.shadow.mapSize.height = 8000; // default
+        // this.dLight.shadow.camera.near = 10;    // default
+        // this.dLight.shadow.camera.far = 5000;     // default
+
+        // this.dLight.shadowMapWidth = this.dLight.shadowMapHeight = 1000
+        this.dLight.intensity = 2.5
+        this.scene.add(this.dLight)
 
 
-        const light = new THREE.HemisphereLight(0xffffff, 0x000000, 0.5);
-        this.scene.add(light);
+        // const light = new THREE.HemisphereLight(0xffffff, 0x000000, 0.05);
+        // this.scene.add(light);
 
-        // let ambient = new THREE.AmbientLight(0x000000)
-        // ambient.color.setHSL(0.01, 0.01, 0.5)
-        // scene.add(ambient)
+        let ambient = new THREE.AmbientLight(0x000000)
+        ambient.color.setHSL(0.01, 0.01, 0.05)
+        this.scene.add(ambient)
 
         // Helpers.addLight(scene, 0.55, 0.9, 0.5, 2000, 10000, 10000);
 
@@ -84,11 +90,12 @@ class Game {
         // this.renderer.shadowMap.enabled = true;
         // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // renderer.setPixelRatio(1)
 
         this.scene.add(addSky())
-        addSun(dLight, this.sunPosition)
- 
+
+        addSun(this.dLight, this.assets)
+
+
         this.animate()
     }
 
@@ -99,19 +106,17 @@ class Game {
         worker.post({ type: 'userCreated', user })
 
         LoadPlayerModel(shipType, (mesh: THREE.Mesh) => {
-
-            // MainPlayer.castShadow = true;
-            // MainPlayer.receiveShadow = true;
             mesh.add(this.camera1)
             mesh.add(this.camera2)
-
-            // this.players.push();//{ mesh: null, user: user })
-            // currentUser = user
-
 
             this.player.setMesh(mesh, position, rotation);
 
             this.initFirstPersonMode();
+
+            const earth = addEarth(this.camera1.getWorldPosition(this.camera1.position), this.assets);
+
+            this.earth = earth;
+            this.scene.add(earth)
 
             this.scene.add(mesh)
         }, this);
@@ -294,8 +299,8 @@ class Game {
 
         this.controls.screenSpacePanning = false;
 
-        this.controls.minDistance = 300;
-        this.controls.maxDistance = 10000;
+        this.controls.minDistance = 550;
+        this.controls.maxDistance = 500000;
 
         this.controls.zoomSpeed = 2;
         this.controls.rotateSpeed = 0.1;
@@ -389,8 +394,20 @@ class Game {
         this.render()
         this.shotAnimate()
 
+        // this.dLight.position.x += 100;
+
         for (let i = 0; i < this.allRunes.length; i++) {
             this.allRunes[i].rotation.y += 0.01
+        }
+
+        for (let i = 0; i < this.allAsteroids.length; i++) {
+            this.allAsteroids[i].rotation.y += 0.001
+            this.allAsteroids[i].rotation.z += 0.001
+        }
+
+        if (this.earth) {
+            this.earth.rotation.y += 0.00006;
+            this.earth.getObjectByName('clouds').rotation.z -= 0.00005;
         }
 
         for (let i = 0; i < this.bullets.length; i++) {
@@ -455,23 +472,27 @@ class Game {
             }
         }
 
+
+
     }
 
     onResize(e) {
-        this.renderer.setSize(e.data.width, e.data.height)
+        if (this.renderer) {
+            this.renderer.setSize(e.data.width, e.data.height)
 
-        this.camera1['aspect'] = e.data.width / e.data.height
-        this.camera1['updateProjectionMatrix']()
+            this.camera1['aspect'] = e.data.width / e.data.height
+            this.camera1['updateProjectionMatrix']()
 
-        this.camera2['aspect'] = e.data.width / e.data.height
-        this.camera2['updateProjectionMatrix']()
+            this.camera2['aspect'] = e.data.width / e.data.height
+            this.camera2['updateProjectionMatrix']()
 
-        this.fakeCamera['aspect'] = e.data.width / e.data.height
-        this.fakeCamera['updateProjectionMatrix']()
+            this.fakeCamera['aspect'] = e.data.width / e.data.height
+            this.fakeCamera['updateProjectionMatrix']()
+        }
+
     }
 
 }
-
 
 
 const game = new Game();
@@ -480,15 +501,20 @@ const worker = insideWorker(e => {
     const canvas = e.data.canvas
     if (canvas) {
         if (!canvas.style) canvas.style = { width: 0, height: 0 }
-        game.start(canvas);
+
+        Preloader().then(assets => {
+            game.start(canvas, assets);
+
+            SocketService.socket.emit('addNewPlayer', e.data.opts)
+            setTimeout(() => {
+                worker.post({ type: 'preloader', enabled: false })
+            }, 500)
+        })
+
     }
 
     if (e.data.type === 'resize') {
         game.onResize(e);
-    }
-
-    if (e.data.type === 'connection') {
-        SocketService.socket.emit('addNewPlayer', e.data.playerOptions)
     }
 
     if (e.data.type === 'startFire') {

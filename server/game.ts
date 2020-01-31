@@ -225,9 +225,9 @@ export class Game {
 
    static randomRotation(): IVector3 {
       return {
-         x: this.randomDecemal(0, Math.PI),
-         y: this.randomDecemal(0, Math.PI),
-         z: this.randomDecemal(0, Math.PI)
+         x: 0,//this.randomDecemal(0, Math.PI),
+         y: 0,//this.randomDecemal(0, Math.PI),
+         z: 0 //this.randomDecemal(0, Math.PI)
       }
    }
 
