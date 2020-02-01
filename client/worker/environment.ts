@@ -1,40 +1,32 @@
 import * as THREE from 'three'
-import GLTFLoader from "./three/GLTFLoader";
+
 import { Lensflare, LensflareElement } from './three/Lensflare';
-
-import { Mesh } from 'three';
 import { vertexShader, fragmentShader } from './shaders';
-import { CustomImageLoader } from './loaders';
 
-export function addAsteroids(asteroids: any[], cb) {
-    var gltfLoader = new GLTFLoader();
 
-    gltfLoader['load']('models/simple-asteroid.glb', (object) => {
+export function addAsteroids(asteroids: any[], assets): THREE.Mesh[] {
+    const obj = assets.asteroid;
 
-        let material = new THREE.MeshStandardMaterial({
-            color: 0x999999, roughness: 0.8, metalness: 0.2
-        });
+    let material = new THREE.MeshStandardMaterial({
+        color: 0x999999, roughness: 0.8, metalness: 0.2
+    });
 
-        let geometry = object.scene.children[0].geometry;
+    let geometry = obj.scene.children[0].geometry;
 
-        asteroids.forEach((c) => {
-            let mesh = new THREE.Mesh(geometry, material);
+    return asteroids.map((c) => {
+        let mesh = new THREE.Mesh(geometry, material);
 
-            mesh.scale.set(c.size, c.size, c.size);
-            mesh.userData = c;
-            mesh.position.x = c.position.x;
-            mesh.position.y = c.position.y;
-            mesh.position.z = c.position.z;
+        mesh.scale.set(c.size, c.size, c.size);
+        mesh.userData = c;
+        mesh.position.x = c.position.x;
+        mesh.position.y = c.position.y;
+        mesh.position.z = c.position.z;
 
-            mesh.rotation.x = c.position.x;
-            mesh.rotation.y = c.position.y;
-            mesh.rotation.z = c.position.z;
+        mesh.rotation.x = c.position.x;
+        mesh.rotation.y = c.position.y;
+        mesh.rotation.z = c.position.z;
 
-            cb(mesh);
-        });
-    }, undefined, (error) => {
-        // object loading error
-        console.log(error);
+        return mesh;
     });
 }
 
@@ -118,7 +110,7 @@ export function addSun(light, assets): void {
     light.add(addLensFlare(assets));
 }
 
-export function addEarth(player, assets) {
+export function addEarth(position, assets) {
     const earthRadius = 500000;
 
     const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
@@ -130,7 +122,7 @@ export function addEarth(player, assets) {
     const material: any = new THREE.MeshPhongMaterial({});
 
     material.map = textureMap
-    material.bumpScale =  400
+    material.bumpScale = 400
     material.bumpMap = textureBump
     material.specularMap = textureSpecular
     material.specular = new THREE.Color('#bbb')
@@ -140,7 +132,7 @@ export function addEarth(player, assets) {
     meshEarth.castShadow = false;
     meshEarth.receiveShadow = false;
 
-    meshEarth.position.set(5000, -5000, -850000);
+    meshEarth.position.set(0, 0, -1000000);
     meshEarth.scale.y = -1;
 
     var geometryClouds = new THREE.SphereGeometry(earthRadius + 3000, 32, 32)
@@ -155,29 +147,33 @@ export function addEarth(player, assets) {
     cloudMesh.name = 'clouds';
     meshEarth.add(cloudMesh);
 
-    meshEarth.add(addAtosphere(geometry, player));
+    meshEarth.add(addAtosphere(geometry, position));
 
     return meshEarth;
 }
 
 function addAtosphere(geometry, position) {
+    position = position.clone();
+    position.y = 0;// remove offset
+    
     const customMaterial = new THREE.ShaderMaterial(
         {
             uniforms:
             {
-                "c": { type: "f", value: 0.08 },
-                "p": { type: "f", value: 2 },
+                "c": { type: "f", value: 0.45 },
+                "p": { type: "f", value: 7 },
                 glowColor: { type: "c", value: new THREE.Color(0x0053d0) },
                 viewVector: { type: "v3", value: position }
             },
             vertexShader: vertexShader,
             fragmentShader: fragmentShader,
-            side: THREE.FrontSide,
+            side: THREE.BackSide,
             blending: THREE.AdditiveBlending,
             transparent: true
         });
 
     const glowMesh = new THREE.Mesh(geometry.clone(), customMaterial.clone());
+    glowMesh.name = 'glow';
     glowMesh.scale.multiplyScalar(1.03);
 
     return glowMesh;

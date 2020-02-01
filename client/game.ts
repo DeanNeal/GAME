@@ -6,13 +6,13 @@ declare var document: any;
 
 import createWorker from './worker/create-worker';
 import { IWorker, IGameOptions } from './interfaces/interfaces';
-
+import * as dat from 'dat.gui';
 
 export class Game {
     public container: HTMLCanvasElement;
     public worker: IWorker;
     public speedBlock: HTMLElement;
- 
+
     constructor(opts: IGameOptions) {
         // this.onWindowResize = this.onWindowResize.bind(this);
 
@@ -24,10 +24,25 @@ export class Game {
         this.onKeyPress = this.onKeyPress.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
 
-        this.onContextmenu =  this.onContextmenu.bind(this);
+        this.onContextmenu = this.onContextmenu.bind(this);
         this.onMouseWheel = this.onMouseWheel.bind(this);
 
         this.init(opts);
+        this.datGui();
+    }
+
+    private datGui() {
+        // const gui = new dat.GUI({});
+
+        // var pGUI = gui.add({ interation: 0 }, 'interation').min(0.0).max(8.0).step(0.01).name("p").listen();
+        // var cGUI = gui.add({ interation: 0 }, 'interation').min(0.0).max(1.0).step(0.01).name("c").listen();
+
+        // pGUI.onChange((value)=>  {
+        //     this.worker.post({type: 'dat.gui', value: {p: value}})
+        // });
+        // cGUI.onChange((value)=>  {
+        //     this.worker.post({type: 'dat.gui', value: {c: value}})
+        // });
     }
 
     private init(opts: IGameOptions): void {
@@ -36,42 +51,42 @@ export class Game {
 
         GlobalService.preloader.next(true);
 
-        this.worker = createWorker(this.container, './worker.js', (e: MessageEvent)=> {
-            switch(e.data.type) {
+        this.worker = createWorker(this.container, './worker.js', (e: MessageEvent) => {
+            switch (e.data.type) {
                 case 'preloader':
                     GlobalService.preloader.next(e.data.enabled);
-                break;
+                    break;
                 case 'updateRunes':
                     GlobalService.runes.next(e.data.runes)
-                break;
-                
+                    break;
+
                 case 'gui':
                     GlobalService.gui.next(e.data.gui);
-                break;
-    
+                    break;
+
                 case 'userCreated':
                     GlobalService.user.next(e.data.user);
                     this.onWindowResize();
-                break;
+                    break;
 
-                case 'userUpdated': 
+                case 'userUpdated':
                     GlobalService.user.next(e.data.user);
-                break;
+                    break;
 
                 case 'userList':
                     GlobalService.users.next(e.data.users);
-                break;
-    
+                    break;
+
                 case 'playSound':
                     AudioService.playAudio(e.data.params.sound, e.data.params.volume, true);
-                break;
+                    break;
 
                 case 'gotDamage':
                     GlobalService.damage.next();
-                break;
+                    break;
             }
         }, opts);
-        
+
         this.addListeners();
     }
 
@@ -86,12 +101,12 @@ export class Game {
     //     var interval = setInterval(function () {
     //         // minutes = parseInt(timer / 60, 10)
     //         seconds = parseInt(timer % 60, 10);
-      
+
     //         // minutes = minutes < 10 ? "0" + minutes : minutes;
     //         // seconds = seconds < 10 ? "0" + seconds : seconds;
-      
+
     //         display.textContent = /*minutes + ":" +*/ seconds;
-      
+
     //         if (--timer < 0) {
     //             timer = duration;
     //             display.textContent = '';
@@ -102,7 +117,7 @@ export class Game {
 
     private onWindowResize(): void {
         this.worker.post({
-             type: 'resize', width: window.innerWidth, height: window.innerHeight
+            type: 'resize', width: window.innerWidth, height: window.innerHeight
         });
     }
 
@@ -110,7 +125,7 @@ export class Game {
         e.preventDefault();
         e.stopPropagation();
 
-        if(e.button === 0){// && GlobalService.viewMode.getValue() === 0) {
+        if (e.button === 0) {// && GlobalService.viewMode.getValue() === 0) {
             this.worker.post({
                 type: 'startFire'
             });
@@ -160,7 +175,7 @@ export class Game {
     }
 
     private onKeyDown(e: KeyboardEvent): void {
-        if(e.keyCode === 9) {
+        if (e.keyCode === 9) {
             e.preventDefault();
             this.worker.post({
                 type: 'changeViewMode'
@@ -187,7 +202,7 @@ export class Game {
         })
     }
 
-    private onKeyUp(e: KeyboardEvent): void{
+    private onKeyUp(e: KeyboardEvent): void {
         this.worker.post({
             type: 'keyup',
             mouse: {
@@ -220,7 +235,7 @@ export class Game {
         window.addEventListener('mousedown', this.onMouseDown, false);
         window.addEventListener('mousemove', this.onMouseMove, false);
         window.addEventListener('mouseup', this.onMouseUp, false);
-        
+
         window.addEventListener('keydown', this.onKeyDown, false);
         window.addEventListener('keyup', this.onKeyUp, false);
         window.addEventListener('keypress', this.onKeyPress, false);
@@ -230,7 +245,7 @@ export class Game {
 
         window.addEventListener("mousewheel", this.onMouseWheel);
         window.addEventListener("DOMMouseScroll", this.onMouseWheel);
-        
+
         // this.onWindowResize();
     }
 
@@ -240,7 +255,7 @@ export class Game {
         window.removeEventListener('mousedown', this.onMouseDown, false);
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('mouseup', this.onMouseUp, false);
-        
+
         window.removeEventListener('keydown', this.onKeyDown, false);
         window.removeEventListener('keyup', this.onKeyUp, false);
         window.removeEventListener('keypress', this.onKeyPress, false);
@@ -248,7 +263,7 @@ export class Game {
         window.removeEventListener('contextmenu', this.onContextmenu, false);
 
         window.addEventListener("mousewheel", this.onMouseWheel);
-		window.addEventListener("DOMMouseScroll", this.onMouseWheel);
+        window.addEventListener("DOMMouseScroll", this.onMouseWheel);
     }
 
     public disconnect(): void {
@@ -257,5 +272,5 @@ export class Game {
         this.worker = undefined;
         this.container.remove();
     }
- 
+
 }

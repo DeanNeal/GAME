@@ -182,7 +182,7 @@ export class Game {
 
    createRunes(): IRune[] {
       let runes = [];
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 0; i++) {
          runes.push({
             id: i,
             // color: getRandColor(),

@@ -6,7 +6,7 @@ import  * as THREE from 'three';
 export default function flyControls( object, camera, container) {
 
 	this.object = object;
-	camera.position.set(0, 48, 0);
+	camera.position.set(0, 50, -300);
 	this.cameraInitPosition = camera.position.clone();
 
 	this.domElement = container || /*( domElement !== undefined ) ? domElement : */document;

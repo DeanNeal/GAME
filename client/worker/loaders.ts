@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import GLTFLoader from './three/GLTFLoader';
 
 export class CustomImageLoader {
 
@@ -14,4 +15,18 @@ export class CustomImageLoader {
         });
     }
 
+}
+
+export class CustomModelLoader {
+    load(url) {
+        const loader = new GLTFLoader();
+        return new Promise((resolve, reject) => {
+            loader['load'](url, (object: any) => {
+                resolve(object)
+            },
+                () => { },
+                (e) => reject(e)
+            );
+        });
+    }
 }
