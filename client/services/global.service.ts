@@ -28,7 +28,7 @@ class GlobalService {
     // public toggleTab = new Subject();
 
 
-    public speed = new Subject<number>();
+    public gui = new Subject();
     public viewMode = new BehaviorSubject<GameMode>(0);
     public preloader = new Subject();
 

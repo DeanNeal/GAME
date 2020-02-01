@@ -45,8 +45,8 @@ export class Game {
                     GlobalService.runes.next(e.data.runes)
                 break;
                 
-                case 'speed':
-                    GlobalService.speed.next(e.data.speed.moveMult);
+                case 'gui':
+                    GlobalService.gui.next(e.data.gui);
                 break;
     
                 case 'userCreated':

@@ -143,15 +143,15 @@ export function addEarth(player, assets) {
     meshEarth.position.set(5000, -5000, -850000);
     meshEarth.scale.y = -1;
 
-    var geometry1 = new THREE.SphereGeometry(earthRadius + 3000, 32, 32)
-    var material1 = new THREE.MeshPhongMaterial({
+    var geometryClouds = new THREE.SphereGeometry(earthRadius + 3000, 32, 32)
+    var materialClouds = new THREE.MeshPhongMaterial({
         map: textureClouds,
         side: THREE.FrontSide,
-        opacity: 0.35,
+        opacity: 0.5,
         transparent: true,
         depthWrite: false,
     })
-    var cloudMesh = new THREE.Mesh(geometry1, material1)
+    var cloudMesh = new THREE.Mesh(geometryClouds, materialClouds)
     cloudMesh.name = 'clouds';
     meshEarth.add(cloudMesh);
 
@@ -165,8 +165,8 @@ function addAtosphere(geometry, position) {
         {
             uniforms:
             {
-                "c": { type: "f", value: 0.05 },
-                "p": { type: "f", value: 5 },
+                "c": { type: "f", value: 0.08 },
+                "p": { type: "f", value: 2 },
                 glowColor: { type: "c", value: new THREE.Color(0x0053d0) },
                 viewVector: { type: "v3", value: position }
             },
@@ -178,7 +178,7 @@ function addAtosphere(geometry, position) {
         });
 
     const glowMesh = new THREE.Mesh(geometry.clone(), customMaterial.clone());
-    glowMesh.scale.multiplyScalar(1.04);
+    glowMesh.scale.multiplyScalar(1.03);
 
     return glowMesh;
 }

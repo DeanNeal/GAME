@@ -267,10 +267,7 @@ export default function flyControls( object, camera, container) {
 		// 	this.updateRotationVector();
 		// }
 		
-		return {
-			moveMult,
-			rotMult
-		}
+		return moveMult;
 	};
 
 	this.cameraUpdate = function () {

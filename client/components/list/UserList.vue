@@ -55,7 +55,7 @@ export default {
     padding: 5px;
     z-index: 10;
     position: fixed;
-    right: -400px;
+    right: 0px;
     // border: 1px solid #999;
     // background: #fff;
     transition: 0.2s;

@@ -37,8 +37,8 @@ class Game {
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 300, 6000000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 300, 6000000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 6000000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 6000000)
 
     public fakeCamera: THREE.Camera;
 
@@ -62,7 +62,7 @@ class Game {
     //red zone
     public startTimeRedZone: number = new Date().getTime();
     public readonly durationBetweenZoneDamage: number = 1000;
-    public readonly zoneRadius: number = 80000;
+    public readonly zoneRadius: number = 120000;
 
     public bokehPass;
     public dLight;
@@ -115,7 +115,7 @@ class Game {
         var renderPass = new RenderPass(this.scene, this.camera1);
         this.composer.addPass(renderPass);
 
-        this.bokehPass = new BokehPass(this.scene, this.camera1, {focus: 1, width: 1080, height: 1920, maxblur: 0.05});
+        this.bokehPass = new BokehPass(this.scene, this.camera1, { focus: 1, width: 1080, height: 1920, maxblur: 0.05 });
         this.composer.addPass(this.bokehPass);
     }
 
@@ -131,9 +131,9 @@ class Game {
 
             this.player.setMesh(mesh, position, rotation);
 
-            
+
             this.initFirstPersonMode();
-  
+
 
             const earth = addEarth(this.camera1.getWorldPosition(this.camera1.position), this.assets);
 
@@ -384,21 +384,31 @@ class Game {
     }
 
 
+    redZoneIndicator() {
+        let zoneProcentage = (Math.abs(Math.max(...this.player.mesh.position.toArray())) / this.zoneRadius ) *100;
+        return (zoneProcentage >= 100) ? 'CRITICAL' : (zoneProcentage.toFixed(0) + '%');
+    }
+
+
     render() {
         let delta = this.clock.getDelta()
 
         if (this.controls) {
             const speed = this.controls.update(delta)
-            worker.post({ type: 'speed', speed })
+            worker.post({ type: 'gui', gui: {
+                speed,
+                zoneProcentage:  this.redZoneIndicator()
+            }})
+           
         }
 
         this.camera2.copy(this.fakeCamera);
 
         this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
 
-        if(this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
-        if(this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
-      
+        if (this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
+        if (this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
+
     }
 
     getDirectionOfBullet(matrixWorld, camPos) {
@@ -424,13 +434,14 @@ class Game {
         }
 
         for (let i = 0; i < this.allAsteroids.length; i++) {
-            this.allAsteroids[i].rotation.y += 0.001
-            this.allAsteroids[i].rotation.z += 0.001
+            this.allAsteroids[i].rotation.x += 0.002
+            this.allAsteroids[i].rotation.y += 0.002
+            this.allAsteroids[i].rotation.z += 0.002
         }
 
         if (this.earth) {
-            this.earth.rotation.y += 0.00006;
-            this.earth.getObjectByName('clouds').rotation.z -= 0.00005;
+            this.earth.rotation.y += 0.00004;
+            this.earth.getObjectByName('clouds').rotation.z -= 0.00006;
         }
 
         for (let i = 0; i < this.bullets.length; i++) {

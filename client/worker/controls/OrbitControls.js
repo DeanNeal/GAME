@@ -237,9 +237,7 @@ export default THREE.OrbitControls = function ( player, object, domElement) {
 
 			this.smoothZoomUpdate();
 
-			return {
-				moveMult: 0
-			};
+			return 0;
 
 		};
 
