@@ -110,7 +110,7 @@ export function addSun(light, assets): void {
     light.add(addLensFlare(assets));
 }
 
-export function addEarth(position, assets) {
+export function addEarth(assets) {
     const earthRadius = 500000;
 
     const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
@@ -147,12 +147,13 @@ export function addEarth(position, assets) {
     cloudMesh.name = 'clouds';
     meshEarth.add(cloudMesh);
 
-    meshEarth.add(addAtosphere(geometry, position));
-
     return meshEarth;
 }
 
-function addAtosphere(geometry, position) {
+export function addAtosphere(position) {
+    const earthRadius = 500000;
+    
+    const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
     position = position.clone();
     position.y = 0;// remove offset
     

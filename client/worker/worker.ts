@@ -20,7 +20,7 @@ import { RenderPass } from './three/post-processing/RenderPass'
 import { BokehPass } from './three/post-processing/BokehPass';
 
 import { createBullet } from './objects'
-import { addAsteroids, addRunes, addSky, addSun, addEarth } from './environment'
+import { addAsteroids, addAtosphere, addRunes, addSky, addSun, addEarth } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
 import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
@@ -53,7 +53,7 @@ class Game {
     public player: Player;
 
     public earth: THREE.Mesh;
-    public clouds: THREE.Mesh;
+    public earthGlow: THREE.Mesh;
 
     //shooting
     public startTimeShooting: number = new Date().getTime();
@@ -137,10 +137,15 @@ class Game {
 
         this.initFirstPersonMode();
 
-        const earth = addEarth(this.camera1.getWorldPosition(this.camera1.position), this.assets);
+        const earth = addEarth(this.assets);
 
         this.earth = earth;
         this.scene.add(earth)
+
+        const earthGlow = addAtosphere(this.camera1.getWorldPosition(this.camera1.position));
+        earthGlow.position.copy(this.earth.position);
+        this.earthGlow = earthGlow;
+        this.scene.add(earthGlow);
 
         this.scene.add(ship)
     }
