@@ -55,7 +55,6 @@ export class Game {
                 break;
 
                 case 'userUpdated': 
-                    debugger
                     GlobalService.user.next(e.data.user);
                 break;
 

@@ -1,7 +1,7 @@
 import insideWorker from './inside-worker'
 
-import FlyControls from './FlyControls'
-import OrbitControls from './OrbitControls';
+import FlyControls from './controls/FlyControls'
+import OrbitControls from './controls/OrbitControls';
 
 import SocketService from '../services/socket.service'
 
@@ -340,7 +340,7 @@ class Game {
     }
 
     fire() {
-        if (this.player.params) {
+        if (this.player && this.player.params) {
             let bullet = createBullet()
 
             let pos = this.player.mesh.position.clone()
@@ -576,11 +576,6 @@ const worker = insideWorker(e => {
     }
 
     if (e.data.type === 'mousewheel') {
-        // if (e.data.delta < 0) {
-        //   controls.zoomOut();
-        // } else {
-        //   controls.zoomIn();
-        // }
         game.controls.mousewheel(e.data.mouse);
     }
 
