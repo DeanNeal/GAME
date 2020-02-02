@@ -109,7 +109,7 @@ export class Game {
 
          if(userDamagingId) {
             this.users.find(r => r._id === userDamagingId).kills += 1
-            this.io.sockets.connected[userDemagedId].broadcast.emit('playSound', { sound: 'explosion', position: user.position });
+            this.io.sockets.connected[userDemagedId].broadcast.emit('playSound', { sound: 'explosionShip', position: user.position });
          }
       } else {
          if(userDamagingId) this.io.sockets.emit('playSound', { sound: 'damage', position: user.position });
@@ -149,11 +149,12 @@ export class Game {
       let asteriod = this.asteroids.find(r => r.id === id);
       asteriod.health -= 20;
 
-      this.io.sockets.emit('playSound', { sound: 'damage', position: asteriod.position });
-
       if (asteriod.health <= 0) {
          this.io.sockets.emit('asteroidWasRemoved', asteriod.id)
          this.asteroids = this.asteroids.filter(r => r.id !== id);
+         this.io.sockets.emit('playSound', { sound: 'explosionAsteroid', position: asteriod.position });
+      } else {
+         this.io.sockets.emit('playSound', { sound: 'damage', position: asteriod.position });
       }
    }
 

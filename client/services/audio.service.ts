@@ -10,7 +10,8 @@ class AudioService {
     this.collection["damage"] = this.createSound("damage.mp3", 0.3);
     this.collection["rune"] = this.createSound("rune.mp3", 0.3);
     this.collection["blaster"] = this.createSound("blaster-1.mp3", 0.1);
-    this.collection["explosion"] = this.createSound("explosion.mp3", 0.1);
+    this.collection["explosionShip"] = this.createSound("explosionShip.mp3", 0.1);
+    this.collection["explosionAsteroid"] = this.createSound("explosionAsteroid.mp3", 0.1);
   }
 
   createSound(name: string, volume: number, isMusic = false): IAudio {
