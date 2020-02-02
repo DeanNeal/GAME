@@ -87,6 +87,7 @@ export default {
     margin-top: 10px;
     li {
       color: #fff;
+      padding-left: 10px;
       &+ li {
         margin: 10px 0 0 0;
       }
