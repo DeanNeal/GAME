@@ -97,7 +97,7 @@ class Game {
         // this.scene.add(light);
 
         let ambient = new THREE.AmbientLight(0x000000)
-        ambient.color.setHSL(0.01, 0.01, 0.02)
+        ambient.color.setHSL(0.01, 0.01, 0.005)
         this.scene.add(ambient)
 
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: settings.antialiasing, alpha: true })

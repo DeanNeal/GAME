@@ -183,16 +183,19 @@ export function addAtosphere(position) {
 export function addMoon(assets) {
     const geometry = new THREE.SphereGeometry(EARTH_RADIUS / 5, 50, 50); //3.6678
     const textureMap = assets.moon;
-    const textureBump = assets.moon_bump;
-    // const textureSpecular = assets.earth_specular;
+    // const textureBump = assets.moon_bump;
+    const textureSpecular = assets.moon_specular;
 
     const material: any = new THREE.MeshPhongMaterial({});
 
     material.map = textureMap
-    material.bumpScale = 600
-    material.bumpMap = textureBump
+    material.bumpScale = 2600
+    material.bumpMap = textureMap
  
-    material.shininess = 10;
+    material.specularMap = textureSpecular
+    material.specular = new THREE.Color('#bbb')
+
+    material.shininess = 0;
 
     const meshMoon = new THREE.Mesh(geometry, material);
     meshMoon.castShadow = false;

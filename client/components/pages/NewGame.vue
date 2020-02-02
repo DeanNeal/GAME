@@ -54,7 +54,7 @@ export default {
     start () {
       GlobalService.inMenu.next(false)
       GlobalService.inGame.next(true)
-      AudioService.stopAudio('menuMusic')
+      AudioService.stopAudio('menuMusic', true)
 
       GlobalService.gameInstance.next(new Game(this.playerOptions))
     },
