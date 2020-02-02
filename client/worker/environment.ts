@@ -155,13 +155,15 @@ export function addAtosphere(position) {
     
     const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
     position = position.clone();
+    //adjust
+    position.x = -60;
     position.y = 0;// remove offset
     
     const customMaterial = new THREE.ShaderMaterial(
         {
             uniforms:
             {
-                "c": { type: "f", value: 0.45 },
+                "c": { type: "f", value: 0.3 },
                 "p": { type: "f", value: 7 },
                 glowColor: { type: "c", value: new THREE.Color(0x0053d0) },
                 viewVector: { type: "v3", value: position }
