@@ -38,8 +38,8 @@ class Game {
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 6000000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 6000000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 5000000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 5000000)
 
     public fakeCamera: THREE.Camera;
 
@@ -57,8 +57,8 @@ class Game {
 
     //shooting
     public startTimeShooting: number = new Date().getTime();
-    readonly durationBetweenShots: number = 230;
-    readonly bulletSpeed: number = 450;
+    readonly durationBetweenShots: number = 300;
+    readonly bulletSpeed: number = 500;
     public isShooting: boolean = false;
 
     //red zone
@@ -81,7 +81,7 @@ class Game {
         // // lights
         this.dLight = new THREE.DirectionalLight(0xffffff, 1)
 
-        this.dLight.position.set(800000, 0, -50000);//.normalize();
+        this.dLight.position.set(800000, 0, 500000);//.normalize();
         this.dLight.castShadow = false
 
         // this.dLight.shadow.mapSize.width = 8000;  // default
@@ -90,14 +90,14 @@ class Game {
         // this.dLight.shadow.camera.far = 5000;     // default
 
         // this.dLight.shadowMapWidth = this.dLight.shadowMapHeight = 1000
-        this.dLight.intensity = 2.5
+        this.dLight.intensity = 1.5
         this.scene.add(this.dLight)
 
         // const light = new THREE.HemisphereLight(0xffffff, 0x000000, 0.05);
         // this.scene.add(light);
 
         let ambient = new THREE.AmbientLight(0x000000)
-        ambient.color.setHSL(0.01, 0.01, 0.05)
+        ambient.color.setHSL(0.01, 0.01, 0.02)
         this.scene.add(ambient)
 
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
@@ -128,8 +128,8 @@ class Game {
 
         worker.post({ type: 'userCreated', user })
 
-        const ship  = this.assets.ship.scene.children[0].clone();
-        
+        const ship = this.assets.ship.scene.children[0].clone();
+
         ship.add(this.camera1)
         ship.add(this.camera2)
 
@@ -222,7 +222,7 @@ class Game {
         const { position, rotation, shipType } = user;
 
         const ship = this.assets.ship.scene.children[0].clone();
-   
+
         const loader = new THREE.FontLoader()
         loader.load('./helvetiker_regular.typeface.json', (font) => {
 
@@ -251,7 +251,7 @@ class Game {
             enemy.setMesh(ship, position, rotation);
             this.players.push(enemy);//({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
         })
-        
+
 
     }
 
@@ -432,8 +432,23 @@ class Game {
         return dir;
     }
 
+    checkRedZone() {
+        if (this.player && this.player.mesh) {
+            let { x, y, z } = this.player.mesh.position;
+
+            if (Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius, Math.abs(z) > this.zoneRadius) {
+                const elapsed = new Date().getTime() - this.startTimeRedZone
+                if (elapsed > this.durationBetweenZoneDamage) {
+                    // console.log('RED ZONE', x,y,z);
+                    SocketService.socket.emit('outsideZone', this.player.params._id);
+                    this.startTimeRedZone = new Date().getTime()
+                }
+            }
+        }
+    }
+
     animate() {
-    
+
         worker.post({ type: 'animateStart' })
 
         this.render()
@@ -491,6 +506,7 @@ class Game {
             })
         }
 
+        // getPerformanceOfFunction(() => {
         if (this.allRunes.length && this.player && this.player.mesh) {
             runesCollisionDetection(this.player, this.allRunes)
         }
@@ -500,23 +516,12 @@ class Game {
         }
 
         if (this.allAsteroids.length && this.player && this.player.mesh) {
-            // getPerformanceOfFunction(() => {
             asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets.filter(r => r.collision), this.player);
-            // });
         }
+        // });
+        // console.log(this.bullets.length ? this.bullets[0].mesh.position : '');
 
-        if (this.player && this.player.mesh) {
-            let { x, y, z } = this.player.mesh.position;
-
-            if (Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius, Math.abs(z) > this.zoneRadius) {
-                const elapsed = new Date().getTime() - this.startTimeRedZone
-                if (elapsed > this.durationBetweenZoneDamage) {
-                    // console.log('RED ZONE', x,y,z);
-                    SocketService.socket.emit('outsideZone', this.player.params._id);
-                    this.startTimeRedZone = new Date().getTime()
-                }
-            }
-        }
+        this.checkRedZone();
 
         worker.post({ type: 'animateEnd' })
 
@@ -541,8 +546,8 @@ class Game {
     }
 
     datGui(value) {
-        if(value.p) this.earth.getObjectByName('glow')['material'].uniforms["p"].value = value.p;
-        if(value.c) this.earth.getObjectByName('glow')['material'].uniforms["c"].value = value.c;
+        if (value.p) this.earth.getObjectByName('glow')['material'].uniforms["p"].value = value.p;
+        if (value.c) this.earth.getObjectByName('glow')['material'].uniforms["c"].value = value.c;
     }
 
 }
@@ -566,7 +571,7 @@ const worker = insideWorker(e => {
 
     }
 
-    if(e.data.type === 'dat.gui') {
+    if (e.data.type === 'dat.gui') {
         game.datGui(e.data.value);
     }
 

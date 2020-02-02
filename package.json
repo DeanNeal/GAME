@@ -64,6 +64,7 @@
     "three": "^0.112.1",
     "three-bmfont-text": "^2.3.0",
     "three-buffer-vertex-data": "^1.1.0",
+    "threex": "^1.0.0",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5",

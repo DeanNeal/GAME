@@ -9,6 +9,9 @@ export async function Preloader() {
         { url: "./images/lensflare0.png", type: 'img', name: 'lens1'},
         { url: "./images/lensflare2.png", type: 'img', name: 'lens2'},
         { url: "./images/lensflare3.png", type: 'img', name: 'lens3'},
+        { url: "./images/moonmap4k.jpg", type: 'img', name: 'moon'},
+        { url: "./images/moonbump4k.jpg", type: 'img', name: 'moon_bump'},
+       
 
         { url: "./models/simple-asteroid.glb", type: 'model', name: 'asteroid'},
         { url: "./models/ship.glb", type: 'model', name: 'ship'}

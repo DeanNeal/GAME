@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { Lensflare, LensflareElement } from './three/Lensflare';
 import { vertexShader, fragmentShader } from './shaders';
 
+const EARTH_RADIUS = 1000000;
 
 export function addAsteroids(asteroids: any[], assets): THREE.Mesh[] {
     const obj = assets.asteroid;
@@ -70,7 +71,7 @@ export function addSky(): THREE.Group {
         color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1
     });
 
-    const geometry = new THREE.OctahedronGeometry(200);
+    const geometry = new THREE.OctahedronGeometry(400);
     const group = new THREE.Group();
 
     array.forEach(() => {
@@ -85,7 +86,7 @@ export function addSky(): THREE.Group {
         const scale = 7 * Math.random();
         mesh.scale.set(scale, scale, scale);
 
-        mesh.position.add(angle.multiplyScalar(2000000));
+        mesh.position.add(angle.multiplyScalar(4000000));
         group.add(mesh);
     });
 
@@ -111,9 +112,7 @@ export function addSun(light, assets): void {
 }
 
 export function addEarth(assets) {
-    const earthRadius = 500000;
-
-    const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
+    const geometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
     const textureMap = assets.earth;
     const textureBump = assets.earth_bump;
     const textureSpecular = assets.earth_specular;
@@ -122,20 +121,20 @@ export function addEarth(assets) {
     const material: any = new THREE.MeshPhongMaterial({});
 
     material.map = textureMap
-    material.bumpScale = 400
+    material.bumpScale = 800
     material.bumpMap = textureBump
     material.specularMap = textureSpecular
     material.specular = new THREE.Color('#bbb')
-    material.shininess = 14;
+    material.shininess = 10;
 
     const meshEarth = new THREE.Mesh(geometry, material);
     meshEarth.castShadow = false;
     meshEarth.receiveShadow = false;
 
-    meshEarth.position.set(0, 0, -1000000);
+    meshEarth.position.set(0, 0, -2000000);
     meshEarth.scale.y = -1;
 
-    var geometryClouds = new THREE.SphereGeometry(earthRadius + 3000, 32, 32)
+    var geometryClouds = new THREE.SphereGeometry(EARTH_RADIUS + 3000, 64, 64)
     var materialClouds = new THREE.MeshPhongMaterial({
         map: textureClouds,
         side: THREE.FrontSide,
@@ -146,19 +145,18 @@ export function addEarth(assets) {
     var cloudMesh = new THREE.Mesh(geometryClouds, materialClouds)
     cloudMesh.name = 'clouds';
     meshEarth.add(cloudMesh);
+    meshEarth.add(addMoon(assets))
 
     return meshEarth;
 }
 
 export function addAtosphere(position) {
-    const earthRadius = 500000;
-    
-    const geometry = new THREE.SphereGeometry(earthRadius, 50, 50);
+    const geometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
     position = position.clone();
     //adjust
     position.x = -60;
     position.y = 0;// remove offset
-    
+
     const customMaterial = new THREE.ShaderMaterial(
         {
             uniforms:
@@ -177,7 +175,32 @@ export function addAtosphere(position) {
 
     const glowMesh = new THREE.Mesh(geometry.clone(), customMaterial.clone());
     glowMesh.name = 'glow';
-    glowMesh.scale.multiplyScalar(1.03);
+    glowMesh.scale.multiplyScalar(1.04);
 
     return glowMesh;
+}
+
+export function addMoon(assets) {
+    const geometry = new THREE.SphereGeometry(EARTH_RADIUS / 5, 50, 50); //3.6678
+    const textureMap = assets.moon;
+    const textureBump = assets.moon_bump;
+    // const textureSpecular = assets.earth_specular;
+
+    const material: any = new THREE.MeshPhongMaterial({});
+
+    material.map = textureMap
+    material.bumpScale = 800
+    material.bumpMap = textureBump
+ 
+    material.shininess = 10;
+
+    const meshMoon = new THREE.Mesh(geometry, material);
+    meshMoon.castShadow = false;
+    meshMoon.receiveShadow = false;
+
+    meshMoon.position.set(-1500000, 0, 2500000);
+    meshMoon.scale.y = -1;
+
+
+    return meshMoon;
 }

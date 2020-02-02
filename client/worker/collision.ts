@@ -1,6 +1,5 @@
 import SocketService from "../services/socket.service";
 import * as THREE from 'three';
-import { getVolumeFromDistance } from "./utils";
 import { Player, Bullet } from "./models";
 
 /**
