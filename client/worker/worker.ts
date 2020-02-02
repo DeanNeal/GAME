@@ -73,7 +73,7 @@ class Game {
         this.animate = this.animate.bind(this);
     }
 
-    start(canvas: HTMLCanvasElement, assets) {
+    start(canvas: HTMLCanvasElement, assets, settings) {
         this.assets = assets;
         this.canvas = canvas;
         this.fakeCamera = this.camera2.clone();
@@ -100,7 +100,7 @@ class Game {
         ambient.color.setHSL(0.01, 0.01, 0.02)
         this.scene.add(ambient)
 
-        this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+        this.renderer = new THREE.WebGLRenderer({ canvas, antialias: settings.antialiasing, alpha: true })
 
 
         this.scene.add(addSky())
@@ -561,7 +561,7 @@ const worker = insideWorker(e => {
         if (!canvas.style) canvas.style = { width: 0, height: 0 }
 
         Preloader().then(assets => {
-            game.start(canvas, assets);
+            game.start(canvas, assets, e.data.settings);
 
             SocketService.socket.emit('join', e.data.opts)
             setTimeout(() => {

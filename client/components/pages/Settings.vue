@@ -2,40 +2,47 @@
   <div class="page settings">
     <app-back></app-back>
 
-    <ul>
-      <li>
-        <label class="checkbox">
-          <span> anti-aliasing: </span>
-          <input
-            type="checkbox"
-            @change="onAnti($event)"
-            :checked="antialiasing"
-          />
-        </label>
-      </li>
+    <div class="section">
+      <h2>Video</h2>
+      <ul>
+        <li v-if="!inGame">
+          <label class="checkbox">
+            <span> anti-aliasing: </span>
+            <input
+              type="checkbox"
+              @change="onChange($event, 'antialiasing')"
+              :checked="state.antialiasing"
+            />
+          </label>
+        </li>
+      </ul>
+    </div>
+    <div class="section">
+      <h2>Audio</h2>
+      <ul>
+        <li>
+          <label class="checkbox">
+            <span>Sounds: </span>
+            <input
+              type="checkbox"
+              @change="onChange($event, 'sounds')"
+              :checked="state.sounds"
+            />
+          </label>
+        </li>
 
-      <li>
-        <label class="checkbox">
-          <span>Sounds: </span>
-          <input
-            type="checkbox"
-            @change="onMuteSounds($event)"
-            :checked="soundsEnabled"
-          />
-        </label>
-      </li>
-
-      <li>
-        <label class="checkbox">
-          <span>Music: </span>
-          <input
-            type="checkbox"
-            @change="onMuteMusic($event)"
-            :checked="musicEnabled"
-          />
-        </label>
-      </li>
-    </ul>
+        <li>
+          <label class="checkbox">
+            <span>Music: </span>
+            <input
+              type="checkbox"
+              @change="onChange($event, 'music')"
+              :checked="state.music"
+            />
+          </label>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -46,37 +53,26 @@ import AudioService from '../../services/audio.service'
 export default {
   data: () => {
     return {
-      antialiasing: false,
-      soundsEnabled: false,
-      musicEnabled: false
+      inGame: false,
+      state: {}
     }
   },
   mounted () {
-    GlobalService.musicEnabled.subscribe(state => {
-      this.musicEnabled = state
-      if (state) {
-        AudioService.playAudio('menuMusic', 0.2, true)
-      } else {
-        AudioService.stopAudio('menuMusic')
-      }
+    GlobalService.inGame.subscribe(state => {
+      this.inGame = state
     })
-
-    GlobalService.soundsEnabled.subscribe(state => {
-      this.soundsEnabled = state
+    GlobalService.globalSettings.subscribe(state => {
+      this.state = state
     })
   },
   methods: {
     back () {
       GlobalService.currentPage.next('mainMenu')
     },
-    onMuteSounds (e) {
-      GlobalService.setSoundsEnabled(e.target.checked)
-    },
-    onMuteMusic (e) {
-      GlobalService.setMusicEnabled(e.target.checked)
-    },
-    onAnti (e) {
-      // GlobalService.setMusicEnabled(e.target.checked)
+    onChange (e, name) {
+      this.state[name] = e.target.checked
+      this.state.lastChanged = name
+      GlobalService.setSettings(this.state)
     }
   }
 }
@@ -84,12 +80,24 @@ export default {
 
 <style lang="less">
 .settings {
+  h2 {
+    color: #fff;
+  }
   ul {
-    margin: 70px 0 0 0;
+    margin-top: 10px;
     li {
-      margin: 20px 0;
       color: #fff;
+      &+ li {
+        margin: 10px 0 0 0;
+      }
     }
+  }
+
+  .section {
+      margin-top: 60px;
+      & + .section {
+        margin-top: 30px;
+      }
   }
 }
 </style>

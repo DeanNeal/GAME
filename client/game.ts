@@ -101,7 +101,7 @@ export class Game {
                     this.stats.end();
                 break;
             }
-        }, opts);
+        }, opts, GlobalService.globalSettings.getValue());
 
         this.addListeners();
     }

@@ -24,8 +24,8 @@ class AudioService {
 
   playAudio(name: string, volume?: number, start?: boolean, smooth?: boolean): void {
     const a = this.collection[name];
-    if(!a.isMusic && GlobalService.soundsEnabled.getValue() === false) return;
-    if(a.isMusic && GlobalService.musicEnabled.getValue() === false) return;
+    if(!a.isMusic && GlobalService.globalSettings.getValue().sounds === false) return;
+    if(a.isMusic && GlobalService.globalSettings.getValue().music === false) return;
 
     if (volume !== null && volume !== undefined) {
       if (smooth) {

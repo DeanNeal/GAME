@@ -16,6 +16,7 @@
 
 <script>
 import GlobalService from '../services/global.service'
+import AudioService from '../services/audio.service'
 
 import SettingsPage from './pages/Settings.vue'
 import CreditsPage from './pages/Credits.vue'
@@ -49,13 +50,21 @@ export default {
       this.inMenu = state
     })
 
+    GlobalService.globalSettings.subscribe(state => {
+      if (!state.lastChanged || state.lastChanged === 'music') {
+        if (state.music) {
+          AudioService.playAudio('menuMusic', 0.2, true)
+        } else {
+          AudioService.stopAudio('menuMusic')
+        }
+      }
+    })
+
     // GlobalService.viewMode.subscribe(mode => {
     //   // this.showTab = !this.showTab;
     //   this.viewMode = mode
     // })
   },
-  methods: {
-
-  }
+  methods: {}
 }
 </script>
