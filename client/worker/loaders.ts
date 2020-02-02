@@ -30,3 +30,17 @@ export class CustomModelLoader {
         });
     }
 }
+
+export class CustomFontLoader {
+    load(url) {
+        const loader = new THREE.FontLoader()
+        return new Promise((resolve, reject) => {
+            loader['load'](url, (object: any) => {
+                resolve(object)
+            },
+                () => { },
+                (e) => reject(e)
+            );
+        });
+    }
+}

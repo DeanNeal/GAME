@@ -51,6 +51,20 @@ export class Game {
         // cGUI.onChange((value)=>  {
         //     this.worker.post({type: 'dat.gui', value: {c: value}})
         // });
+
+        // var xGUI = gui.add({ interation: 0 }, 'interation').min(-100).max(100).step(0.01).name("x").listen();
+        // var yGUI = gui.add({ interation: 0 }, 'interation').min(-100).max(100).step(0.01).name("y").listen();
+        // var zGUI = gui.add({ interation: 0 }, 'interation').min(-800).max(500).step(0.01).name("z").listen();
+
+        // xGUI.onChange((value) => {
+        //     this.worker.post({ type: 'dat.gui', value: { x: value } })
+        // });
+        // yGUI.onChange((value) => {
+        //     this.worker.post({ type: 'dat.gui', value: { y: value } })
+        // });
+        // zGUI.onChange((value) => {
+        //     this.worker.post({ type: 'dat.gui', value: { z: value } })
+        // });
     }
 
     private init(opts: IGameOptions): void {
@@ -66,10 +80,6 @@ export class Game {
                     break;
                 case 'updateRunes':
                     GlobalService.runes.next(e.data.runes)
-                    break;
-
-                case 'gui':
-                    GlobalService.gui.next(e.data.gui);
                     break;
 
                 case 'userCreated':
@@ -95,11 +105,11 @@ export class Game {
 
                 case 'animateBegin':
                     this.stats.begin();
-                break;
-                
+                    break;
+
                 case 'animateEnd':
                     this.stats.end();
-                break;
+                    break;
             }
         }, opts, GlobalService.globalSettings.getValue());
 
@@ -234,7 +244,7 @@ export class Game {
 
     private onMouseWheel(e): void {
         e = window.event || e;
-        const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+        // const delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
         this.worker.post({
             type: 'mousewheel',

@@ -160,7 +160,7 @@ export class Game {
 
    createAsteroids(): IAsteroid[] {
       let asteroids = []
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 0; i++) {
          asteroids.push({
             health: 100,
             size: Game.randomInteger(5, 20),

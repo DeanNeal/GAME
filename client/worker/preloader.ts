@@ -1,4 +1,4 @@
-import { CustomImageLoader, CustomModelLoader } from "./loaders";
+import { CustomImageLoader, CustomModelLoader, CustomFontLoader } from "./loaders";
 
 export async function Preloader() {
     const array = [
@@ -15,11 +15,14 @@ export async function Preloader() {
        
 
         { url: "./models/simple-asteroid.glb", type: 'model', name: 'asteroid'},
-        { url: "./models/ship.glb", type: 'model', name: 'ship'}
+        { url: "./models/ship.glb", type: 'model', name: 'ship'},
+
+        { url: "./helvetiker_regular.typeface.json", type: 'font', name: 'helvetiker_font'},
     ];
 
     const imgLoader = new CustomImageLoader();
     const modelLoader = new CustomModelLoader();
+    const fontLoader = new CustomFontLoader();
 
     return new Promise(async (resolve, reject) => {
         let assets = {};
@@ -28,6 +31,7 @@ export async function Preloader() {
             const item = array[i];
             if(item.type === 'img') assets[item.name] = await imgLoader.load(item.url);
             if(item.type === 'model') assets[item.name] = await modelLoader.load(item.url);
+            if(item.type === 'font') assets[item.name] = await fontLoader.load(item.url);
         }
 
         resolve(assets);

@@ -25,6 +25,7 @@ import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyC
 import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
 import { Player, Bullet } from './models';
 import { Preloader } from './preloader';
+import { attachGUI, scaleXLeft, scaleXRight } from './gui';
 
 
 
@@ -64,7 +65,7 @@ class Game {
     //red zone
     public startTimeRedZone: number = new Date().getTime();
     public readonly durationBetweenZoneDamage: number = 1000;
-    public readonly zoneRadius: number = 120000;
+    public readonly zoneRadius: number = 50000;
 
     public bokehPass;
     public dLight;
@@ -76,6 +77,7 @@ class Game {
     start(canvas: HTMLCanvasElement, assets, settings) {
         this.assets = assets;
         this.canvas = canvas;
+
         this.fakeCamera = this.camera2.clone();
 
         // // lights
@@ -108,7 +110,7 @@ class Game {
         addSun(this.dLight, this.assets)
 
 
-        this.postprocessing()
+        // this.postprocessing()
         this.animate()
     }
 
@@ -122,6 +124,12 @@ class Game {
         this.composer.addPass(this.bokehPass);
     }
 
+    updateGui(user) {
+        this.player.params = user;
+
+        scaleXLeft(this.player.mesh.getObjectByName('HP_GROUP').getObjectByName('hp'), this.player.params.health / 100);
+    }
+
     userCreated(user) {
         const { position, rotation, shipType } = user;
         this.player = new Player(user);
@@ -130,10 +138,16 @@ class Game {
 
         const ship = this.assets.ship.scene.children[0].clone();
 
-        ship.add(this.camera1)
-        ship.add(this.camera2)
+
 
         this.player.setMesh(ship, position, rotation);
+
+        // setTimeout(() => {
+        ship.add(this.camera1)
+        ship.add(this.camera2)
+        // }, 3000)
+
+        attachGUI(this.player.mesh, this.assets);
 
         this.initFirstPersonMode();
 
@@ -189,6 +203,8 @@ class Game {
     resetPosition(position, rotation) {
         this.player.mesh.position.set(position.x, position.y, position.z)
         this.player.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
+
+        scaleXLeft(this.player.mesh.getObjectByName('HP_GROUP').getObjectByName('hp'), 1);
     }
 
     anotherNewPlayer(users) {
@@ -223,36 +239,32 @@ class Game {
 
         const ship = this.assets.ship.scene.children[0].clone();
 
-        const loader = new THREE.FontLoader()
-        loader.load('./helvetiker_regular.typeface.json', (font) => {
+        const font = this.assets.helvetiker_font;
 
-            const textGeo = new THREE.TextGeometry(user.playerName, {
-                font: font,
-                size: 20,
-                height: 1,
-                bevelEnabled: false,
-                bevelThickness: 1,
-                bevelSize: 0.01,
-                bevelSegments: 10,
-            })
-
-            let material = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                emissive: 0xffffff,
-            })
-
-            const userTextMesh = new THREE.Mesh(textGeo, material)
-
-            this.scene.add(ship)
-            this.scene.add(userTextMesh)
-
-            //should be after
-            const enemy = new Player(user, userTextMesh);
-            enemy.setMesh(ship, position, rotation);
-            this.players.push(enemy);//({ mesh: newPlayer, user: user, userTextMesh: userTextMesh, font: font})
+        const textGeo = new THREE.TextGeometry(user.playerName, {
+            font: font,
+            size: 20,
+            height: 1,
+            bevelEnabled: false,
+            bevelThickness: 1,
+            bevelSize: 0.01,
+            bevelSegments: 10,
         })
 
+        let material = new THREE.MeshPhongMaterial({
+            color: 0xffffff,
+            emissive: 0xffffff,
+        })
 
+        const userTextMesh = new THREE.Mesh(textGeo, material)
+
+        this.scene.add(ship)
+        this.scene.add(userTextMesh)
+
+        //should be after
+        const enemy = new Player(user, userTextMesh);
+        enemy.setMesh(ship, position, rotation);
+        this.players.push(enemy);
     }
 
     updateUsersCoords(users) {
@@ -394,8 +406,8 @@ class Game {
 
 
     redZoneIndicator() {
-        let zoneProcentage = (Math.abs(Math.max(...this.player.mesh.position.toArray())) / this.zoneRadius) * 100;
-        return (zoneProcentage >= 100) ? 'CRITICAL' : (zoneProcentage.toFixed(0) + '%');
+        let zoneProcentage = (Math.max(...this.player.mesh.position.toArray().map(r=> Math.abs(r))) / this.zoneRadius) * 100;
+        return zoneProcentage >= 100 ? 100 : zoneProcentage;
     }
 
 
@@ -404,13 +416,7 @@ class Game {
 
         if (this.controls) {
             const speed = this.controls.update(delta)
-            worker.post({
-                type: 'gui', gui: {
-                    speed,
-                    zoneProcentage: this.redZoneIndicator()
-                }
-            })
-
+  
         }
 
         this.camera2.copy(this.fakeCamera);
@@ -418,7 +424,7 @@ class Game {
         this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
 
         if (this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
-        if (this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
+        if (this.bokehPass && this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
 
     }
 
@@ -436,14 +442,15 @@ class Game {
         if (this.player && this.player.mesh) {
             let { x, y, z } = this.player.mesh.position;
 
-            if (Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius, Math.abs(z) > this.zoneRadius) {
+            if (Math.abs(x) > this.zoneRadius || Math.abs(y) > this.zoneRadius || Math.abs(z) > this.zoneRadius) {
                 const elapsed = new Date().getTime() - this.startTimeRedZone
                 if (elapsed > this.durationBetweenZoneDamage) {
-                    // console.log('RED ZONE', x,y,z);
                     SocketService.socket.emit('outsideZone', this.player.params._id);
                     this.startTimeRedZone = new Date().getTime()
                 }
             }
+
+            scaleXRight(this.player.mesh.getObjectByName('ZONE_GROUP').getObjectByName('zone'), this.redZoneIndicator() / 100);
         }
     }
 
@@ -499,6 +506,9 @@ class Game {
         })
 
         if (this.player && this.player.mesh) {
+            // this.player.mesh.getObjectByName('gui_hp').lookAt(this.camera1.getWorldPosition(this.camera1.position))
+            // this.player.mesh.getObjectByName('gui_hp').quaternion.copy(this.camera1.quaternion)
+
             SocketService.socket.emit('move', {
                 id: this.player.params._id,
                 position: this.player.mesh.position,
@@ -520,6 +530,7 @@ class Game {
         }
         // });
         // console.log(this.bullets.length ? this.bullets[0].mesh.position : '');
+
 
         this.checkRedZone();
 
@@ -546,8 +557,13 @@ class Game {
     }
 
     datGui(value) {
-        if (value.p) this.earth.getObjectByName('glow')['material'].uniforms["p"].value = value.p;
-        if (value.c) this.earth.getObjectByName('glow')['material'].uniforms["c"].value = value.c;
+        // if (value.p) this.earth.getObjectByName('glow')['material'].uniforms["p"].value = value.p;
+        // if (value.c) this.earth.getObjectByName('glow')['material'].uniforms["c"].value = value.c;
+
+        // if (value.x) this.player.mesh.getObjectByName('gui_hp').position.x = value.x;
+        // if (value.y) this.player.mesh.getObjectByName('gui_hp').position.y = value.y;
+        // if (value.z) this.player.mesh.getObjectByName('gui_hp').position.z = value.z;
+
     }
 
 }
@@ -638,6 +654,8 @@ SocketService.socket
     })
     .on('userUpdated', user => {
         worker.post({ type: 'userUpdated', user })
+
+        game.updateGui(user);
     })
     .on('userList', users => {
         worker.post({ type: 'userList', users })

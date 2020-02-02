@@ -95,6 +95,7 @@ export default {
     margin-bottom: 10px;
     background: none;
     color: #fff;
+    font-size: 20px;
     border-radius: 4px;
     outline: none;
   }

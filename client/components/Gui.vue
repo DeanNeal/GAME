@@ -1,17 +1,5 @@
 <template>
-  <div class="gui" v-if="inGame" :class="{ damage: damage }">
-    <!--<div class="gui__info">
-        <div>Controls - > WA/QE + mouse</div>
-        <div>Shift - constant speed</div>
-        <div>Tab - change view mode</div>
-      </div> -->
-    <div class="gui__hp">HP {{ user.health }}</div>
-    <div class="gui__right">
-      <div class="gui__speed">{{ gui.speed }} KM/H</div>
-      <div class="gui__redzone">ZONE: {{ gui.zoneProcentage }}</div>
-    </div>
-    <!--<div class="gui__timer"></div>-->
-    <div class="gui__damage"></div>
+  <div class="gui" v-if="inGame">
     <app-user-list></app-user-list>
 
     <div class="preloader" v-if="preloader">
@@ -32,15 +20,10 @@ export default {
   },
   data: () => {
     return {
-      gui: {},
-      damage: false,
       preloader: false,
       inMenu: false,
       inGame: false,
-      timeout: null,
-      user: {
-        health: null
-      }
+      timeout: null
     }
   },
   mounted () {
@@ -60,10 +43,6 @@ export default {
 
     GlobalService.preloader.subscribe(state => {
       this.preloader = state
-    })
-
-    GlobalService.gui.subscribe(gui => {
-      this.gui = gui
     })
 
     GlobalService.damage.subscribe(() => {
@@ -117,86 +96,6 @@ export default {
 </script>
 
 <style lang="less">
-.gui {
-  &.damage {
-    .gui__damage {
-      display: block;
-    }
-  }
-  &__damage {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: rgba(255, 0, 0, 0.3);
-    width: 100%;
-    height: 100%;
-  }
-
-  &__hp {
-    position: absolute;
-    width: 200px;
-    text-align: left;
-    font-size: 48px;
-    color: #fff;
-    text-align: center;
-    bottom: 40px;
-    left: 10px;
-    margin: auto;
-    height: 50px;
-    white-space: nowrap;
-  }
-
-  &__right {
-    position: absolute;
-    // width: 250px;
-    text-align: right;
-    font-size: 48px;
-    color: #fff;
-    text-align: right;
-    bottom: 40px;
-    right: 10px;
-    margin: auto;
-    // height: 50px;
-    // white-space: nowrap;
-    flex-wrap: wrap;
-    display: flex;
-  }
-
-  &__speed {
-    width: 100%;
-  }
-
-  &__redzone {
-    width: 100%;
-  }
-
-  &__info {
-    position: absolute;
-    top: 10px;
-    width: 100%;
-    color: #fff;
-    padding: 5px;
-    font-size: 13px;
-    text-align: center;
-    z-index: 1;
-  }
-  
-  &__timer {
-    position: absolute;
-    width: 200px;
-    font-size: 180px;
-    color: #fff;
-    text-align: center;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    height: 200px;
-  }
-}
-
 .preloader {
   position: fixed;
   width: 100%;

@@ -257,7 +257,7 @@ export default function flyControls( object, camera, container) {
 		// expose the rotation vector for convenience
 		this.object.rotation.setFromQuaternion( this.object.quaternion, this.object.rotation.order );
 
-		this.cameraUpdate();
+		// this.cameraUpdate();
 
 		//smooth stop
 		// if(this.viewMode === 1) {
