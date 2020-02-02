@@ -109,6 +109,7 @@ export class Game {
 
          if(userDamagingId) {
             this.users.find(r => r._id === userDamagingId).kills += 1
+            this.io.sockets.connected[userDemagedId].broadcast.emit('playSound', { sound: 'explosion', position: user.position });
          }
       } else {
          if(userDamagingId) this.io.sockets.emit('playSound', { sound: 'damage', position: user.position });

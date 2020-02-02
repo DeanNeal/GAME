@@ -7,11 +7,14 @@ declare var document: any;
 import createWorker from './worker/create-worker';
 import { IWorker, IGameOptions } from './interfaces/interfaces';
 import * as dat from 'dat.gui';
+import * as Stats from 'stats-js';
 
 export class Game {
     public container: HTMLCanvasElement;
     public worker: IWorker;
     public speedBlock: HTMLElement;
+
+    public stats;
 
     constructor(opts: IGameOptions) {
         // this.onWindowResize = this.onWindowResize.bind(this);
@@ -26,6 +29,11 @@ export class Game {
 
         this.onContextmenu = this.onContextmenu.bind(this);
         this.onMouseWheel = this.onMouseWheel.bind(this);
+
+
+        this.stats = new Stats();
+        this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild(this.stats.dom);
 
         this.init(opts);
         this.datGui();
@@ -84,6 +92,14 @@ export class Game {
                 case 'gotDamage':
                     GlobalService.damage.next();
                     break;
+
+                case 'animateBegin':
+                    this.stats.begin();
+                break;
+                
+                case 'animateEnd':
+                    this.stats.end();
+                break;
             }
         }, opts);
 

@@ -38,8 +38,8 @@ class Game {
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 200, 6000000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 200, 6000000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 6000000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 6000000)
 
     public fakeCamera: THREE.Camera;
 
@@ -57,8 +57,8 @@ class Game {
 
     //shooting
     public startTimeShooting: number = new Date().getTime();
-    readonly durationBetweenShots: number = 500;
-    readonly bulletSpeed: number = 350;
+    readonly durationBetweenShots: number = 230;
+    readonly bulletSpeed: number = 450;
     public isShooting: boolean = false;
 
     //red zone
@@ -433,7 +433,8 @@ class Game {
     }
 
     animate() {
-        requestAnimationFrame(this.animate)
+    
+        worker.post({ type: 'animateStart' })
 
         this.render()
         this.shotAnimate()
@@ -517,8 +518,9 @@ class Game {
             }
         }
 
+        worker.post({ type: 'animateEnd' })
 
-
+        requestAnimationFrame(this.animate)
     }
 
     onResize(e) {
