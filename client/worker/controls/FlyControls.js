@@ -28,7 +28,7 @@ export default function flyControls( object, camera, container) {
 
 
 	// internals
-	this.maxSpeed = 80;
+	this.maxSpeed = 120;
 	this.acceleration = 0.45;
 	this.tmpQuaternion = new THREE.Quaternion();
 

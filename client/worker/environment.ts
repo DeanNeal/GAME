@@ -71,7 +71,7 @@ export function addSky(): THREE.Group {
         color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1
     });
 
-    const geometry = new THREE.OctahedronGeometry(400);
+    const geometry = new THREE.OctahedronGeometry(500);
     const group = new THREE.Group();
 
     array.forEach(() => {
@@ -189,7 +189,7 @@ export function addMoon(assets) {
     const material: any = new THREE.MeshPhongMaterial({});
 
     material.map = textureMap
-    material.bumpScale = 800
+    material.bumpScale = 600
     material.bumpMap = textureBump
  
     material.shininess = 10;

@@ -58,7 +58,7 @@ class Game {
     //shooting
     public startTimeShooting: number = new Date().getTime();
     readonly durationBetweenShots: number = 300;
-    readonly bulletSpeed: number = 500;
+    readonly bulletSpeed: number = 600;
     public isShooting: boolean = false;
 
     //red zone
@@ -345,7 +345,7 @@ class Game {
             }
 
             this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
-        }, 5000)
+        }, 4000)
     }
 
     fire() {
@@ -381,7 +381,7 @@ class Game {
                 }
 
                 this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
-            }, 5000)
+            }, 4000)
         }
     }
 
