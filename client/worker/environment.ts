@@ -9,8 +9,10 @@ export function addAsteroids(asteroids: any[], assets): THREE.Mesh[] {
     const obj = assets.asteroid;
 
     let material = new THREE.MeshStandardMaterial({
-        color: 0x999999, roughness: 0.8, metalness: 0.2
+        color: 0x999999, roughness: 0.8, metalness: 0.2, side:  THREE.DoubleSide
     });
+
+    
 
     let geometry = obj.scene.children[0].geometry;
 
@@ -22,6 +24,7 @@ export function addAsteroids(asteroids: any[], assets): THREE.Mesh[] {
         mesh.position.x = c.position.x;
         mesh.position.y = c.position.y;
         mesh.position.z = c.position.z;
+
 
         mesh.rotation.x = c.position.x;
         mesh.rotation.y = c.position.y;
@@ -68,7 +71,7 @@ export function addSky(): THREE.Group {
     const array = new Array(5000).fill('');
 
     const material = new THREE.MeshPhongMaterial({
-        color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1
+        emissive: 0xffffff, emissiveIntensity: 1
     });
 
     const geometry = new THREE.OctahedronGeometry(500);
@@ -124,8 +127,8 @@ export function addEarth(assets) {
     material.bumpScale = 800
     material.bumpMap = textureBump
     material.specularMap = textureSpecular
-    material.specular = new THREE.Color('#bbb')
-    material.shininess = 10;
+    material.specular = new THREE.Color('#fff')
+    material.shininess = 8;
 
     const meshEarth = new THREE.Mesh(geometry, material);
     meshEarth.castShadow = false;

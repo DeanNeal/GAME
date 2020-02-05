@@ -19,14 +19,13 @@ import { RenderPass } from './three/post-processing/RenderPass'
 // import { FilmPass } from './three/post-processing/FilmPass';
 import { BokehPass } from './three/post-processing/BokehPass';
 
-import { createBullet } from './objects'
 import { addAsteroids, addAtosphere, addRunes, addSky, addSun, addEarth } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
-import { getVolumeFromDistance, LoadPlayerModel, getPerformanceOfFunction } from './utils'
-import { Player, Bullet } from './models';
+import { getVolumeFromDistance, getPerformanceOfFunction } from './utils'
+import { Player } from './models';
 import { Preloader } from './preloader';
 import { attachGUI, scaleXLeft, scaleXRight } from './gui';
-
+import { Bullet } from './entities/bullet';
 
 
 type ViewMode = 0 | 1;
@@ -59,16 +58,17 @@ class Game {
     //shooting
     public startTimeShooting: number = new Date().getTime();
     readonly durationBetweenShots: number = 300;
-    readonly bulletSpeed: number = 600;
     public isShooting: boolean = false;
 
     //red zone
     public startTimeRedZone: number = new Date().getTime();
     public readonly durationBetweenZoneDamage: number = 1000;
-    public readonly zoneRadius: number = 50000;
+    public readonly zoneRadius: number = 100000;
 
     public bokehPass;
     public dLight;
+
+    public sparks = [];
 
     constructor() {
         this.animate = this.animate.bind(this);
@@ -332,73 +332,73 @@ class Game {
     }
 
     otherFire(params) {
-        let userMesh = this.players.find(r => r.params._id === params.userId).mesh
-        let pos = userMesh.position.clone()
-        let bullet = createBullet()
-        const direction = new THREE.Vector3(params.direction.x, params.direction.y, params.direction.z);
+        // let userMesh = this.players.find(r => r.params._id === params.userId).mesh
+        // let pos = userMesh.position.clone()
+        // let bullet = createBullet()
+        // const direction = new THREE.Vector3(params.direction.x, params.direction.y, params.direction.z);
 
-        bullet.position.set(pos.x, pos.y, pos.z)
-        bullet.rotation.set(
-            params.rotation._x,
-            params.rotation._y,
-            params.rotation._z
-        )
+        // bullet.position.set(pos.x, pos.y, pos.z)
+        // bullet.rotation.set(
+        //     params.rotation._x,
+        //     params.rotation._y,
+        //     params.rotation._z
+        // )
 
-        //offset
-        bullet.translateZ(-50);
+        // //offset
+        // // bullet.translateZ(-50);
 
-        this.bullets.push(new Bullet(bullet, direction, false));
+        // this.bullets.push(new Bullet(bullet, direction, false));
 
-        this.scene.add(bullet);
+        // this.scene.add(bullet);
 
-        setTimeout(() => {
-            if (bullet.parent) {
-                this.scene.remove(bullet)
-            }
+        // setTimeout(() => {
+        //     if (bullet.parent) {
+        //         this.scene.remove(bullet)
+        //     }
 
-            this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
-        }, 4000)
+        //     this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
+        // }, 4000)
     }
 
     fire() {
         if (this.player && this.player.params) {
-            let bullet = createBullet()
+            // let bullet = createBullet()
 
-            let pos = this.player.mesh.position.clone()
-            let rot = this.player.mesh.rotation.clone()
+            // let pos = this.player.mesh.position.clone()
+            // let rot = this.player.mesh.rotation.clone()
 
-            bullet.position.set(pos.x, pos.y, pos.z)
-            bullet.rotation.set(rot.x, rot.y, rot.z)
+            // bullet.position.set(pos.x, pos.y, pos.z)
+            // bullet.rotation.set(rot.x, rot.y, rot.z)
 
-            const playerPos = this.player.mesh.position.clone();
-            const matrixWorld = this.player.mesh.matrixWorld.clone();
-            const direction = this.getDirectionOfBullet(matrixWorld, playerPos);
+            // const playerPos = this.player.mesh.position.clone();
+            // const matrixWorld = this.player.mesh.matrixWorld.clone();
+            // const direction = this.getDirectionOfBullet(matrixWorld, playerPos);
 
-            bullet.translateZ(-150);
+            // bullet.translateZ(-150);
+            const bullet = new Bullet(this.player, true);
+            this.bullets.push(bullet)
 
-            this.bullets.push(new Bullet(bullet, direction, true))
+            this.scene.add(bullet.mesh);
 
-            this.scene.add(bullet);
+            // SocketService.socket.emit('fire', {
+            //     userId: this.player.params._id,
+            //     direction: direction,
+            //     rotation: rot,
+            //     position: pos
+            // })
 
-            SocketService.socket.emit('fire', {
-                userId: this.player.params._id,
-                direction: direction,
-                rotation: rot,
-                position: pos
-            })
+            // setTimeout(() => {
+            //     if (bullet.mesh.parent) {
+            //         this.scene.remove(bullet.mesh)
+            //     }
 
-            setTimeout(() => {
-                if (bullet.parent) {
-                    this.scene.remove(bullet)
-                }
-
-                this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
-            }, 4000)
+            //     this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.mesh.id);
+            // }, 4000)
         }
     }
 
     playSound(params) {
-        console.log('SOUND: ' + params.sound, params);
+        // console.log('SOUND: ' + params.sound, params);
         const pos = new THREE.Vector3(params.position.x, params.position.y, params.position.z);
         params.volume = getVolumeFromDistance(this.player.mesh.position, pos);
         worker.post({ type: 'playSound', params })
@@ -406,17 +406,17 @@ class Game {
 
 
     redZoneIndicator() {
-        let zoneProcentage = (Math.max(...this.player.mesh.position.toArray().map(r=> Math.abs(r))) / this.zoneRadius) * 100;
+        let zoneProcentage = (Math.max(...this.player.mesh.position.toArray().map(r => Math.abs(r))) / this.zoneRadius) * 100;
         return zoneProcentage >= 100 ? 100 : zoneProcentage;
     }
 
 
-    render() {
-        let delta = this.clock.getDelta()
+    render(delta) {
+        // let delta = this.clock.getDelta()
 
         if (this.controls) {
             const speed = this.controls.update(delta)
-  
+
         }
 
         this.camera2.copy(this.fakeCamera);
@@ -426,16 +426,6 @@ class Game {
         if (this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
         if (this.bokehPass && this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
 
-    }
-
-    getDirectionOfBullet(matrixWorld, camPos) {
-        //Pick a point in front of the camera in camera space:
-        const pLocal = new THREE.Vector3(0, 0, -1)
-        // //Now transform that point into world space:
-        const pWorld = pLocal.applyMatrix4(matrixWorld)
-        // //You can now construct the desired direction vector:
-        const dir = pWorld.sub(camPos).normalize()
-        return dir;
     }
 
     checkRedZone() {
@@ -455,32 +445,32 @@ class Game {
     }
 
     animate() {
+        requestAnimationFrame(this.animate)
 
         worker.post({ type: 'animateStart' })
 
-        this.render()
+        const delta = this.clock.getDelta()
+
+        this.render(delta)
         this.shotAnimate()
 
-        // this.dLight.position.x += 100;
+
+        this.sparks.forEach((s) => s.update(this, delta));
+        this.bullets.forEach(b => b.update(this, delta));
 
         for (let i = 0; i < this.allRunes.length; i++) {
             this.allRunes[i].rotation.y += 0.01
         }
 
         for (let i = 0; i < this.allAsteroids.length; i++) {
-            this.allAsteroids[i].rotation.x += 0.002
-            this.allAsteroids[i].rotation.y += 0.002
-            this.allAsteroids[i].rotation.z += 0.002
+            this.allAsteroids[i].rotation.x += 0.0015
+            this.allAsteroids[i].rotation.y += 0.0015
+            this.allAsteroids[i].rotation.z += 0.0015
         }
 
         if (this.earth) {
             this.earth.rotation.y += 0.00004;
             this.earth.getObjectByName('clouds').rotation.z -= 0.00006;
-        }
-
-        for (let i = 0; i < this.bullets.length; i++) {
-            const dir = this.bullets[i].direction.clone();
-            this.bullets[i].mesh.position.add(dir.multiplyScalar(this.bulletSpeed))
         }
 
         this.players.forEach(user => {
@@ -522,11 +512,11 @@ class Game {
         }
 
         if (this.bullets.length) {
-            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision), this.player)
+            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision && !r.isDestroyed), this.player, this)
         }
 
         if (this.allAsteroids.length && this.player && this.player.mesh) {
-            asteroidWithBulletCollision(this.scene, this.allAsteroids, this.bullets.filter(r => r.collision), this.player);
+            asteroidWithBulletCollision(this.allAsteroids, this.bullets.filter(r => r.collision && !r.isDestroyed), this);
         }
         // });
         // console.log(this.bullets.length ? this.bullets[0].mesh.position : '');
@@ -535,8 +525,6 @@ class Game {
         this.checkRedZone();
 
         worker.post({ type: 'animateEnd' })
-
-        requestAnimationFrame(this.animate)
     }
 
     onResize(e) {

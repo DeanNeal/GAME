@@ -16,15 +16,3 @@ export class Player {
      this.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
    }
  }
- 
- export class Bullet {
-   public mesh: THREE.Mesh;
-   public direction;
-   public collision: boolean;
-   public isDestroyed: boolean = false;
-   constructor(mesh, direction, collision = false) {
-     this.mesh = mesh;
-     this.direction = direction;
-     this.collision = collision;
-   }
- }

@@ -6,7 +6,7 @@ import  * as THREE from 'three';
 export default function flyControls( object, camera, container) {
 
 	this.object = object;
-	camera.position.set(0, 50, -300);
+	camera.position.set(0, 90, -300);
 	this.cameraInitPosition = camera.position.clone();
 
 	this.domElement = container || /*( domElement !== undefined ) ? domElement : */document;
@@ -28,8 +28,8 @@ export default function flyControls( object, camera, container) {
 
 
 	// internals
-	this.maxSpeed = 120;
-	this.acceleration = 0.45;
+	this.maxSpeed = 100;
+	this.acceleration = 0.6;
 	this.tmpQuaternion = new THREE.Quaternion();
 
 	this.mouseStatus = 0;

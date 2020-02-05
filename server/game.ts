@@ -147,7 +147,7 @@ export class Game {
 
    damageToAsteroid(id: string) {
       let asteriod = this.asteroids.find(r => r.id === id);
-      asteriod.health -= 20;
+      asteriod.health -= 10;
 
       if (asteriod.health <= 0) {
          this.io.sockets.emit('asteroidWasRemoved', asteriod.id)
@@ -160,7 +160,7 @@ export class Game {
 
    createAsteroids(): IAsteroid[] {
       let asteroids = []
-      for (let i = 0; i < 0; i++) {
+      for (let i = 0; i < 300; i++) {
          asteroids.push({
             health: 100,
             size: Game.randomInteger(5, 20),
@@ -184,14 +184,14 @@ export class Game {
 
    createRunes(): IRune[] {
       let runes = [];
-      for (let i = 0; i < 0; i++) {
+      for (let i = 0; i < 10; i++) {
          runes.push({
             id: i,
             // color: getRandColor(),
             position: {
-               x: 5000 * (2.0 * Math.random() - 1.0),
-               y: 5000 * (2.0 * Math.random() - 1.0),
-               z: 5000 * (2.0 * Math.random() - 1.0)
+               x: 40000 * (2.0 * Math.random() - 1.0),
+               y: 40000 * (2.0 * Math.random() - 1.0),
+               z: 40000 * (2.0 * Math.random() - 1.0)
             },
             rotation: {
                x: Math.random() * Math.PI,
@@ -206,9 +206,9 @@ export class Game {
 
    static randomPosition(): IVector3 {
       return {
-         x: 2500 * (5.0 * Math.random() - 1.0),
-         y: 2500 * (5.0 * Math.random() - 1.0),
-         z: 2500 * (5.0 * Math.random() - 1.0)
+         x: 0,//2500 * (5.0 * Math.random() - 1.0),
+         y: 0,//2500 * (5.0 * Math.random() - 1.0),
+         z: 0//2500 * (5.0 * Math.random() - 1.0)
       }
    }
 

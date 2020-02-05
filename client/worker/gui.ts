@@ -24,7 +24,7 @@ export function attachGUI(player, assets) {
 
 }
 
-function createIndicator(name, color, size = [50, 3, 3]) {
+function createIndicator(name, color, size = [50, 5, 4]) {
     let material = new THREE.MeshPhongMaterial({
         color: color,
         emissive: color,
@@ -66,7 +66,7 @@ function createLabel(assets, name, dir, size = 4, color = 0xffffff) {
     let material = new THREE.MeshPhongMaterial({ emissive: color })
 
     const text = new THREE.Mesh(textGeo, material)
-    text.position.y = 5.9;
+    text.position.y = 6.5;
 
     if (dir === 'left') text.position.x = -50 / 2 + (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x) / 2;
     if (dir === 'right') text.position.x = 50 / 2 - (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x) / 2;
