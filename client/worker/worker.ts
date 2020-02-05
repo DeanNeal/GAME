@@ -26,6 +26,7 @@ import { Player } from './models';
 import { Preloader } from './preloader';
 import { attachGUI, scaleXLeft, scaleXRight } from './gui';
 import { Bullet } from './entities/bullet';
+import { Sparks } from './entities/sparks';
 
 
 type ViewMode = 0 | 1;
@@ -289,6 +290,15 @@ class Game {
         })
     }
 
+    createSparks(params) {
+        const sparks = new Sparks(params.size);
+
+        sparks.mesh.position.copy(params.collisionPosition);
+
+        this.sparks.push(sparks);
+        this.scene.add(sparks.mesh)
+    }
+
     initFirstPersonMode() {
         this.controls = new FlyControls(this.player.mesh, this.camera1, this.canvas)
         // controls.enablePan = false;
@@ -331,69 +341,24 @@ class Game {
         }
     }
 
-    otherFire(params) {
-        // let userMesh = this.players.find(r => r.params._id === params.userId).mesh
-        // let pos = userMesh.position.clone()
-        // let bullet = createBullet()
-        // const direction = new THREE.Vector3(params.direction.x, params.direction.y, params.direction.z);
-
-        // bullet.position.set(pos.x, pos.y, pos.z)
-        // bullet.rotation.set(
-        //     params.rotation._x,
-        //     params.rotation._y,
-        //     params.rotation._z
-        // )
+    otherFire(id) {
+        let userMesh = this.players.find(r => r.params._id === id).mesh
+        const bullet = new Bullet(userMesh);
 
         // //offset
         // // bullet.translateZ(-50);
 
-        // this.bullets.push(new Bullet(bullet, direction, false));
-
-        // this.scene.add(bullet);
-
-        // setTimeout(() => {
-        //     if (bullet.parent) {
-        //         this.scene.remove(bullet)
-        //     }
-
-        //     this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.id);
-        // }, 4000)
+        this.bullets.push(bullet);
+        this.scene.add(bullet.mesh);
     }
 
     fire() {
         if (this.player && this.player.params) {
-            // let bullet = createBullet()
-
-            // let pos = this.player.mesh.position.clone()
-            // let rot = this.player.mesh.rotation.clone()
-
-            // bullet.position.set(pos.x, pos.y, pos.z)
-            // bullet.rotation.set(rot.x, rot.y, rot.z)
-
-            // const playerPos = this.player.mesh.position.clone();
-            // const matrixWorld = this.player.mesh.matrixWorld.clone();
-            // const direction = this.getDirectionOfBullet(matrixWorld, playerPos);
-
             // bullet.translateZ(-150);
-            const bullet = new Bullet(this.player, true);
+            const bullet = new Bullet(this.player.mesh, true);
             this.bullets.push(bullet)
 
             this.scene.add(bullet.mesh);
-
-            // SocketService.socket.emit('fire', {
-            //     userId: this.player.params._id,
-            //     direction: direction,
-            //     rotation: rot,
-            //     position: pos
-            // })
-
-            // setTimeout(() => {
-            //     if (bullet.mesh.parent) {
-            //         this.scene.remove(bullet.mesh)
-            //     }
-
-            //     this.bullets = this.bullets.filter(b => b.mesh.id !== bullet.mesh.id);
-            // }, 4000)
         }
     }
 
@@ -404,28 +369,9 @@ class Game {
         worker.post({ type: 'playSound', params })
     }
 
-
     redZoneIndicator() {
         let zoneProcentage = (Math.max(...this.player.mesh.position.toArray().map(r => Math.abs(r))) / this.zoneRadius) * 100;
         return zoneProcentage >= 100 ? 100 : zoneProcentage;
-    }
-
-
-    render(delta) {
-        // let delta = this.clock.getDelta()
-
-        if (this.controls) {
-            const speed = this.controls.update(delta)
-
-        }
-
-        this.camera2.copy(this.fakeCamera);
-
-        this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
-
-        if (this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
-        if (this.bokehPass && this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
-
     }
 
     checkRedZone() {
@@ -444,6 +390,23 @@ class Game {
         }
     }
 
+    render(delta) {
+        // let delta = this.clock.getDelta()
+
+        if (this.controls) {
+            const speed = this.controls.update(delta)
+
+        }
+
+        this.camera2.copy(this.fakeCamera);
+
+        this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
+
+        if (this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
+        if (this.bokehPass && this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
+
+    }
+
     animate() {
         requestAnimationFrame(this.animate)
 
@@ -451,9 +414,11 @@ class Game {
 
         const delta = this.clock.getDelta()
 
-        this.render(delta)
-        this.shotAnimate()
 
+        this.shotAnimate()
+        
+        this.render(delta)
+       
 
         this.sparks.forEach((s) => s.update(this, delta));
         this.bullets.forEach(b => b.update(this, delta));
@@ -512,7 +477,7 @@ class Game {
         }
 
         if (this.bullets.length) {
-            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision && !r.isDestroyed), this.player, this)
+            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision && !r.isDestroyed), this.player)
         }
 
         if (this.allAsteroids.length && this.player && this.player.mesh) {
@@ -663,8 +628,8 @@ SocketService.socket
     .on('anotherNewPlayer', users => {
         game.anotherNewPlayer(users);
     })
-    .on('otherFire', params => {
-        game.otherFire(params);
+    .on('otherFire', id => {
+        game.otherFire(id);
     })
     .on('dead', function ({ position, rotation }) {
         game.resetPosition(position, rotation)
@@ -680,4 +645,7 @@ SocketService.socket
     })
     .on('playSound', (params) => {
         game.playSound(params);
-    });
+    })
+    .on('createSparks', (params) => {
+        game.createSparks(params);
+    })

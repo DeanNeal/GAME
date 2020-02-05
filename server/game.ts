@@ -13,7 +13,7 @@ export class Game {
             this.io.sockets.emit('updateUsersCoords', this.users)
          }
       }, 10)
-      
+
       //initial state
       this.runes = this.createRunes();
       this.asteroids = this.createAsteroids();
@@ -52,15 +52,15 @@ export class Game {
 
          socket.on('fire', (bullet) => {
             this.io.sockets.emit('playSound', { sound: 'blaster', position: bullet.position });
-            socket.broadcast.emit('otherFire', bullet)
+            socket.broadcast.emit('otherFire', socket.id)
          })
 
-         socket.on('damageToEnemy', (userDemagedId: string, userDamagingId: string) => {
-            this.damageToPlayer(userDemagedId, userDamagingId);
+         socket.on('damageToEnemy', (userDemagedId: string, userDamagingId: string, collisionPosition) => {
+            this.damageToPlayer(userDemagedId, userDamagingId, collisionPosition);
          })
 
-         socket.on('damageToAsteroid', (id) => {
-            this.damageToAsteroid(id);
+         socket.on('damageToAsteroid', (params) => {
+            this.damageToAsteroid(params);
          });
 
          socket.on('outsideZone', (userDemagedId) => {
@@ -92,10 +92,10 @@ export class Game {
       this.io.sockets.emit('userList', this.users)
    }
 
-   damageToPlayer(userDemagedId: string, userDamagingId?: string) {
-      const user = this.users.find(r=> r._id === userDemagedId);
+   damageToPlayer(userDemagedId: string, userDamagingId?: string, collisionPosition?) {
+      const user = this.users.find(r => r._id === userDemagedId);
       user.health -= 10;
-      
+
       if (user.health <= 0) {
          user.health = 100
          user.death++;
@@ -107,14 +107,16 @@ export class Game {
                rotation: Game.randomRotation()
             })
 
-         if(userDamagingId) {
+         if (userDamagingId) {
             this.users.find(r => r._id === userDamagingId).kills += 1
             this.io.sockets.connected[userDemagedId].broadcast.emit('playSound', { sound: 'explosionShip', position: user.position });
          }
       } else {
-         if(userDamagingId) this.io.sockets.emit('playSound', { sound: 'damage', position: user.position });
-         if(!userDamagingId) this.io.sockets.to(userDemagedId).emit('playSound', { sound: 'damage', position: user.position });
-         
+         if (userDamagingId) this.io.sockets.emit('playSound', { sound: 'damage', position: user.position });
+         if (!userDamagingId) this.io.sockets.to(userDemagedId).emit('playSound', { sound: 'damage', position: user.position });
+
+         if (collisionPosition) this.io.sockets.emit('createSparks', { collisionPosition: collisionPosition, size: 8 });
+
          this.io.sockets.to(userDemagedId).emit('gotDamage', user)
       }
 
@@ -145,16 +147,17 @@ export class Game {
       }
    }
 
-   damageToAsteroid(id: string) {
-      let asteriod = this.asteroids.find(r => r.id === id);
+   damageToAsteroid(params) {
+      let asteriod = this.asteroids.find(r => r.id === params.id);
       asteriod.health -= 10;
 
       if (asteriod.health <= 0) {
          this.io.sockets.emit('asteroidWasRemoved', asteriod.id)
-         this.asteroids = this.asteroids.filter(r => r.id !== id);
+         this.asteroids = this.asteroids.filter(r => r.id !== params.id);
          this.io.sockets.emit('playSound', { sound: 'explosionAsteroid', position: asteriod.position });
       } else {
          this.io.sockets.emit('playSound', { sound: 'damage', position: asteriod.position });
+         this.io.sockets.emit('createSparks', { collisionPosition: params.collisionPosition, size: 20 });
       }
    }
 

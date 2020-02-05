@@ -63,7 +63,7 @@ export function runesCollisionDetection(player: Player, allRunes: THREE.Mesh[]) 
 }
 
 let lastBulletWithEnemyCollisionId;
-export function bulletsWithEnemyCollisionDetection(scene: THREE.Scene, players: Player[], bullets, player: Player, context) {
+export function bulletsWithEnemyCollisionDetection(scene: THREE.Scene, players: Player[], bullets, player: Player) {
 
     bullets
         .forEach((bullet) => {
@@ -73,20 +73,13 @@ export function bulletsWithEnemyCollisionDetection(scene: THREE.Scene, players: 
 
             if (pl) {
                 if (bulletMesh.id !== lastBulletWithEnemyCollisionId) {
-                    const sparks = new Sparks(10);
-             
-                    sparks.mesh.position.copy(collision.point);
-                    
-                    context.sparks.push(sparks);
-                    context.scene.add(sparks.mesh)
-
-
+ 
                     scene.remove(bulletMesh);
                     bullet.isDestroyed = true;
                     lastBulletWithEnemyCollisionId = bulletMesh.id;
 
                     const enemy = players.find(r => r.mesh == pl.parent);
-                    SocketService.socket.emit('damageToEnemy', enemy.params._id, player.params._id)
+                    SocketService.socket.emit('damageToEnemy', enemy.params._id, player.params._id, collision.point)
 
                 }
             }
@@ -95,27 +88,21 @@ export function bulletsWithEnemyCollisionDetection(scene: THREE.Scene, players: 
 
 let lastBulletWithAsteroidCollisionId;
 export function asteroidWithBulletCollision(asteroids: THREE.Mesh[], bullets, context) {
-  
+
     bullets
         .forEach((bullet) => {
             const bulletMesh = bullet.mesh;
-            let collision:any = detectCollision(bullet.mesh, asteroids);
+            let collision: any = detectCollision(bullet.mesh, asteroids);
             let asteroid = collision.object;
 
             if (asteroid) {
-                if (bulletMesh.id !== lastBulletWithAsteroidCollisionId) {  
-                    const sparks = new Sparks(20);
-             
-                    sparks.mesh.position.copy(collision.point);
-                    
-                    context.sparks.push(sparks);
-                    context.scene.add(sparks.mesh)
-                    
+                if (bulletMesh.id !== lastBulletWithAsteroidCollisionId) {
+
                     context.scene.remove(bulletMesh);
                     bullet.isDestroyed = true;
                     lastBulletWithAsteroidCollisionId = bulletMesh.id;
 
-                    SocketService.socket.emit('damageToAsteroid', asteroid.userData.id)
+                    SocketService.socket.emit('damageToAsteroid', { id: asteroid.userData.id, collisionPosition: collision.point })
 
                 }
             }

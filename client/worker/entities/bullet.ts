@@ -2,37 +2,26 @@ import * as THREE from 'three'
 import socketService from '../../services/socket.service';
 
 
-function createBullet(): THREE.Mesh {
-    const bullet = new THREE.Mesh(
-        new THREE.BoxGeometry(10, 10, 500),
-        new THREE.MeshPhongMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 1 })
-    )
-
-    return bullet;
-}
-// const ray = new THREE.Ray();
-// const intersectionPoint = new THREE.Vector3();
-// const normal = new THREE.Vector3();
-
 export class Bullet {
-    public mesh: THREE.Mesh = createBullet();
+    public mesh: THREE.Mesh;
     public direction: THREE.Vector3;
     public collision: boolean;
     public isDestroyed: boolean = false;
     readonly bulletSpeed: number = 1000;
 
     public currentTime: number = 0;
-    readonly lifetime: number = 2; //4 sec
-    // public ray = new THREE.Ray();
+    readonly lifetime: number = 2;
 
     constructor(player, collision = false) {
-        let position = player.mesh.position.clone()
-        let rotation = player.mesh.rotation.clone()
-        const playerPos = player.mesh.position.clone()
-        const matrixWorld = player.mesh.matrixWorld.clone()
+        let position = player.position.clone()
+        let rotation = player.rotation.clone()
+        const playerPos = player.position.clone()
+        const matrixWorld = player.matrixWorld.clone()
 
         const { x: px, y: py, z: pz } = position;
         const { x: rx, y: ry, z: rz } = rotation;
+
+        this.mesh = this.create();
 
         this.collision = collision;
 
@@ -41,12 +30,22 @@ export class Bullet {
 
         this.direction = this.getDirectionOfBullet(matrixWorld, playerPos);
 
-        socketService.socket.emit('fire', {
-            userId: player.params._id,
-            direction: this.direction,
-            position: position,
-            rotation: rotation
-        })
+        if (collision) {
+            socketService.socket.emit('fire', {
+                direction: this.direction,
+                position: position,
+                rotation: rotation
+            })
+        }
+    }
+
+    create() {
+        const bullet = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 10, 500),
+            new THREE.MeshPhongMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 1 })
+        )
+
+        return bullet;
     }
 
 
