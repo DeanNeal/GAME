@@ -1,26 +1,33 @@
 import * as THREE from 'three'
 
 export function attachGUI(player, assets) {
+
+    const group = new THREE.Group();
+    group.name = 'GUI';
+
     const group1 = new THREE.Group();
     const hp = createIndicator('hp', 0x3c78ff);
     group1.name = 'HP_GROUP';
-    group1.position.set(-210, -65, -600);
+    group1.position.set(-240, -100, -400);
     group1.add(hp);
     group1.add(wireFrame(hp.clone()));
     group1.add(createLabel(assets, 'HP', 'left'))
-    player.add(group1);
+    group.add(group1);
 
     const group2 = new THREE.Group();
     const zone = createIndicator('zone', 0xf52a15);
     group2.name = 'ZONE_GROUP';
-    group2.position.set(210, -65, -600);
+    group2.position.set(240, -100, -400);
     group2.add(zone)
     group2.add(wireFrame(zone.clone()))
     group2.add(createLabel(assets, 'ZONE', 'right'))
-    player.add(group2);
+    group.add(group2);
 
-    const group3 = new THREE.Group();
+    // const group3 = new THREE.Group();
     //TODO speed
+
+    player.add(group);
+
 
 }
 

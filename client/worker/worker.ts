@@ -39,8 +39,8 @@ class Game {
     public clock: THREE.Clock = new THREE.Clock()
     public scene: THREE.Scene = new THREE.Scene()
 
-    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 5000000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 220, 5000000)
+    public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 100, 5000000)
+    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 100, 5000000)
 
     public fakeCamera: THREE.Camera;
 
@@ -139,15 +139,11 @@ class Game {
 
         const ship = this.assets.ship.scene.children[0].clone();
 
-
-
         this.player.setMesh(ship, position, rotation);
 
-        // setTimeout(() => {
         ship.add(this.camera1)
         ship.add(this.camera2)
-        // }, 3000)
-
+      
         attachGUI(this.player.mesh, this.assets);
 
         this.initFirstPersonMode();
@@ -159,6 +155,7 @@ class Game {
 
         const earthGlow = addAtosphere(this.camera1.getWorldPosition(this.camera1.position));
         earthGlow.position.copy(this.earth.position);
+
         this.earthGlow = earthGlow;
         this.scene.add(earthGlow);
 
@@ -291,7 +288,7 @@ class Game {
     }
 
     createSparks(params) {
-        const sparks = new Sparks(params.size);
+        const sparks = new Sparks(params.size, this.assets);
 
         sparks.mesh.position.copy(params.collisionPosition);
 
@@ -310,9 +307,14 @@ class Game {
         this.controls.dragToLook = false
         this.camera1.up = new THREE.Vector3(0, 1, 0);
 
+        // this.player.mesh.children.forEach((r,i)=> {
+        //     if(i < 3) r.visible = false
+        // })
+        this.player.mesh.getObjectByName('GUI').visible = true;
     }
 
     initThirdPersonMode() {
+
         this.controls = new OrbitControls(this.player.mesh, this.fakeCamera, this.canvas);
         // controls.enablePan = true;
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -329,6 +331,11 @@ class Game {
         this.controls.rotateSpeed = 0.1;
 
         this.controls.maxPolarAngle = Math.PI;
+
+        // this.player.mesh.children.forEach((r,i)=> {
+        //     if(i < 3) r.visible = true
+        // })
+        this.player.mesh.getObjectByName('GUI').visible = false;
     }
 
     shotAnimate() {
@@ -354,8 +361,9 @@ class Game {
 
     fire() {
         if (this.player && this.player.params) {
-            // bullet.translateZ(-150);
+        
             const bullet = new Bullet(this.player.mesh, true);
+            bullet.mesh.translateY(-50);
             this.bullets.push(bullet)
 
             this.scene.add(bullet.mesh);
@@ -461,9 +469,6 @@ class Game {
         })
 
         if (this.player && this.player.mesh) {
-            // this.player.mesh.getObjectByName('gui_hp').lookAt(this.camera1.getWorldPosition(this.camera1.position))
-            // this.player.mesh.getObjectByName('gui_hp').quaternion.copy(this.camera1.quaternion)
-
             SocketService.socket.emit('move', {
                 id: this.player.params._id,
                 position: this.player.mesh.position,
@@ -483,10 +488,7 @@ class Game {
         if (this.allAsteroids.length && this.player && this.player.mesh) {
             asteroidWithBulletCollision(this.allAsteroids, this.bullets.filter(r => r.collision && !r.isDestroyed), this);
         }
-        // });
-        // console.log(this.bullets.length ? this.bullets[0].mesh.position : '');
-
-
+      
         this.checkRedZone();
 
         worker.post({ type: 'animateEnd' })
@@ -510,8 +512,8 @@ class Game {
     }
 
     datGui(value) {
-        // if (value.p) this.earth.getObjectByName('glow')['material'].uniforms["p"].value = value.p;
-        // if (value.c) this.earth.getObjectByName('glow')['material'].uniforms["c"].value = value.c;
+        if (value.p) this.scene.getObjectByName('glow')['material'].uniforms["p"].value = value.p;
+        if (value.c) this.scene.getObjectByName('glow')['material'].uniforms["c"].value = value.c;
 
         // if (value.x) this.player.mesh.getObjectByName('gui_hp').position.x = value.x;
         // if (value.y) this.player.mesh.getObjectByName('gui_hp').position.y = value.y;

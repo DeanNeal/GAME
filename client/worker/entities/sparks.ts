@@ -6,12 +6,12 @@ export class Sparks {
     public size: number;
     public currentTime: number = 0;
     readonly lifetime: number = 1;
-    constructor(size = 40) {
+    constructor(size = 40, assets) {
         this.size = size;
-        this.mesh = this.create();
+        this.mesh = this.create(assets);
     }
 
-    create() {
+    create(assets) {
         const particleCount = 100,
             particles = new THREE.Geometry(),
             pMaterial = new THREE.PointsMaterial({
@@ -60,7 +60,7 @@ export class Sparks {
                 const direction = particle.clone().normalize();
                 particle.add(direction.multiplyScalar(this.velocity));
             }
-            this.mesh.material['opacity'] -= 0.02;
+            // this.mesh.material['opacity'] -= 0.01;
             this.mesh.geometry['verticesNeedUpdate'] = true;
             // flag to the particle system
             // that we've changed its vertices.

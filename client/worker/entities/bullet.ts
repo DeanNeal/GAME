@@ -7,10 +7,10 @@ export class Bullet {
     public direction: THREE.Vector3;
     public collision: boolean;
     public isDestroyed: boolean = false;
-    readonly bulletSpeed: number = 1000;
+    readonly bulletSpeed: number = 1500;
 
     public currentTime: number = 0;
-    readonly lifetime: number = 2;
+    readonly lifetime: number = 1.5;
 
     constructor(player, collision = false) {
         let position = player.position.clone()
@@ -41,7 +41,7 @@ export class Bullet {
 
     create() {
         const bullet = new THREE.Mesh(
-            new THREE.BoxGeometry(10, 10, 500),
+            new THREE.BoxGeometry(10, 10, 800),
             new THREE.MeshPhongMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 1 })
         )
 

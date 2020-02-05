@@ -115,10 +115,10 @@ export class Game {
          if (userDamagingId) this.io.sockets.emit('playSound', { sound: 'damage', position: user.position });
          if (!userDamagingId) this.io.sockets.to(userDemagedId).emit('playSound', { sound: 'damage', position: user.position });
 
-         if (collisionPosition) this.io.sockets.emit('createSparks', { collisionPosition: collisionPosition, size: 8 });
-
          this.io.sockets.to(userDemagedId).emit('gotDamage', user)
       }
+
+      if (collisionPosition) this.io.sockets.emit('createSparks', { collisionPosition: collisionPosition, size: 8 });
 
       this.io.sockets.to(userDemagedId).emit('userUpdated', user)
       this.io.sockets.emit('userList', this.users)
@@ -157,8 +157,9 @@ export class Game {
          this.io.sockets.emit('playSound', { sound: 'explosionAsteroid', position: asteriod.position });
       } else {
          this.io.sockets.emit('playSound', { sound: 'damage', position: asteriod.position });
-         this.io.sockets.emit('createSparks', { collisionPosition: params.collisionPosition, size: 20 });
       }
+
+      this.io.sockets.emit('createSparks', { collisionPosition: params.collisionPosition, size: 20 });
    }
 
    createAsteroids(): IAsteroid[] {
