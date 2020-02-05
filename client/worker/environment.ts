@@ -157,7 +157,9 @@ export function addAtosphere(position) {
     const geometry = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
     position = position.clone();
     //adjust
-
+    position.x = -40;
+    position.y = 0;
+    position.z = -300;
     const customMaterial = new THREE.ShaderMaterial(
         {
             uniforms:

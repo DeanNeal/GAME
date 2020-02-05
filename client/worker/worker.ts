@@ -40,7 +40,7 @@ class Game {
     public scene: THREE.Scene = new THREE.Scene()
 
     public camera1: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 100, 5000000)
-    public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 100, 5000000)
+    // public camera2: THREE.Camera = new THREE.PerspectiveCamera(45, 1920 / 1080, 100, 5000000)
 
     public fakeCamera: THREE.Camera;
 
@@ -79,7 +79,8 @@ class Game {
         this.assets = assets;
         this.canvas = canvas;
 
-        this.fakeCamera = this.camera2.clone();
+
+        // this.fakeCamera = this.camera2.clone();
 
         // // lights
         this.dLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -142,8 +143,8 @@ class Game {
         this.player.setMesh(ship, position, rotation);
 
         ship.add(this.camera1)
-        ship.add(this.camera2)
-      
+        // ship.add(this.camera2)
+
         attachGUI(this.player.mesh, this.assets);
 
         this.initFirstPersonMode();
@@ -297,7 +298,10 @@ class Game {
     }
 
     initFirstPersonMode() {
-        this.controls = new FlyControls(this.player.mesh, this.camera1, this.canvas)
+        this.camera1.position.set(0, 50, 40);
+        this.camera1.rotation.set(0, 0, 0);
+        this.controls = new FlyControls(this.player.mesh, this.canvas)
+        this.controls.setViewMode(0);
         // controls.enablePan = false;
 
         this.controls.movementSpeed = 1000
@@ -314,23 +318,28 @@ class Game {
     }
 
     initThirdPersonMode() {
+        this.controls.setViewMode(1);
+        this.camera1.position.set(0, 200, 1000);
+        this.camera1.rotation.set(-0.3, 0, 0);
 
-        this.controls = new OrbitControls(this.player.mesh, this.fakeCamera, this.canvas);
-        // controls.enablePan = true;
-        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        this.controls.dampingFactor = 0.25;
+        // this.controls.dragToLook = true;
 
-        this.controls.smoothZoom = true;
+        // this.controls = new OrbitControls(this.player.mesh, this.fakeCamera, this.canvas);
+        // // controls.enablePan = true;
+        // this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        // this.controls.dampingFactor = 0.25;
 
-        this.controls.screenSpacePanning = false;
+        // this.controls.smoothZoom = true;
 
-        this.controls.minDistance = 550;
-        this.controls.maxDistance = 500000;
+        // this.controls.screenSpacePanning = false;
 
-        this.controls.zoomSpeed = 2;
-        this.controls.rotateSpeed = 0.1;
+        // this.controls.minDistance = 550;
+        // this.controls.maxDistance = 500000;
 
-        this.controls.maxPolarAngle = Math.PI;
+        // this.controls.zoomSpeed = 2;
+        // this.controls.rotateSpeed = 0.1;
+
+        // this.controls.maxPolarAngle = Math.PI;
 
         // this.player.mesh.children.forEach((r,i)=> {
         //     if(i < 3) r.visible = true
@@ -353,7 +362,7 @@ class Game {
         const bullet = new Bullet(userMesh);
 
         // //offset
-        // // bullet.translateZ(-50);
+        bullet.mesh.translateZ(-350);
 
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);
@@ -361,9 +370,9 @@ class Game {
 
     fire() {
         if (this.player && this.player.params) {
-        
+
             const bullet = new Bullet(this.player.mesh, true);
-            bullet.mesh.translateY(-50);
+            bullet.mesh.translateZ(-350);
             this.bullets.push(bullet)
 
             this.scene.add(bullet.mesh);
@@ -404,11 +413,20 @@ class Game {
         if (this.controls) {
             const speed = this.controls.update(delta)
 
+            worker.post({ type: 'speed', speed })
+            // const speedGroup: any = this.player.mesh.getObjectByName('SPEED_GROUP');
+
+            // for (var i = speedGroup.children.length - 1; i >= 0; i--) {
+            //     speedGroup.remove(speedGroup.children[i]);
+            // }
+
+            // speedGroup.add(createSpeedLabel(this.assets, speed.toString()));
+
         }
 
-        this.camera2.copy(this.fakeCamera);
+        // this.camera2.copy(this.fakeCamera);
 
-        this.renderer.render(this.scene, this.viewMode === 0 ? this.camera1 : this.camera2)
+        this.renderer.render(this.scene, this.camera1);///this.viewMode === 0 ? this.camera1 : this.camera2)
 
         if (this.bokehPass) this.bokehPass.uniforms.maxblur.value -= this.bokehPass.uniforms.maxblur.value <= 0 ? 0 : 0.0003;
         if (this.bokehPass && this.bokehPass.uniforms.maxblur.value > 0) this.composer.render();
@@ -424,9 +442,9 @@ class Game {
 
 
         this.shotAnimate()
-        
+
         this.render(delta)
-       
+
 
         this.sparks.forEach((s) => s.update(this, delta));
         this.bullets.forEach(b => b.update(this, delta));
@@ -457,13 +475,13 @@ class Game {
                 sprite.position.set(70 + scale * 6, 70 + scale * 6, 70 + scale * 6);
 
 
-                if (this.viewMode === 0) {
-                    user.userTextMesh.lookAt(this.player.mesh.position)
-                    user.userTextMesh.quaternion.copy(this.player.mesh.quaternion);
-                } else {
-                    user.userTextMesh.lookAt(this.camera2.getWorldPosition(this.camera2.position))
-                    user.userTextMesh.quaternion.copy(this.camera2.getWorldQuaternion(this.camera2.quaternion));
-                }
+                // if (this.viewMode === 0) {
+                user.userTextMesh.lookAt(this.player.mesh.position)
+                user.userTextMesh.quaternion.copy(this.player.mesh.quaternion);
+                // } else {
+                // user.userTextMesh.lookAt(this.camera2.getWorldPosition(this.camera2.position))
+                // user.userTextMesh.quaternion.copy(this.camera2.getWorldQuaternion(this.camera2.quaternion));
+                // }
 
             }
         })
@@ -488,7 +506,7 @@ class Game {
         if (this.allAsteroids.length && this.player && this.player.mesh) {
             asteroidWithBulletCollision(this.allAsteroids, this.bullets.filter(r => r.collision && !r.isDestroyed), this);
         }
-      
+
         this.checkRedZone();
 
         worker.post({ type: 'animateEnd' })
@@ -502,11 +520,11 @@ class Game {
             this.camera1['aspect'] = e.data.width / e.data.height
             this.camera1['updateProjectionMatrix']()
 
-            this.camera2['aspect'] = e.data.width / e.data.height
-            this.camera2['updateProjectionMatrix']()
+            // this.camera2['aspect'] = e.data.width / e.data.height
+            // this.camera2['updateProjectionMatrix']()
 
-            this.fakeCamera['aspect'] = e.data.width / e.data.height
-            this.fakeCamera['updateProjectionMatrix']()
+            // this.fakeCamera['aspect'] = e.data.width / e.data.height
+            // this.fakeCamera['updateProjectionMatrix']()
         }
 
     }
@@ -600,6 +618,10 @@ const worker = insideWorker(e => {
 
 
     }
+
+    if(e.data.type === 'inMenu') {
+        game.controls.disabled = e.data.value;
+    } 
 })
 
 

@@ -3,11 +3,11 @@
  */
 import  * as THREE from 'three';
 
-export default function flyControls( object, camera, container) {
+export default function flyControls( object, container) {
 
 	this.object = object;
-	camera.position.set(0, 50, 40);
-	this.cameraInitPosition = camera.position.clone();
+	// camera.position.set(0, 50, 40);
+	// this.cameraInitPosition = camera.position.clone();
 
 	this.domElement = container || /*( domElement !== undefined ) ? domElement : */document;
 /*	if ( domElement ) this.domElement.setAttribute( 'tabindex', -1 );*/
@@ -15,6 +15,9 @@ export default function flyControls( object, camera, container) {
 	// API
 
 	// this.direction = undefined;
+
+	this.viewMode = 0;
+	this.disabled = false;
 
 	// this.movementSpeed = 0;
 	this.rollSpeed = 0.005;
@@ -166,9 +169,13 @@ export default function flyControls( object, camera, container) {
 		//}
 	};
 
+	this.setViewMode = function(mode) {
+		this.viewMode = mode;
+	};
+
 	this.mousemove = function( event ) {
 
-		if ( !this.dragToLook || this.mouseStatus > 0 ) {
+		if ( this.viewMode === 0 && (!this.dragToLook || this.mouseStatus > 0 )) {
 
 			var container = this.getContainerDimensions();
 			var halfWidth  = container.size[ 0 ] / 2;
@@ -260,12 +267,12 @@ export default function flyControls( object, camera, container) {
 		// this.cameraUpdate();
 
 		//smooth stop
-		// if(this.viewMode === 1) {
-		// 	this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005  ? this.moveState.yawLeft/1.07 : 0
-		// 	this.moveState.pitchDown  = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown /1.07 : 0
+		if(this.viewMode === 1 || this.disabled) {
+			this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005  ? this.moveState.yawLeft/1.04 : 0
+			this.moveState.pitchDown  = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown /1.04 : 0
 
-		// 	this.updateRotationVector();
-		// }
+			this.updateRotationVector();
+		}
 		
 		return moveMult;
 	};

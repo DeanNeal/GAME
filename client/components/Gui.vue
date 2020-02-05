@@ -1,7 +1,7 @@
 <template>
   <div class="gui" v-if="inGame">
     <app-user-list></app-user-list>
-
+    <div class="speed">{{speed}}</div>
     <div class="preloader" v-if="preloader">
       <div class="spinner"></div>
       <div class="preloader__text">Loading...</div>
@@ -23,7 +23,8 @@ export default {
       preloader: false,
       inMenu: false,
       inGame: false,
-      timeout: null
+      timeout: null,
+      speed: 0
     }
   },
   mounted () {
@@ -43,6 +44,10 @@ export default {
 
     GlobalService.preloader.subscribe(state => {
       this.preloader = state
+    })
+
+    GlobalService.speed.subscribe(speed => {
+      this.speed = speed
     })
 
     GlobalService.damage.subscribe(() => {
@@ -79,17 +84,21 @@ export default {
   },
   methods: {
     goToMenu () {
-      GlobalService.gameInstance.getValue().worker.post({ type: 'stopFire' })
-
       GlobalService.inMenu.next(true)
       GlobalService.currentPage.next('mainMenu')
       GlobalService.gameInstance.getValue().removeListeners()
       AudioService.playAudio('menuMusic', 0.2, true)
+
+      GlobalService.gameInstance.getValue().worker.post({ type: 'stopFire' })
+      GlobalService.gameInstance.getValue().worker.post({ type: 'inMenu', value: true })
+      
     },
     backToGame () {
       GlobalService.inMenu.next(false)
       GlobalService.gameInstance.getValue().addListeners()
       AudioService.stopAudio('menuMusic')
+
+      GlobalService.gameInstance.getValue().worker.post({ type: 'inMenu', value: false })
     }
   }
 }
@@ -114,5 +123,14 @@ export default {
     width: 100%;
     text-align: center;
   }
+}
+.speed {
+  font-size: 52px;
+  color: #fff;
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align:center;
 }
 </style>

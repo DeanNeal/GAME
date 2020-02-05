@@ -1,7 +1,6 @@
 import SocketService from "../services/socket.service";
 import * as THREE from 'three';
 import { Player } from "./models";
-import { Sparks } from "./entities/sparks";
 
 
 /**

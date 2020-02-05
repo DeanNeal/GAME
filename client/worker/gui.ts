@@ -23,12 +23,10 @@ export function attachGUI(player, assets) {
     group2.add(createLabel(assets, 'ZONE', 'right'))
     group.add(group2);
 
-    // const group3 = new THREE.Group();
+
     //TODO speed
 
     player.add(group);
-
-
 }
 
 function createIndicator(name, color, size = [50, 5, 4]) {
@@ -81,7 +79,6 @@ function createLabel(assets, name, dir, size = 4, color = 0xffffff) {
 
     return text;
 }
-
 
 export function scaleXLeft(mesh, scale) {
     mesh.scale.x = scale;

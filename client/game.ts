@@ -110,6 +110,10 @@ export class Game {
                 case 'animateEnd':
                     this.stats.end();
                     break;
+
+                case 'speed':
+                    GlobalService.speed.next(e.data.speed); 
+                break;
             }
         }, opts, GlobalService.globalSettings.getValue());
 

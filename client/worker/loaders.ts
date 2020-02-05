@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import GLTFLoader from './three/GLTFLoader';
+import * as loadFont from 'load-bmfont';
 
 export class CustomImageLoader {
 
@@ -41,6 +42,19 @@ export class CustomFontLoader {
                 () => { },
                 (e) => reject(e)
             );
+        });
+    }
+}
+
+export class CustomBmFontLoader {
+    load(url) {
+        const loader = loadFont;
+        return new Promise((resolve, reject) => {
+            loader(url, (err, object: any) => {
+                if(err) reject(err);
+                
+                resolve(object)
+            });
         });
     }
 }
