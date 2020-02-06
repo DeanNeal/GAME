@@ -8,6 +8,7 @@ export interface IUser {
    id: string;
    _id: string;
    playerName: string;
+   speed: number;
    health: number;
    death: number;
    kills: number;

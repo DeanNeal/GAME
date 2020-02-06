@@ -88,7 +88,7 @@ export default {
       ul {
         width: 100%;
         max-height: 200px;
-        overflow: auto;
+        // overflow: auto;
         margin-top: 20px;
         li {
           // background: #eee;
@@ -106,7 +106,18 @@ export default {
           &.current-player {
             // background: rgba(17, 17, 17, 0.575);
             font-weight: 700;
-          
+            padding-left: 15px;
+            &:before {
+              content: '';
+              position: absolute;
+              width: 5px;
+              height: 5px;
+              background: #fff;
+              left: 0;
+              top: 0;
+              bottom: 0;
+              margin: auto;
+            } 
           }
           i {
             position: absolute;

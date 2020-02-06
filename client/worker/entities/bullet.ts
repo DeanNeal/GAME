@@ -7,7 +7,7 @@ export class Bullet {
     public direction: THREE.Vector3;
     public collision: boolean;
     public isDestroyed: boolean = false;
-    readonly bulletSpeed: number = 1500;
+    readonly bulletSpeed: number = 1800;
 
     public currentTime: number = 0;
     readonly lifetime: number = 1.5;

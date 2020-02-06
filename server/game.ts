@@ -78,6 +78,7 @@ export class Game {
          shipType: playerOptions.shipType,
          position: Game.randomPosition(),
          rotation: Game.randomRotation(),
+         speed: 0,
          kills: 0,
          health: 100,
          death: 0
@@ -124,9 +125,10 @@ export class Game {
       this.io.sockets.emit('userList', this.users)
    }
 
-   updateUsersCoords({ id, position, rotation }) {
+   updateUsersCoords({ id, position, rotation, speed }) {
       const user = this.users.find(r => r._id === id);
       if (user) {
+         user.speed = speed;
          user.position = position
          user.rotation = rotation
       }

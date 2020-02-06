@@ -254,6 +254,8 @@ class Game {
                     distance = distance < 100 ? 100 : distance;
 
                     p.userTextMesh.position.set(user.position.x + distance, user.position.y + distance, user.position.z + distance);
+
+                    p.speed = user.speed;
                 }
             })
         })
@@ -466,10 +468,12 @@ class Game {
             }
         })
 
+        this.players.forEach(p=> p.update(delta));
         if (this.player && this.player.mesh) {
             this.player.update(delta);
             SocketService.socket.emit('move', {
                 id: this.player.params._id,
+                speed: this.player.speed,
                 position: this.player.mesh.position,
                 rotation: this.player.mesh.rotation
             })
