@@ -19,6 +19,8 @@ export function addAsteroids(asteroids: any[], assets): THREE.Mesh[] {
     return asteroids.map((c) => {
         let mesh = new THREE.Mesh(geometry, material);
 
+        mesh.name = 'asteroid';
+
         mesh.scale.set(c.size, c.size, c.size);
         mesh.userData = c;
         mesh.position.x = c.position.x;

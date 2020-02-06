@@ -13,7 +13,7 @@ import { RenderPass } from './three/post-processing/RenderPass'
 import { BokehPass } from './three/post-processing/BokehPass';
 
 import { addAsteroids, addAtosphere, addRunes, addSky, addSun, addEarth } from './environment'
-import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
+import { runesCollisionDetection, bulletCollision } from './collision'
 import { getVolumeFromDistance, getPerformanceOfFunction } from './utils'
 import { Player } from './entities/player';
 import { Preloader } from './preloader';
@@ -228,7 +228,8 @@ class Game {
 
     createNewPlayer(user) {
         const ship = this.assets.ship.scene.children[0].clone();
-
+        ship.name = 'ship';
+        
         const enemy = new Player(user, ship, true, this.assets);
 
         this.scene.add(ship)
@@ -484,13 +485,14 @@ class Game {
             runesCollisionDetection(this.player, this.allRunes)
         }
 
-        if (this.bullets.length) {
-            bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision && !r.isDestroyed), this.player)
-        }
+        // if (this.bullets.length) {
+        //     bulletsWithEnemyCollisionDetection(this.scene, this.players, this.bullets.filter(r => r.collision && !r.isDestroyed), this.player)
+        // }
 
-        if (this.allAsteroids.length && this.player && this.player.mesh) {
-            asteroidWithBulletCollision(this.allAsteroids, this.bullets.filter(r => r.collision && !r.isDestroyed), this);
-        }
+        // if (this.allAsteroids.length && this.player && this.player.mesh) {
+        //     asteroidWithBulletCollision(this.allAsteroids, this.bullets.filter(r => r.collision && !r.isDestroyed), this);
+        // }
+        bulletCollision([...this.allAsteroids, ...this.players.map(r => r.mesh.children[0])], this.bullets.filter(r => r.collision && !r.isDestroyed), this);
 
         this.checkRedZone();
 

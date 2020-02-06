@@ -16,6 +16,7 @@ export class Player {
         const { position, rotation, shipType } = params;
         this.params = params;
         this.mesh = mesh;
+        this.mesh.children[0].userData = {id: params._id};
         this.mesh.position.set(position.x, position.y, position.z)
         this.mesh.rotation.set(rotation.x, rotation.y, rotation.z)
 
@@ -47,11 +48,11 @@ export class Player {
 
     addFire(assets) {
 
-        const particleCount = 1000,
+        const particleCount = 500,
             particles = new THREE.Geometry(),
             pMaterial = new THREE.PointsMaterial({
                 color: 0xffffff,
-                size: 6,
+                size: 3,
                 // map: assets.particle,
                 blending: THREE.AdditiveBlending,
                 transparent: true
@@ -61,14 +62,11 @@ export class Player {
         // now create the individual particles
         for (var p = 0; p < particleCount; p++) {
 
-            // var pX = Math.random() > 0.5 ? angle * randomDecemal(1, 10) : -angle * randomDecemal(1, 10),
-            //     pY = Math.random() > 0.5 ? angle * randomDecemal(1, 10) : -angle * randomDecemal(1, 10),
-            //     pZ = randomDecemal(1, 2),//Math.random() * 5 - 2,
             var particle = new THREE.Vector3(0, 0, 0)
             particle['init'] = {
-                x: Math.random() > 0.5 ? angle * randomDecemal(0.3, 2) : -angle * randomDecemal(0.3, 2),
-                y: Math.random() > 0.5 ? angle * randomDecemal(0.3, 2) : -angle * randomDecemal(0.3, 2),
-                z: randomDecemal(2, 2.1)
+                x: Math.random() > 0.5 ? angle * randomDecemal(0, 1) : -angle * randomDecemal(0, 1),
+                y: Math.random() > 0.5 ? angle * randomDecemal(0, 1) : -angle * randomDecemal(0, 1),
+                z: randomDecemal(1, 2)
             }
             // add it to the geometry
             particles.vertices.push(particle);
