@@ -175,7 +175,7 @@ export default function flyControls( object, container) {
 
 	this.mousemove = function( event ) {
 
-		if ( this.viewMode === 0 && (!this.dragToLook || this.mouseStatus > 0 )) {
+		if ( (!this.dragToLook || this.mouseStatus > 0 )) {
 
 			var container = this.getContainerDimensions();
 			var halfWidth  = container.size[ 0 ] / 2;

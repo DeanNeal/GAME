@@ -61,7 +61,7 @@
     "socket.io-client": "^2.3.0",
     "stats-js": "^1.0.1",
     "style-loader": "^0.13.1",
-    "three": "^0.112.1",
+    "three": "^0.113.2",
     "three-bmfont-text": "^2.3.0",
     "three-buffer-vertex-data": "^1.1.0",
     "threex": "^1.0.0",

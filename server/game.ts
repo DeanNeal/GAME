@@ -28,7 +28,7 @@ export class Game {
          socket.on('join', (playerOptions: IPlayerOptions) => {
             socket.emit('userCreated', this.addUser(socket, playerOptions))
 
-            this.io.sockets.emit('anotherNewPlayer', this.users)
+            this.io.sockets.emit('newPlayerJoined', this.users)
             this.io.sockets.emit('userList', this.users)
             socket.emit('updateRunes', this.runes)
             socket.emit('updateAsteroids', this.asteroids)

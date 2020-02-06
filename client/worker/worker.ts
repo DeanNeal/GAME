@@ -1,7 +1,7 @@
 import insideWorker from './inside-worker'
 
 import FlyControls from './controls/FlyControls'
-import OrbitControls from './controls/OrbitControls';
+// import OrbitControls from './controls/OrbitControls';
 
 import SocketService from '../services/socket.service'
 
@@ -9,20 +9,13 @@ import * as THREE from 'three'
 
 import { EffectComposer } from './three/post-processing/EffectComposer';
 import { RenderPass } from './three/post-processing/RenderPass'
-// import { SSAOPass } from './three/post-processing/SSAOPass'
-// import { SAOPass } from './three/post-processing/SAOPass';
-// import { UnrealBloomPass } from './three/post-processing/UnrealBloomPass';
-// import { ShaderPass } from './three/post-processing/ShaderPass';
-// import { LuminosityShader } from './three/post-processing/LuminosityShader';
-// import { SepiaShader } from './shaders';
-// import { ShaderPass } from './three/post-processing/ShaderPass';
-// import { FilmPass } from './three/post-processing/FilmPass';
+
 import { BokehPass } from './three/post-processing/BokehPass';
 
 import { addAsteroids, addAtosphere, addRunes, addSky, addSun, addEarth } from './environment'
 import { asteroidWithBulletCollision, runesCollisionDetection, bulletsWithEnemyCollisionDetection } from './collision'
 import { getVolumeFromDistance, getPerformanceOfFunction } from './utils'
-import { Player } from './models';
+import { Player } from './entities/player';
 import { Preloader } from './preloader';
 import { attachGUI, scaleXLeft, scaleXRight } from './gui';
 import { Bullet } from './entities/bullet';
@@ -133,20 +126,20 @@ class Game {
     }
 
     userCreated(user) {
-        const { position, rotation, shipType } = user;
-        this.player = new Player(user);
-
-        worker.post({ type: 'userCreated', user })
-
         const ship = this.assets.ship.scene.children[0].clone();
-
-        this.player.setMesh(ship, position, rotation);
 
         ship.add(this.camera1)
         // ship.add(this.camera2)
 
+        this.player = new Player(user, ship, false, this.assets);
+
+        worker.post({ type: 'userCreated', user })
+
+
+
         attachGUI(this.player.mesh, this.assets);
 
+        this.controls = new FlyControls(this.player.mesh, this.canvas)
         this.initFirstPersonMode();
 
         const earth = addEarth(this.assets);
@@ -206,7 +199,7 @@ class Game {
         scaleXLeft(this.player.mesh.getObjectByName('HP_GROUP').getObjectByName('hp'), 1);
     }
 
-    anotherNewPlayer(users) {
+    newPlayerJoined(users) {
         users.forEach((user, i) => {
             let exists = this.players
                 .map((x: Player) => {
@@ -234,35 +227,13 @@ class Game {
     }
 
     createNewPlayer(user) {
-        const { position, rotation, shipType } = user;
-
         const ship = this.assets.ship.scene.children[0].clone();
 
-        const font = this.assets.helvetiker_font;
-
-        const textGeo = new THREE.TextGeometry(user.playerName, {
-            font: font,
-            size: 20,
-            height: 1,
-            bevelEnabled: false,
-            bevelThickness: 1,
-            bevelSize: 0.01,
-            bevelSegments: 10,
-        })
-
-        let material = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff,
-        })
-
-        const userTextMesh = new THREE.Mesh(textGeo, material)
+        const enemy = new Player(user, ship, true, this.assets);
 
         this.scene.add(ship)
-        this.scene.add(userTextMesh)
+        this.scene.add(enemy.userTextMesh)
 
-        //should be after
-        const enemy = new Player(user, userTextMesh);
-        enemy.setMesh(ship, position, rotation);
         this.players.push(enemy);
     }
 
@@ -299,8 +270,9 @@ class Game {
 
     initFirstPersonMode() {
         this.camera1.position.set(0, 50, 40);
+        // this.camera1.position.set(0, 50, 600);
         this.camera1.rotation.set(0, 0, 0);
-        this.controls = new FlyControls(this.player.mesh, this.canvas)
+        
         this.controls.setViewMode(0);
         // controls.enablePan = false;
 
@@ -319,8 +291,11 @@ class Game {
 
     initThirdPersonMode() {
         this.controls.setViewMode(1);
-        this.camera1.position.set(0, 200, 1000);
-        this.camera1.rotation.set(-0.3, 0, 0);
+        this.camera1.position.set(0, 220, 1000);
+        this.camera1.rotation.set(-0.02, 0, 0);
+
+        // this.camera1.position.set(0, 1050, 0);
+        // this.camera1.rotation.set(-Math.PI/2, 0, 0);
 
         // this.controls.dragToLook = true;
 
@@ -412,7 +387,7 @@ class Game {
 
         if (this.controls) {
             const speed = this.controls.update(delta)
-
+            this.player.speed = speed;
             worker.post({ type: 'speed', speed })
             // const speedGroup: any = this.player.mesh.getObjectByName('SPEED_GROUP');
 
@@ -439,6 +414,7 @@ class Game {
         worker.post({ type: 'animateStart' })
 
         const delta = this.clock.getDelta()
+        const elapsed = this.clock.getElapsedTime();
 
 
         this.shotAnimate()
@@ -487,6 +463,7 @@ class Game {
         })
 
         if (this.player && this.player.mesh) {
+            this.player.update(delta);
             SocketService.socket.emit('move', {
                 id: this.player.params._id,
                 position: this.player.mesh.position,
@@ -619,9 +596,9 @@ const worker = insideWorker(e => {
 
     }
 
-    if(e.data.type === 'inMenu') {
+    if (e.data.type === 'inMenu') {
         game.controls.disabled = e.data.value;
-    } 
+    }
 })
 
 
@@ -649,8 +626,8 @@ SocketService.socket
     .on('updateUsersCoords', users => {
         game.updateUsersCoords(users);
     })
-    .on('anotherNewPlayer', users => {
-        game.anotherNewPlayer(users);
+    .on('newPlayerJoined', users => {
+        game.newPlayerJoined(users);
     })
     .on('otherFire', id => {
         game.otherFire(id);

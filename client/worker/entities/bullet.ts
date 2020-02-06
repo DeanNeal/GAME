@@ -41,7 +41,7 @@ export class Bullet {
 
     create() {
         const bullet = new THREE.Mesh(
-            new THREE.BoxGeometry(10, 10, 800),
+            new THREE.BoxGeometry(8, 8, 800),
             new THREE.MeshPhongMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 1 })
         )
 
