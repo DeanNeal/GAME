@@ -3,9 +3,11 @@
  */
 import  * as THREE from 'three';
 
-export default function flyControls( object, container) {
+export default function flyControls( object, container, camera) {
 
 	this.object = object;
+	this.camera = camera;
+	this.initPosition = camera.position.clone();
 	// camera.position.set(0, 50, 40);
 	// this.cameraInitPosition = camera.position.clone();
 
@@ -171,6 +173,8 @@ export default function flyControls( object, container) {
 
 	this.setViewMode = function(mode) {
 		this.viewMode = mode;
+
+		this.initPosition = this.camera.position.clone();
 	};
 
 	this.mousemove = function( event ) {
@@ -233,7 +237,7 @@ export default function flyControls( object, container) {
 		if(this.moveState.back) {
 			this.movementSpeedMultiplier -= this.movementSpeedMultiplier > -this.maxSpeed ? this.acceleration : 0;
 		}
-
+     
 		if(!this.moveState.forward  && !this.moveState.back) {
 			if(!this.moveState.freeze) {
 				if(this.movementSpeedMultiplier > 0) {
@@ -243,7 +247,7 @@ export default function flyControls( object, container) {
 				}
 			}
 		}
-
+	
 		this.movementSpeedMultiplier = Math.round(this.movementSpeedMultiplier * 100) / 100;
 
 
@@ -264,10 +268,10 @@ export default function flyControls( object, container) {
 		// expose the rotation vector for convenience
 		this.object.rotation.setFromQuaternion( this.object.quaternion, this.object.rotation.order );
 
-		// this.cameraUpdate();
+		this.cameraUpdate();
 
 		//smooth stop
-		if(this.viewMode === 1 || this.disabled) {
+		if(this.disabled) {
 			this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005  ? this.moveState.yawLeft/1.04 : 0
 			this.moveState.pitchDown  = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown /1.04 : 0
 
@@ -278,7 +282,8 @@ export default function flyControls( object, container) {
 	};
 
 	this.cameraUpdate = function () {
-		camera.position.z = this.cameraInitPosition.z+ (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier / 3 : 0);
+		const factor = 	this.viewMode === 0 ? 0.1 : 5;
+		this.camera.position.z = this.initPosition.z + (this.movementSpeedMultiplier >= 0  ? this.movementSpeedMultiplier * factor : 0);
 	}
 
 	this.updateMovementVector = function() {

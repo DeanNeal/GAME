@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 export class Sparks {
     public mesh: THREE.Points;
-    readonly velocity: number = 10;
+    readonly velocity: number = 16;
     public size: number;
     public currentTime: number = 0;
     readonly lifetime: number = 1;

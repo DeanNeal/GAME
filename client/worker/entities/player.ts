@@ -47,11 +47,11 @@ export class Player {
 
     addFire(assets) {
 
-        const particleCount = 200,
+        const particleCount = 1000,
             particles = new THREE.Geometry(),
             pMaterial = new THREE.PointsMaterial({
                 color: 0xffffff,
-                size: 5,
+                size: 6,
                 // map: assets.particle,
                 blending: THREE.AdditiveBlending,
                 transparent: true
@@ -66,9 +66,9 @@ export class Player {
             //     pZ = randomDecemal(1, 2),//Math.random() * 5 - 2,
             var particle = new THREE.Vector3(0, 0, 0)
             particle['init'] = {
-                x: Math.random() > 0.5 ? angle * randomDecemal(0.3, 3) : -angle * randomDecemal(0.3, 3),
-                y: Math.random() > 0.5 ? angle * randomDecemal(0.3, 3) : -angle * randomDecemal(0.3, 3),
-                z: randomDecemal(1, 2)
+                x: Math.random() > 0.5 ? angle * randomDecemal(0.3, 2) : -angle * randomDecemal(0.3, 2),
+                y: Math.random() > 0.5 ? angle * randomDecemal(0.3, 2) : -angle * randomDecemal(0.3, 2),
+                z: randomDecemal(2, 2.1)
             }
             // add it to the geometry
             particles.vertices.push(particle);
@@ -83,7 +83,7 @@ export class Player {
 
     update(delta) {
         this.currentTime += delta;
-        const angle = 0.05;
+
         let pCount = this.fire.geometry['vertices'].length;
         let correlation = (pCount / this.maxSpeed) * this.speed;
 
@@ -91,9 +91,9 @@ export class Player {
             const particle = this.fire.geometry['vertices'][i];
             const direction = particle.clone().normalize();
 
-            particle.add(direction.multiplyScalar(this.speed / 5 * randomDecemal(1, 2)));
+            particle.add(direction.multiplyScalar(this.speed / 1 * randomDecemal(0.3, 2)));
 
-            if (Math.abs(particle.z) > 400 || i > correlation) {
+            if (Math.abs(particle.z) > 600 || i > correlation) {
                 particle.x = particle.init.x;
                 particle.y = particle.init.y;
                 particle.z = particle.init.z;

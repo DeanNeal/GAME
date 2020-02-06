@@ -139,7 +139,7 @@ class Game {
 
         attachGUI(this.player.mesh, this.assets);
 
-        this.controls = new FlyControls(this.player.mesh, this.canvas)
+        this.controls = new FlyControls(this.player.mesh, this.canvas, this.camera1)
         this.initFirstPersonMode();
 
         const earth = addEarth(this.assets);
@@ -270,12 +270,15 @@ class Game {
 
     initFirstPersonMode() {
         this.camera1.position.set(0, 50, 40);
-        // this.camera1.position.set(0, 50, 600);
         this.camera1.rotation.set(0, 0, 0);
         
         this.controls.setViewMode(0);
         // controls.enablePan = false;
 
+        this.controls.minDistance = 550;
+        this.controls.maxDistance = 500000;
+
+        
         this.controls.movementSpeed = 1000
         this.controls.domElement = this.canvas;
         this.controls.rollSpeed = Math.PI / 3.5
@@ -290,9 +293,10 @@ class Game {
     }
 
     initThirdPersonMode() {
-        this.controls.setViewMode(1);
+    
         this.camera1.position.set(0, 220, 1000);
         this.camera1.rotation.set(-0.02, 0, 0);
+        this.controls.setViewMode(1);
 
         // this.camera1.position.set(0, 1050, 0);
         // this.camera1.rotation.set(-Math.PI/2, 0, 0);
