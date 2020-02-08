@@ -1,11 +1,13 @@
 import insideWorker from './inside-worker'
 
-import FlyControls from './controls/FlyControls'
+
 // import OrbitControls from './controls/OrbitControls';
 
 import SocketService from '../services/socket.service'
 
 import * as THREE from 'three'
+
+import { PlayerControls } from './controls/PlayerControls'
 
 import { EffectComposer } from './three/post-processing/EffectComposer';
 import { RenderPass } from './three/post-processing/RenderPass'
@@ -20,9 +22,8 @@ import { Preloader } from './preloader';
 import { attachGUI, scaleXLeft, scaleXRight } from './gui';
 import { Bullet } from './entities/bullet';
 import { Sparks } from './entities/sparks';
+import { ViewMode } from '../services/global.service';
 
-
-type ViewMode = 0 | 1;
 
 class Game {
     public assets: any;
@@ -139,7 +140,7 @@ class Game {
 
         attachGUI(this.player.mesh, this.assets);
 
-        this.controls = new FlyControls(this.player.mesh, this.canvas, this.camera1)
+        this.controls = new PlayerControls(this.player.mesh, this.canvas, this.camera1)
         this.initFirstPersonMode();
 
         const earth = addEarth(this.assets);
@@ -229,7 +230,7 @@ class Game {
     createNewPlayer(user) {
         const ship = this.assets.ship.scene.children[0].clone();
         ship.name = 'ship';
-        
+
         const enemy = new Player(user, ship, true, this.assets);
 
         this.scene.add(ship)
@@ -274,17 +275,17 @@ class Game {
     initFirstPersonMode() {
         this.camera1.position.set(0, 50, 40);
         this.camera1.rotation.set(0, 0, 0);
-        
+
         this.controls.setViewMode(0);
         // controls.enablePan = false;
 
         this.controls.minDistance = 550;
         this.controls.maxDistance = 500000;
 
-        
+
         this.controls.movementSpeed = 1000
         this.controls.domElement = this.canvas;
-        this.controls.rollSpeed = Math.PI / 3.5
+        // this.controls.rollSpeed = Math.PI / 3.5
         this.controls.autoForward = false
         this.controls.dragToLook = false
         this.camera1.up = new THREE.Vector3(0, 1, 0);
@@ -296,7 +297,7 @@ class Game {
     }
 
     initThirdPersonMode() {
-    
+
         this.camera1.position.set(0, 220, 1000);
         this.camera1.rotation.set(-0.02, 0, 0);
         this.controls.setViewMode(1);
@@ -469,7 +470,7 @@ class Game {
             }
         })
 
-        this.players.forEach(p=> p.update(delta));
+        this.players.forEach(p => p.update(delta));
         if (this.player && this.player.mesh) {
             this.player.update(delta);
             SocketService.socket.emit('move', {

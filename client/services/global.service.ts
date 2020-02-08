@@ -1,6 +1,6 @@
 import { Observable, Subject, ReplaySubject, BehaviorSubject, from, of, range } from 'rxjs';
 
-type GameMode = 0 | 1;
+export type ViewMode = 0 | 1;
 
 const globalSettings = JSON.parse(localStorage.getItem('globalSettings')) || {
     antialiasing: true,
@@ -32,7 +32,7 @@ class GlobalService {
 
 
     public speed = new Subject();
-    public viewMode = new BehaviorSubject<GameMode>(0);
+    public viewMode = new BehaviorSubject<ViewMode>(0);
     public preloader = new Subject();
 
     public globalSettings = new BehaviorSubject<any>(Object.assign(globalSettings, {lastChanged: null}));
