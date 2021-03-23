@@ -7,6 +7,7 @@ export class PlayerControls {
 	public object;
 	public camera;
 	public initPosition: Vector3;
+	public initWorldPosition;
 	public container;
 	public viewMode = 0;
 	public disabled = false;
@@ -20,6 +21,13 @@ export class PlayerControls {
 	private movementSpeedMultiplier = 0;
 	public maxSpeed = 100;
 	public acceleration = 0.6;
+
+	public fov = 1;
+	public zoom = 1;
+	public inc = 100;
+	public zoomRatio = 1.1;
+	public zoomStart = 1;
+	public zoomDirection;
 
 	private rotationSpeedMultiplier = 0;
 	public maxRotationSpeed = 1;
@@ -166,11 +174,12 @@ export class PlayerControls {
 		this.viewMode = mode;
 
 		this.initPosition = this.camera.position.clone();
+		// this.initWorldPosition = this.camera.position.unproject(this.camera.position);//.getWorldPosition(this.camera.position);
 	}
 
 	mousemove(event: MouseEvent) {
 
-		if ((!this.dragToLook || this.mouseStatus > 0)) {
+		if (this.viewMode === 0 && (!this.dragToLook || this.mouseStatus > 0)) {
 
 			var container = this.getContainerDimensions();
 			var halfWidth = container.size[0] / 2;
@@ -213,7 +222,43 @@ export class PlayerControls {
 
 	}
 
-	mousewheel() {
+	mousewheel(event) {
+		if (this.viewMode === 1) {
+
+
+			if (event.wheelDelta < 0) {
+				this.zoomDirection = '+';
+				this.zoomRatio = Math.round((this.zoomRatio + 1) * 100) / 100;
+			} else {
+				this.zoomDirection = '-';
+				this.zoomRatio = Math.round((this.zoomRatio - 1) * 100) / 100;
+			}
+
+			if (this.zoomRatio < 0) {
+				this.zoomRatio = 0;
+				return;
+			}
+			if (this.zoomRatio > 100) {
+				this.zoomRatio = 100;
+				return;
+			}
+
+			this.zoomStart = 100;
+		}
+	}
+
+	_zoom() {
+		this.zoomStart--;
+
+		if (this.zoomStart > 0) {
+			const position = this.camera.position.clone();
+			const dir = this.camera.position.clone().normalize();
+			const zoom = (Math.round((this.zoomRatio) * 100) / 100) * this.zoomStart;
+console.log(zoom);
+			position.add(dir.multiplyScalar(this.zoomDirection === '+' ? zoom : - zoom));
+
+			this.camera.position.copy(position);
+		}
 
 	}
 
@@ -262,7 +307,7 @@ export class PlayerControls {
 
 		this._movement();
 		this._rotation();
-
+		this._zoom();
 
 
 		var moveMult = Math.round(delta /** this.movementSpeed*/ + Math.abs(this.movementSpeedMultiplier));
@@ -282,10 +327,10 @@ export class PlayerControls {
 		// expose the rotation vector for convenience
 		this.object.rotation.setFromQuaternion(this.object.quaternion, this.object.rotation.order);
 
-		this.cameraUpdate();
+		// this.cameraUpdate();
 
 		//smooth stop
-		if (this.disabled) {
+		if (this.viewMode === 1 || this.disabled) {
 			this.moveState.yawLeft = Math.abs(this.moveState.yawLeft) > 0.0005 ? this.moveState.yawLeft / 1.04 : 0
 			this.moveState.pitchDown = Math.abs(this.moveState.pitchDown) > 0.0005 ? this.moveState.pitchDown / 1.04 : 0
 

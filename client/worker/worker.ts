@@ -277,22 +277,17 @@ class Game {
         this.camera1.rotation.set(0, 0, 0);
 
         this.controls.setViewMode(0);
-        // controls.enablePan = false;
 
         this.controls.minDistance = 550;
         this.controls.maxDistance = 500000;
 
-
         this.controls.movementSpeed = 1000
         this.controls.domElement = this.canvas;
-        // this.controls.rollSpeed = Math.PI / 3.5
         this.controls.autoForward = false
         this.controls.dragToLook = false
         this.camera1.up = new THREE.Vector3(0, 1, 0);
 
-        // this.player.mesh.children.forEach((r,i)=> {
-        //     if(i < 3) r.visible = false
-        // })
+
         this.player.mesh.getObjectByName('GUI').visible = true;
     }
 
@@ -302,31 +297,7 @@ class Game {
         this.camera1.rotation.set(-0.02, 0, 0);
         this.controls.setViewMode(1);
 
-        // this.camera1.position.set(0, 1050, 0);
-        // this.camera1.rotation.set(-Math.PI/2, 0, 0);
-
-        // this.controls.dragToLook = true;
-
-        // this.controls = new OrbitControls(this.player.mesh, this.fakeCamera, this.canvas);
-        // // controls.enablePan = true;
-        // this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        // this.controls.dampingFactor = 0.25;
-
-        // this.controls.smoothZoom = true;
-
-        // this.controls.screenSpacePanning = false;
-
-        // this.controls.minDistance = 550;
-        // this.controls.maxDistance = 500000;
-
-        // this.controls.zoomSpeed = 2;
-        // this.controls.rotateSpeed = 0.1;
-
-        // this.controls.maxPolarAngle = Math.PI;
-
-        // this.player.mesh.children.forEach((r,i)=> {
-        //     if(i < 3) r.visible = true
-        // })
+   
         this.player.mesh.getObjectByName('GUI').visible = false;
     }
 
